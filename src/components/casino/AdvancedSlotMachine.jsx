@@ -139,9 +139,10 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
       return;
     }
 
+    // Ensure client seed exists
+    const seedToUse = clientSeed || Math.random().toString(36).substring(7);
     if (!clientSeed) {
-      setClientSeed(Math.random().toString(36).substring(7));
-      return;
+      setClientSeed(seedToUse);
     }
 
     setSpinning(true);
@@ -152,7 +153,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
       const response = await base44.functions.invoke('spinSlots', {
         bet_per_line: betPerLine,
         lines: lines,
-        client_seed: clientSeed
+        client_seed: seedToUse
       });
 
       const result = response.data;

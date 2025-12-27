@@ -165,6 +165,12 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
       return;
     }
 
+    // Ensure client seed exists
+    const seedToUse = clientSeed || Math.random().toString(36).substring(7);
+    if (!clientSeed) {
+      setClientSeed(seedToUse);
+    }
+
     setDropping(true);
     setLastResult(null);
     setFinalBucket(null);
@@ -175,7 +181,7 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
         bet_amount: betAmount,
         risk_mode: riskMode,
         rows: rows,
-        client_seed: clientSeed
+        client_seed: seedToUse
       });
 
       const result = response.data;
