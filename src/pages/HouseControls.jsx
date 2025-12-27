@@ -1,0 +1,531 @@
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Settings, TrendingUp, TrendingDown, Users, Coins, Trophy, Clock, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import moment from 'moment';
+import { toast } from 'sonner';
+
+export default function HouseControls() {
+  const queryClient = useQueryClient();
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: houseConfig, isLoading: configLoading } = useQuery({
+    queryKey: ['houseConfig'],
+    queryFn: async () => {
+      const configs = await base44.entities.HouseConfig.list();
+      return configs[0] || null;
+    },
+  });
+
+  const { data: players = [] } = useQuery({
+    queryKey: ['allPlayers'],
+    queryFn: () => base44.entities.Player.list('-total_won'),
+  });
+
+  const { data: slotSessions = [] } = useQuery({
+    queryKey: ['recentSlotSessions'],
+    queryFn: () => base44.entities.SlotSession.list('-created_date', 100),
+  });
+
+  const { data: ledgerEntries = [] } = useQuery({
+    queryKey: ['ledgerEntries'],
+    queryFn: () => base44.entities.Ledger.list('-created_date', 500),
+  });
+
+  const { data: pendingPurchases = [] } = useQuery({
+    queryKey: ['pendingPurchases'],
+    queryFn: () => base44.entities.PointsPurchase.filter({ status: 'pending' }, '-created_date'),
+  });
+
+  const { data: packs = [] } = useQuery({
+    queryKey: ['pointsPacks'],
+    queryFn: () => base44.entities.PointsPack.list('sort_order'),
+  });
+
+  const updateConfigMutation = useMutation({
+    mutationFn: async (updates) => {
+      await base44.entities.HouseConfig.update(houseConfig.id, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['houseConfig'] });
+      toast.success('Settings updated');
+    },
+  });
+
+  const approvePurchaseMutation = useMutation({
+    mutationFn: async ({ purchaseId, approved, note }) => {
+      const purchase = pendingPurchases.find(p => p.id === purchaseId);
+      
+      await base44.entities.PointsPurchase.update(purchaseId, {
+        status: approved ? 'approved' : 'rejected',
+        approved_by: currentUser.email,
+        admin_note: note,
+        processed_date: new Date().toISOString()
+      });
+
+      if (approved) {
+        // Credit player
+        const player = players.find(p => p.id === purchase.player_id);
+        const newBalance = player.points_balance + purchase.points_amount;
+        
+        await base44.entities.Player.update(player.id, {
+          points_balance: newBalance
+        });
+
+        await base44.entities.Ledger.create({
+          player_id: player.id,
+          change: purchase.points_amount,
+          reason: 'pack_purchase',
+          balance_after: newBalance,
+          note: `Pack approved by admin`
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pendingPurchases'] });
+      queryClient.invalidateQueries({ queryKey: ['allPlayers'] });
+      toast.success('Purchase processed');
+    },
+  });
+
+  // Calculate stats
+  const totalPointsInCirculation = players.reduce((sum, p) => sum + (p.points_balance || 0), 0);
+  const totalWagered = ledgerEntries.filter(e => e.reason === 'slot_bet').reduce((sum, e) => sum + Math.abs(e.change), 0);
+  const totalPaidOut = ledgerEntries.filter(e => e.reason === 'slot_payout').reduce((sum, e) => sum + e.change, 0);
+  const houseNet = totalWagered - totalPaidOut;
+  const actualRTP = totalWagered > 0 ? ((totalPaidOut / totalWagered) * 100).toFixed(2) : 0;
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todaySessions = slotSessions.filter(s => new Date(s.created_date) >= todayStart);
+  const todayWagered = todaySessions.reduce((sum, s) => sum + s.total_bet, 0);
+  const todayPaidOut = todaySessions.reduce((sum, s) => sum + s.total_win, 0);
+  const todayNet = todayWagered - todayPaidOut;
+
+  if (configLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+      </div>
+    );
+  }
+
+  if (!houseConfig) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <Card className="bg-slate-900 border-slate-700 max-w-md">
+          <CardHeader>
+            <CardTitle className="text-white">Initialize House Config</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-slate-400 mb-4">No house configuration found. Create one to get started.</p>
+            <Button
+              onClick={async () => {
+                await base44.entities.HouseConfig.create({
+                  slots_enabled: true,
+                  min_bet_per_line: 1,
+                  max_bet_per_line: 100,
+                  target_rtp: 96.5,
+                  volatility: 0.5,
+                  jackpot_enabled: true,
+                  jackpot_contribution_pct: 1,
+                  jackpot_pool: 0,
+                  daily_stipend_amount: 100,
+                  daily_stipend_enabled: true
+                });
+                queryClient.invalidateQueries({ queryKey: ['houseConfig'] });
+              }}
+              className="w-full bg-purple-500 hover:bg-purple-600"
+            >
+              Create House Config
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Link to={createPageUrl('Admin')}>
+              <Button variant="ghost" className="text-slate-400 hover:text-white">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-black text-white flex items-center gap-3">
+                <Settings className="w-8 h-8 text-purple-500" />
+                House Controls
+              </h1>
+              <p className="text-slate-400">Manage game settings and economy</p>
+            </div>
+          </div>
+        </div>
+
+        <Tabs defaultValue="controls" className="space-y-6">
+          <TabsList className="bg-slate-800/50 border border-slate-700/50">
+            <TabsTrigger value="controls">Game Settings</TabsTrigger>
+            <TabsTrigger value="economy">Economy Stats</TabsTrigger>
+            <TabsTrigger value="purchases">Pack Requests ({pendingPurchases.length})</TabsTrigger>
+          </TabsList>
+
+          {/* Game Controls */}
+          <TabsContent value="controls" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Basic Controls */}
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader>
+                  <CardTitle className="text-white">Game Controls</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-white">Slots Enabled</Label>
+                      <p className="text-slate-400 text-sm">Master toggle for slots game</p>
+                    </div>
+                    <Switch
+                      checked={houseConfig.slots_enabled}
+                      onCheckedChange={(checked) => updateConfigMutation.mutate({ slots_enabled: checked })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Min Bet Per Line: {houseConfig.min_bet_per_line}</Label>
+                    <Slider
+                      value={[houseConfig.min_bet_per_line]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ min_bet_per_line: val })}
+                      min={1}
+                      max={50}
+                      step={1}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Max Bet Per Line: {houseConfig.max_bet_per_line}</Label>
+                    <Slider
+                      value={[houseConfig.max_bet_per_line]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ max_bet_per_line: val })}
+                      min={10}
+                      max={500}
+                      step={10}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Target RTP: {houseConfig.target_rtp}%</Label>
+                    <p className="text-slate-500 text-xs mb-2">Display only - actual RTP: {actualRTP}%</p>
+                    <Slider
+                      value={[houseConfig.target_rtp]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ target_rtp: val })}
+                      min={85}
+                      max={99}
+                      step={0.5}
+                      className="mt-2"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Jackpot Settings */}
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-amber-400" />
+                    Jackpot Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-white">Jackpot Enabled</Label>
+                      <p className="text-slate-400 text-sm">Progressive jackpot feature</p>
+                    </div>
+                    <Switch
+                      checked={houseConfig.jackpot_enabled}
+                      onCheckedChange={(checked) => updateConfigMutation.mutate({ jackpot_enabled: checked })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Contribution: {houseConfig.jackpot_contribution_pct}%</Label>
+                    <Slider
+                      value={[houseConfig.jackpot_contribution_pct]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ jackpot_contribution_pct: val })}
+                      min={0.5}
+                      max={5}
+                      step={0.5}
+                      disabled={!houseConfig.jackpot_enabled}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Current Jackpot Pool</Label>
+                    <p className="text-3xl font-black text-amber-400 mt-2">
+                      {(houseConfig.jackpot_pool || 0).toLocaleString()} pts
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Manual Adjustment</Label>
+                    <div className="flex gap-2 mt-2">
+                      <Input
+                        type="number"
+                        placeholder="Amount"
+                        id="jackpotAdjust"
+                        className="bg-slate-800 border-slate-700 text-white"
+                      />
+                      <Button
+                        onClick={() => {
+                          const input = document.getElementById('jackpotAdjust');
+                          const amount = parseInt(input.value) || 0;
+                          updateConfigMutation.mutate({ 
+                            jackpot_pool: Math.max(0, houseConfig.jackpot_pool + amount)
+                          });
+                          input.value = '';
+                        }}
+                        variant="outline"
+                        className="border-purple-500/50 text-purple-400"
+                      >
+                        Adjust
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Economy Stats */}
+          <TabsContent value="economy" className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-400 flex items-center gap-2">
+                    <Coins className="w-4 h-4" />
+                    In Circulation
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-black text-purple-400">{totalPointsInCirculation.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-400">Lifetime Wagered</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-black text-cyan-400">{totalWagered.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-400">Lifetime Paid Out</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-black text-green-400">{totalPaidOut.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-400 flex items-center gap-2">
+                    {houseNet >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                    House Net
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className={`text-2xl font-black ${houseNet >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {houseNet >= 0 ? '+' : ''}{houseNet.toLocaleString()}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-400">Today Wagered</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-black text-white">{todayWagered.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-400">Today Paid</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-black text-white">{todayPaidOut.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-400">Today Net</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className={`text-2xl font-black ${todayNet >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {todayNet >= 0 ? '+' : ''}{todayNet.toLocaleString()}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-400">Actual RTP</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-black text-amber-400">{actualRTP}%</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Spins */}
+            <Card className="bg-slate-900/50 border-slate-700/50">
+              <CardHeader>
+                <CardTitle className="text-white">Recent Slot Sessions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-slate-700">
+                      <TableHead className="text-slate-400">Time</TableHead>
+                      <TableHead className="text-slate-400">Player</TableHead>
+                      <TableHead className="text-slate-400">Bet</TableHead>
+                      <TableHead className="text-slate-400">Win</TableHead>
+                      <TableHead className="text-slate-400">Net</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {slotSessions.slice(0, 20).map((session) => {
+                      const player = players.find(p => p.id === session.player_id);
+                      return (
+                        <TableRow key={session.id} className="border-slate-700">
+                          <TableCell className="text-slate-400 text-sm">
+                            {moment(session.created_date).fromNow()}
+                          </TableCell>
+                          <TableCell className="text-white">{player?.display_name || 'Unknown'}</TableCell>
+                          <TableCell className="text-slate-300">{session.total_bet}</TableCell>
+                          <TableCell className="text-green-400">{session.total_win}</TableCell>
+                          <TableCell className={session.net_result >= 0 ? 'text-green-400' : 'text-red-400'}>
+                            {session.net_result >= 0 ? '+' : ''}{session.net_result}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Pack Requests */}
+          <TabsContent value="purchases">
+            <Card className="bg-slate-900/50 border-slate-700/50">
+              <CardHeader>
+                <CardTitle className="text-white">Pending Pack Requests</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {pendingPurchases.length === 0 ? (
+                  <div className="text-center py-12 text-slate-400">
+                    <CheckCircle2 className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                    <p>No pending requests</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-slate-700">
+                        <TableHead className="text-slate-400">Player</TableHead>
+                        <TableHead className="text-slate-400">Pack</TableHead>
+                        <TableHead className="text-slate-400">Amount</TableHead>
+                        <TableHead className="text-slate-400">Requested</TableHead>
+                        <TableHead className="text-slate-400">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingPurchases.map((purchase) => {
+                        const player = players.find(p => p.id === purchase.player_id);
+                        const pack = packs.find(p => p.id === purchase.pack_id);
+                        return (
+                          <TableRow key={purchase.id} className="border-slate-700">
+                            <TableCell>
+                              <div>
+                                <p className="text-white font-medium">{player?.display_name}</p>
+                                <p className="text-slate-500 text-xs">{player?.created_by}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-slate-300">{pack?.name || 'Unknown'}</TableCell>
+                            <TableCell className="text-purple-400 font-bold">
+                              {purchase.points_amount.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-slate-400 text-sm">
+                              {moment(purchase.created_date).fromNow()}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => approvePurchaseMutation.mutate({
+                                    purchaseId: purchase.id,
+                                    approved: true,
+                                    note: 'Approved'
+                                  })}
+                                  disabled={approvePurchaseMutation.isPending}
+                                  className="bg-green-500 hover:bg-green-600 text-white"
+                                >
+                                  <CheckCircle2 className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => approvePurchaseMutation.mutate({
+                                    purchaseId: purchase.id,
+                                    approved: false,
+                                    note: 'Denied'
+                                  })}
+                                  disabled={approvePurchaseMutation.isPending}
+                                  className="border-red-500/50 text-red-400"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
