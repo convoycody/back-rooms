@@ -1,0 +1,347 @@
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Loader2 } from 'lucide-react';
+
+import SlotMachine from '@/components/casino/SlotMachine';
+import BlackjackGame from '@/components/casino/BlackjackGame';
+import BalanceDisplay from '@/components/casino/BalanceDisplay';
+import Leaderboard from '@/components/casino/Leaderboard';
+import RecentGames from '@/components/casino/RecentGames';
+
+export default function Casino() {
+  const [lastChange, setLastChange] = useState(0);
+  const [activeGame, setActiveGame] = useState('slots');
+  const queryClient = useQueryClient();
+
+  // Get current user
+  const { data: currentUser, isLoading: userLoading } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  // Get or create player profile
+  const { data: player, isLoading: playerLoading, refetch: refetchPlayer } = useQuery({
+    queryKey: ['player', currentUser?.email],
+    queryFn: async () => {
+      if (!currentUser) return null;
+      
+      const players = await base44.entities.Player.filter({ created_by: currentUser.email });
+      
+      if (players.length > 0) {
+        return players[0];
+      }
+      
+      // Create new player
+      const newPlayer = await base44.entities.Player.create({
+        display_name: currentUser.full_name || currentUser.email.split('@')[0],
+        points_balance: 1000,
+        level: 1,
+        xp: 0,
+        total_wagered: 0,
+        total_won: 0,
+        games_played: 0,
+        biggest_win: 0,
+      });
+      
+      // Log signup bonus
+      await base44.entities.Ledger.create({
+        player_id: newPlayer.id,
+        change: 1000,
+        reason: 'signup_bonus',
+        balance_after: 1000,
+        note: 'Welcome bonus!'
+      });
+      
+      return newPlayer;
+    },
+    enabled: !!currentUser,
+  });
+
+  // Get all players for leaderboard
+  const { data: allPlayers = [] } = useQuery({
+    queryKey: ['allPlayers'],
+    queryFn: () => base44.entities.Player.list('-total_won', 20),
+  });
+
+  // Get player's game sessions
+  const { data: sessions = [] } = useQuery({
+    queryKey: ['sessions', player?.id],
+    queryFn: () => base44.entities.GameSession.filter(
+      { player_id: player.id },
+      '-created_date',
+      50
+    ),
+    enabled: !!player,
+  });
+
+  // Update player mutation
+  const updatePlayer = useMutation({
+    mutationFn: async ({ updates, session, ledgerEntry }) => {
+      await base44.entities.Player.update(player.id, updates);
+      
+      if (session) {
+        await base44.entities.GameSession.create(session);
+      }
+      
+      if (ledgerEntry) {
+        await base44.entities.Ledger.create(ledgerEntry);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['player'] });
+      queryClient.invalidateQueries({ queryKey: ['sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['allPlayers'] });
+    },
+  });
+
+  const handleSlotSpin = async (result) => {
+    if (!player) return;
+    
+    const pointsDelta = result.payout - result.bet;
+    const newBalance = player.points_balance + pointsDelta;
+    const xpGain = Math.floor(result.bet / 10) + (pointsDelta > 0 ? 10 : 0);
+    const newXp = player.xp + xpGain;
+    const newLevel = Math.floor(newXp / 500) + 1;
+    
+    setLastChange(pointsDelta);
+    
+    await updatePlayer.mutateAsync({
+      updates: {
+        points_balance: newBalance,
+        xp: newXp,
+        level: newLevel,
+        total_wagered: player.total_wagered + result.bet,
+        total_won: player.total_won + (pointsDelta > 0 ? result.payout : 0),
+        games_played: player.games_played + 1,
+        biggest_win: Math.max(player.biggest_win || 0, result.payout),
+      },
+      session: {
+        player_id: player.id,
+        game_type: 'slots',
+        bet_amount: result.bet,
+        result: pointsDelta > 0 ? (result.win?.multiplier >= 50 ? 'jackpot' : 'win') : 'loss',
+        points_delta: pointsDelta,
+        multiplier: result.win?.multiplier || 0,
+        game_data: { reels: result.reels, win_name: result.win?.name },
+        rng_seed: Math.random().toString(36).substring(7),
+      },
+      ledgerEntry: {
+        player_id: player.id,
+        change: pointsDelta,
+        reason: pointsDelta > 0 ? 'game_win' : 'game_bet',
+        balance_after: newBalance,
+        note: `Slots: ${result.reels.join(' ')}`,
+      },
+    });
+    
+    await refetchPlayer();
+  };
+
+  const handleBlackjackEnd = async (result) => {
+    if (!player) return;
+    
+    const pointsDelta = result.payout - result.bet;
+    const newBalance = player.points_balance + pointsDelta;
+    const xpGain = Math.floor(result.bet / 10) + (pointsDelta > 0 ? 15 : 0);
+    const newXp = player.xp + xpGain;
+    const newLevel = Math.floor(newXp / 500) + 1;
+    
+    setLastChange(pointsDelta);
+    
+    await updatePlayer.mutateAsync({
+      updates: {
+        points_balance: newBalance,
+        xp: newXp,
+        level: newLevel,
+        total_wagered: player.total_wagered + result.bet,
+        total_won: player.total_won + (pointsDelta > 0 ? result.payout : 0),
+        games_played: player.games_played + 1,
+        biggest_win: Math.max(player.biggest_win || 0, result.payout),
+      },
+      session: {
+        player_id: player.id,
+        game_type: 'blackjack',
+        bet_amount: result.bet,
+        result: result.outcome === 'blackjack' ? 'jackpot' : 
+                result.payout > result.bet ? 'win' : 
+                result.payout === result.bet ? 'push' : 'loss',
+        points_delta: pointsDelta,
+        multiplier: result.payout / result.bet,
+        game_data: {
+          player_hand: result.playerHand,
+          dealer_hand: result.dealerHand,
+          player_value: result.playerValue,
+          dealer_value: result.dealerValue,
+        },
+        rng_seed: Math.random().toString(36).substring(7),
+      },
+      ledgerEntry: {
+        player_id: player.id,
+        change: pointsDelta,
+        reason: pointsDelta > 0 ? 'game_win' : pointsDelta === 0 ? 'game_bet' : 'game_bet',
+        balance_after: newBalance,
+        note: `Blackjack: ${result.outcome}`,
+      },
+    });
+    
+    await refetchPlayer();
+  };
+
+  if (userLoading || playerLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+        <div className="text-center">
+          <h1 className="text-4xl font-black text-white mb-4">🎰 Office Casino</h1>
+          <p className="text-slate-400 mb-8">Please log in to play</p>
+          <button 
+            onClick={() => base44.auth.redirectToLogin()}
+            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold rounded-xl"
+          >
+            Log In
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent mb-2">
+            🎰 OFFICE CASINO
+          </h1>
+          <p className="text-slate-400 text-sm">
+            Fictional points only • No real money • Just bragging rights
+          </p>
+        </motion.div>
+
+        {/* Balance Display */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <BalanceDisplay 
+            balance={player?.points_balance || 0}
+            lastChange={lastChange}
+            level={player?.level || 1}
+            xp={player?.xp || 0}
+          />
+        </motion.div>
+
+        {/* Main Content */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Games Area */}
+          <div className="lg:col-span-2">
+            <Tabs value={activeGame} onValueChange={setActiveGame} className="w-full">
+              <TabsList className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl p-1 mb-6">
+                <TabsTrigger 
+                  value="slots" 
+                  className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-yellow-500 data-[state=active]:text-black rounded-lg py-3 font-bold"
+                >
+                  🎰 Slots
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="blackjack"
+                  className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500 data-[state=active]:text-black rounded-lg py-3 font-bold"
+                >
+                  🃏 Blackjack
+                </TabsTrigger>
+              </TabsList>
+
+              <AnimatePresence mode="wait">
+                <TabsContent value="slots" className="mt-0">
+                  <motion.div
+                    key="slots"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                  >
+                    <SlotMachine 
+                      balance={player?.points_balance || 0}
+                      onSpin={handleSlotSpin}
+                      disabled={updatePlayer.isPending}
+                    />
+                  </motion.div>
+                </TabsContent>
+
+                <TabsContent value="blackjack" className="mt-0">
+                  <motion.div
+                    key="blackjack"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <BlackjackGame
+                      balance={player?.points_balance || 0}
+                      onGameEnd={handleBlackjackEnd}
+                      disabled={updatePlayer.isPending}
+                    />
+                  </motion.div>
+                </TabsContent>
+              </AnimatePresence>
+            </Tabs>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Leaderboard players={allPlayers} currentPlayerId={player?.id} />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <RecentGames sessions={sessions} />
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="text-center mt-12 pb-8"
+        >
+          <p className="text-slate-600 text-xs max-w-xl mx-auto">
+            This platform uses fictional points for entertainment only. 
+            No real money, prizes, or items of value are involved. 
+            Play responsibly! 🎲
+          </p>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
