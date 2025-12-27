@@ -116,11 +116,17 @@ const PaylineIndicator = ({ line, active }) => {
 export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConfig }) {
   const [grid, setGrid] = useState(Array(5).fill(['🍋', '🍋', '🍋']));
   const [spinning, setSpinning] = useState(false);
-  const [betPerLine, setBetPerLine] = useState(houseConfig?.min_bet_per_line || 5);
+  const [betPerLine, setBetPerLine] = useState(5);
   const [lines, setLines] = useState(1);
   const [clientSeed, setClientSeed] = useState(() => Math.random().toString(36).substring(7));
   const [lastResult, setLastResult] = useState(null);
   const [highlightedLines, setHighlightedLines] = useState([]);
+
+  useEffect(() => {
+    if (houseConfig?.min_bet_per_line) {
+      setBetPerLine(houseConfig.min_bet_per_line);
+    }
+  }, [houseConfig]);
 
   const totalBet = betPerLine * lines;
   const minBet = houseConfig?.min_bet_per_line || 1;
@@ -133,6 +139,11 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
       return;
     }
 
+    if (!clientSeed) {
+      setClientSeed(Math.random().toString(36).substring(7));
+      return;
+    }
+
     setSpinning(true);
     setLastResult(null);
     setHighlightedLines([]);
@@ -140,7 +151,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
     try {
       const response = await base44.functions.invoke('spinSlots', {
         bet_per_line: betPerLine,
-        lines,
+        lines: lines,
         client_seed: clientSeed
       });
 

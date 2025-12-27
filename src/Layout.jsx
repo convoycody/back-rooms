@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Shield, LogOut } from 'lucide-react';
+import WalletDropdown from '@/components/WalletDropdown';
 
 export default function Layout({ children, currentPageName }) {
+  const [lastChange, setLastChange] = useState(0);
+  
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
@@ -44,20 +47,6 @@ export default function Layout({ children, currentPageName }) {
                 🎮 Games
               </Link>
 
-              <Link 
-                to={createPageUrl('Store')}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors text-sm font-medium"
-              >
-                💰 Store
-              </Link>
-
-              <Link 
-                to={createPageUrl('BTCStore')}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-colors text-sm font-medium"
-              >
-                ⚡ BTC
-              </Link>
-
               {isAdmin && (
                 <Link 
                   to={createPageUrl('Admin')}
@@ -67,6 +56,12 @@ export default function Layout({ children, currentPageName }) {
                   Admin
                 </Link>
               )}
+
+              <WalletDropdown 
+                balance={player?.points_balance || 0}
+                level={player?.level || 1}
+                lastChange={lastChange}
+              />
               
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-sm">

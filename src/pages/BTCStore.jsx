@@ -63,7 +63,7 @@ export default function BTCStore() {
         pack_id: pack.id
       });
 
-      if (response.data.success) {
+      if (response.data?.success && response.data?.checkout_url) {
         setCheckoutUrl(response.data.checkout_url);
         setCurrentInvoiceId(response.data.invoice_id);
         
@@ -72,9 +72,12 @@ export default function BTCStore() {
         
         // Start polling for this invoice
         queryClient.invalidateQueries({ queryKey: ['myInvoices'] });
+      } else {
+        alert('Failed to create invoice. Please check BTCPay configuration.');
       }
     } catch (error) {
       console.error('Failed to create invoice:', error);
+      alert(error.response?.data?.error || 'Failed to create invoice');
     } finally {
       setCreating(false);
     }

@@ -219,35 +219,6 @@ export default function Casino() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <h1 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent mb-2">
-            🎰 OFFICE CASINO
-          </h1>
-          <p className="text-slate-400 text-sm">
-            Fictional points only • No real money • Just bragging rights
-          </p>
-        </motion.div>
-
-        {/* Balance Display */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8"
-        >
-          <BalanceDisplay 
-            balance={player?.points_balance || 0}
-            lastChange={lastChange}
-            level={player?.level || 1}
-            xp={player?.xp || 0}
-          />
-        </motion.div>
-
         {/* Main Content */}
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Games Area */}
