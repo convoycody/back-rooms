@@ -52,7 +52,7 @@ const PlinkoBoard = ({ rows = 12, path = [], dropping = false, finalBucket = nul
   return (
     <div className="relative bg-gradient-to-b from-slate-800/50 to-slate-900/50 rounded-2xl p-8 border border-slate-700 overflow-hidden" style={{ height: '500px' }}>
       {/* Pegs */}
-      <div className="absolute inset-0 flex flex-col justify-around py-8">
+      <div className="absolute top-0 left-0 right-0 bottom-20 flex flex-col justify-around py-8">
         {Array.from({ length: rows }).map((_, rowIdx) => (
           <div key={rowIdx} className="flex justify-center gap-8">
             {Array.from({ length: rowIdx + 3 }).map((_, pegIdx) => (
