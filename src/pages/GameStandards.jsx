@@ -383,20 +383,25 @@ export default function GameStandards() {
                       <div>
                         <h4 className="text-white font-semibold text-sm mb-2">Result Display</h4>
                         <ul className="space-y-1 text-sm text-slate-400">
-                          <li>• Animated entry/exit with framer-motion</li>
-                          <li>• Green gradient for wins, red for losses, amber for push</li>
-                          <li>• Large bold text showing win amount</li>
-                          <li>• Breakdown of line wins or multipliers</li>
+                          <li>• <strong className="text-amber-400">Overlay positioning:</strong> Absolute positioning over gameplay area (prevents button jumping)</li>
+                          <li>• <strong className="text-amber-400">Animations:</strong> Fade in/out with scale (0.9 → 1 → 0.9) using framer-motion</li>
+                          <li>• <strong className="text-amber-400">Backdrop:</strong> Semi-transparent with backdrop-blur-sm for depth</li>
+                          <li>• <strong className="text-amber-400">Colors:</strong> Green gradient (wins), red gradient (losses), amber gradient (push)</li>
+                          <li>• <strong className="text-amber-400">Typography:</strong> Large bold white text (text-4xl font-black)</li>
+                          <li>• <strong className="text-amber-400">Duration:</strong> Brief display (~2-3 seconds) before auto-dismiss</li>
+                          <li>• <strong className="text-amber-400">Shadow:</strong> Colored shadow matching result theme for emphasis</li>
                         </ul>
                       </div>
 
                       <div>
                         <h4 className="text-white font-semibold text-sm mb-2">Layout Structure</h4>
                         <ul className="space-y-1 text-sm text-slate-400">
-                          <li>• Fixed height containers to prevent button jumping</li>
-                          <li>• Consistent spacing using Tailwind spacing scale</li>
-                          <li>• Responsive breakpoints (sm:, md:, lg:)</li>
-                          <li>• Mobile-first design approach</li>
+                          <li>• <strong className="text-purple-400">Parent container:</strong> relative positioning to contain overlays</li>
+                          <li>• <strong className="text-purple-400">Result overlays:</strong> absolute + centered (top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2)</li>
+                          <li>• <strong className="text-purple-400">Z-index:</strong> Results use z-50 to appear above game elements</li>
+                          <li>• <strong className="text-purple-400">No layout shift:</strong> Controls remain fixed while results fade in/out on top</li>
+                          <li>• <strong className="text-purple-400">Spacing:</strong> Consistent gap between sections using Tailwind spacing</li>
+                          <li>• <strong className="text-purple-400">Responsive:</strong> Breakpoints at sm:, md:, lg: for all screen sizes</li>
                         </ul>
                       </div>
                     </div>
