@@ -3,6 +3,8 @@ import Admin from './pages/Admin';
 import Store from './pages/Store';
 import HouseControls from './pages/HouseControls';
 import BTCStore from './pages/BTCStore';
+import GameGallery from './pages/GameGallery';
+import PlayGame from './pages/PlayGame';
 import __Layout from './Layout.jsx';
 
 
@@ -12,6 +14,8 @@ export const PAGES = {
     "Store": Store,
     "HouseControls": HouseControls,
     "BTCStore": BTCStore,
+    "GameGallery": GameGallery,
+    "PlayGame": PlayGame,
 }
 
 export const pagesConfig = {

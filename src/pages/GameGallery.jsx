@@ -1,0 +1,165 @@
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { motion } from 'framer-motion';
+import { Loader2, Sparkles } from 'lucide-react';
+import GameCard from '@/components/games/GameCard';
+import BalanceDisplay from '@/components/casino/BalanceDisplay';
+
+export default function GameGallery() {
+  const navigate = useNavigate();
+
+  const { data: currentUser, isLoading: userLoading } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: player } = useQuery({
+    queryKey: ['player', currentUser?.email],
+    queryFn: async () => {
+      if (!currentUser) return null;
+      const players = await base44.entities.Player.filter({ created_by: currentUser.email });
+      return players[0] || null;
+    },
+    enabled: !!currentUser,
+  });
+
+  const { data: games = [], isLoading: gamesLoading } = useQuery({
+    queryKey: ['games'],
+    queryFn: () => base44.entities.Game.list('sort_order'),
+  });
+
+  const handlePlayGame = (game) => {
+    navigate(createPageUrl('PlayGame') + `?game=${game.game_id}`);
+  };
+
+  const featuredGames = games.filter(g => g.featured && g.enabled);
+  const availableGames = games.filter(g => !g.coming_soon && g.enabled);
+  const comingSoon = games.filter(g => g.coming_soon);
+
+  if (userLoading || gamesLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+        <div className="text-center">
+          <h1 className="text-4xl font-black text-white mb-4">🎮 Game Gallery</h1>
+          <p className="text-slate-400 mb-8">Please log in to play</p>
+          <button 
+            onClick={() => base44.auth.redirectToLogin()}
+            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold rounded-xl"
+          >
+            Log In
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-5xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent mb-3">
+            🎮 Game Gallery
+          </h1>
+          <p className="text-slate-400">Choose your game and start playing</p>
+        </motion.div>
+
+        {/* Balance */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8 flex justify-center"
+        >
+          <BalanceDisplay
+            balance={player?.points_balance || 0}
+            lastChange={0}
+            level={player?.level || 1}
+            xp={player?.xp || 0}
+          />
+        </motion.div>
+
+        {/* Featured Games */}
+        {featuredGames.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-12"
+          >
+            <h2 className="text-2xl font-black text-white mb-4 flex items-center gap-2">
+              <Sparkles className="w-6 h-6 text-amber-400" />
+              Featured Games
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredGames.map((game) => (
+                <GameCard key={game.id} game={game} onPlay={handlePlayGame} />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* All Games */}
+        {availableGames.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mb-12"
+          >
+            <h2 className="text-2xl font-black text-white mb-4">All Games</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {availableGames.map((game) => (
+                <GameCard key={game.id} game={game} onPlay={handlePlayGame} />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Coming Soon */}
+        {comingSoon.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <h2 className="text-2xl font-black text-white mb-4">Coming Soon</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {comingSoon.map((game) => (
+                <GameCard key={game.id} game={game} onPlay={handlePlayGame} />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {games.length === 0 && (
+          <div className="text-center py-20 text-slate-400">
+            <p className="text-lg">No games available yet</p>
+            <p className="text-sm mt-2">Check back soon!</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
