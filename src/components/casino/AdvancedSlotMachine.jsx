@@ -31,7 +31,7 @@ const Symbol = ({ symbol, highlight = false, delay = 0 }) => {
 
 const ReelColumn = ({ symbols, spinning, delay, highlightRows = [] }) => {
   const [displaySymbols, setDisplaySymbols] = useState(symbols);
-  const [spinning State, setSpinningState] = useState(false);
+  const [spinningState, setSpinningState] = useState(false);
 
   const allSymbols = ['🍋', '🍒', '🍇', '🔔', '💎', '7️⃣', '⭐', '💰'];
 
