@@ -34,24 +34,61 @@ export default function PlayGame() {
       
       if (players.length > 0) return players[0];
       
+      // Check for referral code in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get('ref');
+      
+      let referrerId = null;
+      let signupBonus = 1000;
+      
+      if (refCode) {
+        const referrers = await base44.entities.Player.filter({ referral_code: refCode });
+        if (referrers.length > 0) {
+          referrerId = referrers[0].id;
+          const configs = await base44.entities.HouseConfig.list();
+          const config = configs[0];
+          if (config?.referral_enabled) {
+            signupBonus += config.referral_new_user_bonus || 0;
+          }
+        }
+      }
+      
+      // Generate unique referral code
+      const referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
       const newPlayer = await base44.entities.Player.create({
         display_name: currentUser.full_name || currentUser.email.split('@')[0],
-        points_balance: 1000,
+        referral_code: referralCode,
+        points_balance: signupBonus,
         level: 1,
         xp: 0,
         total_wagered: 0,
         total_won: 0,
         games_played: 0,
         biggest_win: 0,
+        referred_by: referrerId,
       });
       
       await base44.entities.Ledger.create({
         player_id: newPlayer.id,
-        change: 1000,
+        change: signupBonus,
         reason: 'signup_bonus',
-        balance_after: 1000,
-        note: 'Welcome bonus!'
+        balance_after: signupBonus,
+        note: referrerId ? 'Welcome bonus + referral bonus!' : 'Welcome bonus!'
       });
+      
+      // Create referral record if referred
+      if (referrerId) {
+        const configs = await base44.entities.HouseConfig.list();
+        const config = configs[0];
+        await base44.entities.Referral.create({
+          referrer_id: referrerId,
+          referee_id: newPlayer.id,
+          referral_code_used: refCode,
+          referee_signup_bonus: config?.referral_new_user_bonus || 0,
+          status: 'pending'
+        });
+      }
       
       return newPlayer;
     },
@@ -101,6 +138,15 @@ export default function PlayGame() {
     await refetchPlayer();
     queryClient.invalidateQueries({ queryKey: ['slotSessions'] });
     queryClient.invalidateQueries({ queryKey: ['houseConfig'] });
+    
+    // Check referral bonus eligibility
+    if (player.referred_by && !player.referral_bonus_claimed) {
+      try {
+        await base44.functions.invoke('checkReferralBonus', { player_id: player.id });
+      } catch (err) {
+        // Silent
+      }
+    }
   };
 
   const handleBlackjackEnd = async (result) => {
@@ -159,6 +205,15 @@ export default function PlayGame() {
     setLastChange(result.net_result);
     await refetchPlayer();
     queryClient.invalidateQueries({ queryKey: ['plinkoSessions'] });
+    
+    // Check referral bonus eligibility
+    if (player.referred_by && !player.referral_bonus_claimed) {
+      try {
+        await base44.functions.invoke('checkReferralBonus', { player_id: player.id });
+      } catch (err) {
+        // Silent
+      }
+    }
   };
 
   const renderGame = () => {

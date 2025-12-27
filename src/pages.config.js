@@ -16,6 +16,7 @@ import CryptoDisclosure from './pages/CryptoDisclosure';
 import Support from './pages/Support';
 import BTCPaySetup from './pages/BTCPaySetup';
 import PlayerProfile from './pages/PlayerProfile';
+import Referrals from './pages/Referrals';
 import __Layout from './Layout.jsx';
 
 
@@ -38,6 +39,7 @@ export const PAGES = {
     "Support": Support,
     "BTCPaySetup": BTCPaySetup,
     "PlayerProfile": PlayerProfile,
+    "Referrals": Referrals,
 }
 
 export const pagesConfig = {
