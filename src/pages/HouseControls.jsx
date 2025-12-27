@@ -57,6 +57,11 @@ export default function HouseControls() {
     queryFn: () => base44.entities.PointsPack.list('sort_order'),
   });
 
+  const { data: allReferrals = [] } = useQuery({
+    queryKey: ['allReferrals'],
+    queryFn: () => base44.entities.Referral.list('-created_date'),
+  });
+
   const updateConfigMutation = useMutation({
     mutationFn: async (updates) => {
       await base44.entities.HouseConfig.update(houseConfig.id, updates);
@@ -203,9 +208,177 @@ export default function HouseControls() {
           <TabsList className="bg-slate-800/50 border border-slate-700/50">
             <TabsTrigger value="controls">Game Settings</TabsTrigger>
             <TabsTrigger value="bonuses">Daily Bonuses</TabsTrigger>
+            <TabsTrigger value="referrals">Referral System</TabsTrigger>
             <TabsTrigger value="economy">Economy Stats</TabsTrigger>
             <TabsTrigger value="purchases">Pack Requests ({pendingPurchases.length})</TabsTrigger>
           </TabsList>
+
+          {/* Referral System Tab */}
+          <TabsContent value="referrals" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6 mb-6">
+              {/* Stats */}
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Users className="w-5 h-5 text-purple-400" />
+                    Referral Stats
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-slate-400 text-sm">Total Referrals</p>
+                      <p className="text-2xl font-bold text-white">{allReferrals.length}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 text-sm">Completed</p>
+                      <p className="text-2xl font-bold text-green-400">
+                        {allReferrals.filter(r => r.status === 'completed').length}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 text-sm">Pending</p>
+                      <p className="text-2xl font-bold text-amber-400">
+                        {allReferrals.filter(r => r.status === 'pending').length}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 text-sm">Total Paid</p>
+                      <p className="text-2xl font-bold text-purple-400">
+                        {allReferrals.reduce((sum, r) => sum + (r.referrer_bonus || 0), 0).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Settings */}
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Settings className="w-5 h-5 text-purple-400" />
+                    Referral Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-white">Referral System Enabled</Label>
+                      <p className="text-slate-400 text-sm">Master toggle for referrals</p>
+                    </div>
+                    <Switch
+                      checked={houseConfig.referral_enabled}
+                      onCheckedChange={(checked) => updateConfigMutation.mutate({ referral_enabled: checked })}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* New User Bonus */}
+              <Card className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-green-700/50">
+                <CardHeader>
+                  <CardTitle className="text-white">New User Bonus</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-white">Bonus for Referred User: {houseConfig.referral_new_user_bonus?.toLocaleString() || 0}</Label>
+                    <p className="text-slate-400 text-xs mb-2">Points given on signup</p>
+                    <Slider
+                      value={[houseConfig.referral_new_user_bonus || 15000]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ referral_new_user_bonus: val })}
+                      min={0}
+                      max={50000}
+                      step={1000}
+                      disabled={!houseConfig.referral_enabled}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div className="pt-4 border-t border-slate-700">
+                    <p className="text-slate-400 text-sm mb-1">Today's Signups</p>
+                    <p className="text-green-400 font-bold text-xl">
+                      {allReferrals.filter(r => {
+                        const created = new Date(r.created_date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return created >= today;
+                      }).length}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Referrer Bonus */}
+              <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-700/50">
+                <CardHeader>
+                  <CardTitle className="text-white">Referrer Reward</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-white">Bonus for Inviter: {houseConfig.referral_inviter_bonus?.toLocaleString() || 0}</Label>
+                    <p className="text-slate-400 text-xs mb-2">Points given after qualification</p>
+                    <Slider
+                      value={[houseConfig.referral_inviter_bonus || 25000]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ referral_inviter_bonus: val })}
+                      min={0}
+                      max={100000}
+                      step={1000}
+                      disabled={!houseConfig.referral_enabled}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div className="pt-4 border-t border-slate-700">
+                    <p className="text-slate-400 text-sm mb-1">Completed Today</p>
+                    <p className="text-purple-400 font-bold text-xl">
+                      {allReferrals.filter(r => {
+                        if (!r.updated_date || r.status !== 'completed') return false;
+                        const updated = new Date(r.updated_date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return updated >= today;
+                      }).length}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Qualification */}
+              <Card className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 border-amber-700/50">
+                <CardHeader>
+                  <CardTitle className="text-white">Qualification</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-white">Minimum Games: {houseConfig.referral_min_spins || 10}</Label>
+                    <p className="text-slate-400 text-xs mb-2">Games before referrer gets bonus</p>
+                    <Slider
+                      value={[houseConfig.referral_min_spins || 10]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ referral_min_spins: val })}
+                      min={1}
+                      max={100}
+                      step={1}
+                      disabled={!houseConfig.referral_enabled}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div className="pt-4 border-t border-slate-700">
+                    <p className="text-slate-400 text-sm mb-1">Avg Games to Complete</p>
+                    <p className="text-amber-400 font-bold text-xl">
+                      {allReferrals.filter(r => r.status === 'completed').length > 0
+                        ? Math.round(
+                            allReferrals
+                              .filter(r => r.status === 'completed')
+                              .reduce((sum, r) => sum + (r.referee_games_played || 0), 0) /
+                            allReferrals.filter(r => r.status === 'completed').length
+                          )
+                        : 0}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
           {/* Daily Bonuses Tab */}
           <TabsContent value="bonuses" className="space-y-6">
