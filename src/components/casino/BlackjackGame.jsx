@@ -109,11 +109,11 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
   const [playerHand, setPlayerHand] = useState([]);
   const [dealerHand, setDealerHand] = useState([]);
   const [gameState, setGameState] = useState('betting'); // betting, playing, dealerTurn, ended
-  const [betAmount, setBetAmount] = useState(25);
+  const [betAmount, setBetAmount] = useState(10);
   const [result, setResult] = useState(null);
   const [isDealing, setIsDealing] = useState(false);
 
-  const betOptions = [25, 50, 100, 250, 500];
+  const betOptions = [1, 5, 10, 25, 50, 100];
 
   const playerValue = calculateHand(playerHand);
   const dealerValue = calculateHand(dealerHand);
@@ -282,6 +282,17 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
                   {amount}
                 </button>
               ))}
+              <button
+                onClick={() => setBetAmount(Math.min(500, balance))}
+                disabled={balance < 100}
+                className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                  betAmount === Math.min(500, balance)
+                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30'
+                    : 'bg-slate-800 text-amber-400 hover:bg-slate-700 border border-amber-500/30'
+                }`}
+              >
+                MAX
+              </button>
             </div>
             <Button
               onClick={startGame}

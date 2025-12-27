@@ -33,6 +33,11 @@ export default function Admin() {
     queryFn: () => base44.entities.GameSession.list('-created_date', 100),
   });
 
+  const { data: slotSessions = [] } = useQuery({
+    queryKey: ['allSlotSessions'],
+    queryFn: () => base44.entities.SlotSession.list('-created_date', 100),
+  });
+
   const updatePlayerMutation = useMutation({
     mutationFn: async ({ playerId, updates, ledgerEntry }) => {
       await base44.entities.Player.update(playerId, updates);
@@ -122,9 +127,28 @@ export default function Admin() {
   // Stats
   const totalPlayers = players.length;
   const totalPointsInCirculation = players.reduce((sum, p) => sum + (p.points_balance || 0), 0);
-  const totalGamesPlayed = sessions.length;
+  const totalGamesPlayed = sessions.length + slotSessions.length;
   const houseProfit = sessions.reduce((sum, s) => sum + (s.points_delta < 0 ? Math.abs(s.points_delta) : 0), 0) -
                       sessions.reduce((sum, s) => sum + (s.points_delta > 0 ? s.points_delta : 0), 0);
+  
+  // Live/Recent activity
+  const now = new Date();
+  const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  
+  const playersLast24h = players.filter(p => new Date(p.updated_date) >= last24Hours).length;
+  const playersLast7d = players.filter(p => new Date(p.updated_date) >= last7Days).length;
+  
+  const gamesLast24h = [...sessions, ...slotSessions].filter(s => new Date(s.created_date) >= last24Hours).length;
+  const gamesLast7d = [...sessions, ...slotSessions].filter(s => new Date(s.created_date) >= last7Days).length;
+  
+  // Unique active players (played in last 24h)
+  const activeSessions = [...sessions, ...slotSessions].filter(s => new Date(s.created_date) >= last24Hours);
+  const uniqueActivePlayers = new Set(activeSessions.map(s => s.player_id)).size;
+  
+  // Average stats
+  const avgBalance = totalPlayers > 0 ? Math.round(totalPointsInCirculation / totalPlayers) : 0;
+  const avgGamesPerPlayer = totalPlayers > 0 ? (totalGamesPlayed / totalPlayers).toFixed(1) : 0;
 
   if (userLoading || playersLoading) {
     return (
@@ -167,6 +191,7 @@ export default function Admin() {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-black text-white">{totalPlayers}</p>
+              <p className="text-xs text-slate-500 mt-1">Avg balance: {avgBalance}</p>
             </CardContent>
           </Card>
 
@@ -188,6 +213,7 @@ export default function Admin() {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-black text-cyan-400">{totalGamesPlayed}</p>
+              <p className="text-xs text-slate-500 mt-1">Avg per player: {avgGamesPerPlayer}</p>
             </CardContent>
           </Card>
 
@@ -199,6 +225,49 @@ export default function Admin() {
               <p className={`text-3xl font-black ${houseProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {houseProfit >= 0 ? '+' : ''}{houseProfit.toLocaleString()}
               </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Activity Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="bg-slate-900/50 border-slate-700/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-slate-400">Active Now (24h)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-black text-green-400">{uniqueActivePlayers}</p>
+              <p className="text-xs text-slate-500 mt-1">Unique players</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900/50 border-slate-700/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-slate-400">Players (7d)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-black text-blue-400">{playersLast7d}</p>
+              <p className="text-xs text-slate-500 mt-1">Active this week</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900/50 border-slate-700/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-slate-400">Games (24h)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-black text-purple-400">{gamesLast24h}</p>
+              <p className="text-xs text-slate-500 mt-1">Last 24 hours</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900/50 border-slate-700/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-slate-400">Games (7d)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-black text-pink-400">{gamesLast7d}</p>
+              <p className="text-xs text-slate-500 mt-1">Last 7 days</p>
             </CardContent>
           </Card>
         </div>

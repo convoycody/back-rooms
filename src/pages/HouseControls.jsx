@@ -384,6 +384,17 @@ export default function HouseControls() {
                     />
                   </div>
 
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-white">Show MAX Bet Button</Label>
+                      <p className="text-slate-400 text-sm">Display MAX button in games</p>
+                    </div>
+                    <Switch
+                      checked={houseConfig.max_bet_button_enabled}
+                      onCheckedChange={(checked) => updateConfigMutation.mutate({ max_bet_button_enabled: checked })}
+                    />
+                  </div>
+
                   <div>
                     <Label className="text-white">Target RTP: {houseConfig.target_rtp}%</Label>
                     <p className="text-slate-500 text-xs mb-2">Display only - actual RTP: {actualRTP}%</p>

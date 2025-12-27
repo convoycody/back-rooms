@@ -333,6 +333,37 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
             <span className="text-slate-400">Bet Per Line</span>
             <span className="text-white font-bold">{betPerLine} pts</span>
           </div>
+          <div className="flex gap-2 mb-2">
+            {[1, 5, 10, 25, 50, 100].map((amount) => (
+              <button
+                key={amount}
+                onClick={() => !spinning && setBetPerLine(Math.min(amount, maxBet))}
+                disabled={spinning || amount > balance}
+                className={`flex-1 py-1.5 rounded-lg font-semibold text-sm transition-all ${
+                  betPerLine === amount
+                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                    : amount > balance
+                    ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                {amount}
+              </button>
+            ))}
+            {houseConfig?.max_bet_button_enabled && (
+              <button
+                onClick={() => !spinning && setBetPerLine(maxBet)}
+                disabled={spinning || maxBet > balance}
+                className={`px-3 py-1.5 rounded-lg font-bold text-sm transition-all ${
+                  betPerLine === maxBet
+                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30'
+                    : 'bg-slate-800 text-amber-400 hover:bg-slate-700 border border-amber-500/30'
+                }`}
+              >
+                MAX
+              </button>
+            )}
+          </div>
           <Slider
             value={[betPerLine]}
             onValueChange={([val]) => !spinning && setBetPerLine(val)}
