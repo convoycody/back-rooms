@@ -406,22 +406,6 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
           </div>
         </div>
 
-        {/* Drop Button */}
-        <Button
-          onClick={drop}
-          disabled={dropping || balance < betAmount || !houseConfig?.plinko_enabled}
-          className="w-full h-14 text-xl font-black bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-400 hover:via-amber-400 hover:to-orange-400 text-black rounded-xl shadow-lg shadow-orange-500/30 disabled:opacity-50"
-        >
-          {dropping ? (
-            <Loader2 className="w-6 h-6 animate-spin" />
-          ) : (
-            `DROP - ${betAmount} pts`
-          )}
-        </Button>
-
-        {balance < betAmount && (
-          <p className="text-red-400 text-sm text-center">Insufficient balance</p>
-        )}
       </div>
 
       {/* Recent Drops */}
