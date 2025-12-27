@@ -37,6 +37,13 @@ export default function Layout({ children, currentPageName }) {
             </Link>
 
             <div className="flex items-center gap-4">
+              <Link 
+                to={createPageUrl('Store')}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors text-sm font-medium"
+              >
+                💰 Store
+              </Link>
+
               {isAdmin && (
                 <Link 
                   to={createPageUrl('Admin')}

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 
-import SlotMachine from '@/components/casino/SlotMachine';
+import AdvancedSlotMachine from '@/components/casino/AdvancedSlotMachine';
 import BlackjackGame from '@/components/casino/BlackjackGame';
 import BalanceDisplay from '@/components/casino/BalanceDisplay';
 import Leaderboard from '@/components/casino/Leaderboard';
@@ -66,16 +66,39 @@ export default function Casino() {
     queryFn: () => base44.entities.Player.list('-total_won', 20),
   });
 
-  // Get player's game sessions
-  const { data: sessions = [] } = useQuery({
-    queryKey: ['sessions', player?.id],
+  // Get house config
+  const { data: houseConfig } = useQuery({
+    queryKey: ['houseConfig'],
+    queryFn: async () => {
+      const configs = await base44.entities.HouseConfig.list();
+      return configs[0] || null;
+    },
+  });
+
+  // Get player's game sessions (both types)
+  const { data: gameSessions = [] } = useQuery({
+    queryKey: ['gameSessions', player?.id],
     queryFn: () => base44.entities.GameSession.filter(
       { player_id: player.id },
       '-created_date',
-      50
+      25
     ),
     enabled: !!player,
   });
+
+  const { data: slotSessions = [] } = useQuery({
+    queryKey: ['slotSessions', player?.id],
+    queryFn: () => base44.entities.SlotSession.filter(
+      { player_id: player.id },
+      '-created_date',
+      25
+    ),
+    enabled: !!player,
+  });
+
+  const sessions = [...gameSessions, ...slotSessions].sort((a, b) => 
+    new Date(b.created_date) - new Date(a.created_date)
+  ).slice(0, 50);
 
   // Update player mutation
   const updatePlayer = useMutation({
@@ -100,44 +123,13 @@ export default function Casino() {
   const handleSlotSpin = async (result) => {
     if (!player) return;
     
-    const pointsDelta = result.payout - result.bet;
-    const newBalance = player.points_balance + pointsDelta;
-    const xpGain = Math.floor(result.bet / 10) + (pointsDelta > 0 ? 10 : 0);
-    const newXp = player.xp + xpGain;
-    const newLevel = Math.floor(newXp / 500) + 1;
+    setLastChange(result.net_result);
     
-    setLastChange(pointsDelta);
-    
-    await updatePlayer.mutateAsync({
-      updates: {
-        points_balance: newBalance,
-        xp: newXp,
-        level: newLevel,
-        total_wagered: player.total_wagered + result.bet,
-        total_won: player.total_won + (pointsDelta > 0 ? result.payout : 0),
-        games_played: player.games_played + 1,
-        biggest_win: Math.max(player.biggest_win || 0, result.payout),
-      },
-      session: {
-        player_id: player.id,
-        game_type: 'slots',
-        bet_amount: result.bet,
-        result: pointsDelta > 0 ? (result.win?.multiplier >= 50 ? 'jackpot' : 'win') : 'loss',
-        points_delta: pointsDelta,
-        multiplier: result.win?.multiplier || 0,
-        game_data: { reels: result.reels, win_name: result.win?.name },
-        rng_seed: Math.random().toString(36).substring(7),
-      },
-      ledgerEntry: {
-        player_id: player.id,
-        change: pointsDelta,
-        reason: pointsDelta > 0 ? 'game_win' : 'game_bet',
-        balance_after: newBalance,
-        note: `Slots: ${result.reels.join(' ')}`,
-      },
-    });
-    
+    // Just refetch - the backend function already updated everything
     await refetchPlayer();
+    queryClient.invalidateQueries({ queryKey: ['slotSessions'] });
+    queryClient.invalidateQueries({ queryKey: ['allPlayers'] });
+    queryClient.invalidateQueries({ queryKey: ['houseConfig'] });
   };
 
   const handleBlackjackEnd = async (result) => {
@@ -262,9 +254,9 @@ export default function Casino() {
               <TabsList className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl p-1 mb-6">
                 <TabsTrigger 
                   value="slots" 
-                  className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-yellow-500 data-[state=active]:text-black rounded-lg py-3 font-bold"
+                  className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg py-3 font-bold"
                 >
-                  🎰 Slots
+                  🎰 5×3 Slots
                 </TabsTrigger>
                 <TabsTrigger 
                   value="blackjack"
@@ -282,10 +274,10 @@ export default function Casino() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                   >
-                    <SlotMachine 
+                    <AdvancedSlotMachine 
                       balance={player?.points_balance || 0}
-                      onSpin={handleSlotSpin}
-                      disabled={updatePlayer.isPending}
+                      onSpinComplete={handleSlotSpin}
+                      houseConfig={houseConfig}
                     />
                   </motion.div>
                 </TabsContent>
