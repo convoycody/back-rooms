@@ -33,9 +33,9 @@ export default function Layout({ children, currentPageName }) {
         <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/50">
           <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <Link to={createPageUrl('GameGallery')} className="flex items-center gap-2">
-              <span className="text-2xl">🎰</span>
+              <span className="text-2xl">🚪</span>
               <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400">
-                OFFICE CASINO
+                THE BACKROOMS
               </span>
             </Link>
 

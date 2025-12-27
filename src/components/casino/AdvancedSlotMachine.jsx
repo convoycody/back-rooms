@@ -180,6 +180,26 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
       }, animationDuration);
     } catch (error) {
       console.error('Spin error:', error);
+      
+      // Report error to Dev Center Ops
+      try {
+        await base44.functions.invoke('reportAppError', {
+          app_name: 'The Backrooms',
+          app_id: 'the-backrooms',
+          error_message: error.response?.data?.error || error.message,
+          error_stack: error.stack,
+          severity: 'critical',
+          user_affected: 'player',
+          metadata: {
+            game_type: 'slots',
+            bet_amount: totalBet,
+            balance: balance
+          }
+        });
+      } catch (reportErr) {
+        console.error('Failed to report error:', reportErr);
+      }
+      
       alert(error.response?.data?.error || 'Spin failed');
       setSpinning(false);
     }

@@ -105,6 +105,8 @@ const HandDisplay = ({ cards, label, value, hidden = false, isDealer = false, fa
   </div>
 );
 
+import { base44 } from "@/api/base44Client";
+
 export default function BlackjackGame({ balance, onGameEnd, disabled }) {
   const [deck, setDeck] = useState([]);
   const [playerHand, setPlayerHand] = useState([]);

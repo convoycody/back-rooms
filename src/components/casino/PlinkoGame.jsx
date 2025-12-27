@@ -203,6 +203,27 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
 
     } catch (error) {
       console.error('Drop error:', error);
+      
+      // Report error to Dev Center Ops
+      try {
+        await base44.functions.invoke('reportAppError', {
+          app_name: 'The Backrooms',
+          app_id: 'the-backrooms',
+          error_message: error.response?.data?.error || error.message,
+          error_stack: error.stack,
+          severity: 'critical',
+          user_affected: 'player',
+          metadata: {
+            game_type: 'plinko',
+            bet_amount: betAmount,
+            risk_mode: riskMode,
+            balance: balance
+          }
+        });
+      } catch (reportErr) {
+        console.error('Failed to report error:', reportErr);
+      }
+      
       alert(error.response?.data?.error || 'Drop failed');
       setDropping(false);
     }

@@ -52,7 +52,7 @@ export default function GameGallery() {
         level: 1,
         xp: 0,
       });
-      
+
       await base44.entities.Ledger.create({
         player_id: newPlayer.id,
         change: signupBonus,
@@ -60,6 +60,24 @@ export default function GameGallery() {
         balance_after: signupBonus,
         note: referrerId ? 'Welcome + referral bonus!' : 'Welcome bonus!'
       });
+
+      // Report user registration to Dev Center Ops
+      try {
+        await base44.functions.invoke('reportUserEvent', {
+          app_name: 'The Backrooms',
+          app_id: Deno.env?.get?.('BASE44_APP_ID') || 'the-backrooms',
+          event_type: 'user_registered',
+          user_email: currentUser.email,
+          metadata: {
+            player_id: newPlayer.id,
+            game_start_date: newPlayer.created_date,
+            signup_bonus: signupBonus,
+            referred: !!referrerId
+          }
+        });
+      } catch (err) {
+        console.error('Failed to report user registration:', err);
+      }
       
       if (referrerId) {
         const configs = await base44.entities.HouseConfig.list();
