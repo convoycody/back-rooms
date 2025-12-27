@@ -208,12 +208,12 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
             ⚡ {fastMode ? 'Fast' : 'Normal'}
           </button>
           <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-slate-400">
-              <Info className="w-5 h-5" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-slate-400">
+                <Info className="w-5 h-5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-white text-xl">Paytable & Rules</DialogTitle>
             </DialogHeader>
@@ -258,7 +258,8 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
               </div>
             </div>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       {/* Jackpot Display */}
