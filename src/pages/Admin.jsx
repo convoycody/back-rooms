@@ -205,6 +205,12 @@ export default function Admin() {
 
         {/* Quick Actions */}
         <div className="flex flex-wrap gap-4 mb-8">
+          <Link to={createPageUrl('HouseControls')}>
+            <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold">
+              <Settings className="w-4 h-4 mr-2" />
+              House Controls
+            </Button>
+          </Link>
           <Button 
             onClick={handleGiveBonus}
             className="bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold"
