@@ -14,6 +14,7 @@ import HowBettingWorks from './pages/HowBettingWorks';
 import ResponsiblePlay from './pages/ResponsiblePlay';
 import CryptoDisclosure from './pages/CryptoDisclosure';
 import Support from './pages/Support';
+import BTCPaySetup from './pages/BTCPaySetup';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "ResponsiblePlay": ResponsiblePlay,
     "CryptoDisclosure": CryptoDisclosure,
     "Support": Support,
+    "BTCPaySetup": BTCPaySetup,
 }
 
 export const pagesConfig = {
