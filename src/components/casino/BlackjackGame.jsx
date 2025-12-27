@@ -39,14 +39,14 @@ const calculateHand = (hand) => {
   return value;
 };
 
-const Card = ({ card, hidden = false, delay = 0 }) => {
+const Card = ({ card, hidden = false, delay = 0, fastMode = false }) => {
   const isRed = card.suit === '♥' || card.suit === '♦';
   
   return (
     <motion.div
       initial={{ opacity: 0, y: -50, rotateY: 180 }}
       animate={{ opacity: 1, y: 0, rotateY: hidden ? 180 : 0 }}
-      transition={{ duration: 0.3, delay }}
+      transition={{ duration: fastMode ? 0.1 : 0.3, delay: fastMode ? 0 : delay }}
       className="relative w-16 h-24 sm:w-20 sm:h-28"
       style={{ perspective: '1000px' }}
     >
@@ -77,7 +77,7 @@ const Card = ({ card, hidden = false, delay = 0 }) => {
   );
 };
 
-const HandDisplay = ({ cards, label, value, hidden = false, isDealer = false }) => (
+const HandDisplay = ({ cards, label, value, hidden = false, isDealer = false, fastMode = false }) => (
   <div className="text-center">
     <div className="flex items-center justify-center gap-1 mb-2">
       <span className="text-slate-400 text-sm">{label}</span>
@@ -98,6 +98,7 @@ const HandDisplay = ({ cards, label, value, hidden = false, isDealer = false }) 
           card={card} 
           hidden={isDealer && idx === 1 && hidden}
           delay={idx * 0.1}
+          fastMode={fastMode}
         />
       ))}
     </div>
@@ -112,6 +113,7 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
   const [betAmount, setBetAmount] = useState(10);
   const [result, setResult] = useState(null);
   const [isDealing, setIsDealing] = useState(false);
+  const [fastMode, setFastMode] = useState(false);
 
   const betOptions = [1, 5, 10, 25, 50, 100];
 
@@ -250,11 +252,23 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
   return (
     <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-emerald-500/20 shadow-2xl shadow-emerald-500/5 relative">
       {/* Header */}
-      <div className="text-center mb-6">
-        <h2 className="text-3xl font-black bg-gradient-to-r from-emerald-400 via-green-300 to-emerald-400 bg-clip-text text-transparent tracking-tight">
-          BLACKJACK
-        </h2>
-        <p className="text-slate-400 text-sm mt-1">Get 21 or beat the dealer!</p>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex-1">
+          <h2 className="text-3xl font-black bg-gradient-to-r from-emerald-400 via-green-300 to-emerald-400 bg-clip-text text-transparent tracking-tight">
+            BLACKJACK
+          </h2>
+          <p className="text-slate-400 text-sm mt-1">Get 21 or beat the dealer!</p>
+        </div>
+        <button
+          onClick={() => setFastMode(!fastMode)}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            fastMode 
+              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
+              : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+          }`}
+        >
+          ⚡ {fastMode ? 'Fast' : 'Normal'}
+        </button>
       </div>
 
       {/* Table */}
@@ -304,20 +318,22 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
               value={gameState === 'playing' ? dealerVisibleValue : dealerValue}
               hidden={gameState === 'playing'}
               isDealer={true}
+              fastMode={fastMode}
             />
-            
+
             {/* Divider */}
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
               <span className="text-emerald-500/50 text-sm">vs</span>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
             </div>
-            
+
             {/* Player Hand */}
             <HandDisplay
               cards={playerHand}
               label="Your Hand"
               value={playerValue}
+              fastMode={fastMode}
             />
           </div>
         )}

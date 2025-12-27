@@ -20,20 +20,21 @@ const PAYOUT_TABLES = {
   high: [10, 5, 2, 0.5, 0.2, 0.5, 2, 5, 10]
 };
 
-const PlinkoBoard = ({ rows = 12, path = [], dropping = false, finalBucket = null, riskMode = 'medium' }) => {
+const PlinkoBoard = ({ rows = 12, path = [], dropping = false, finalBucket = null, riskMode = 'medium', fastMode = false }) => {
   const [animatedPath, setAnimatedPath] = useState([]);
   const bucketCount = 9;
 
   useEffect(() => {
     if (dropping && path.length > 0) {
       setAnimatedPath([]);
+      const dropSpeed = fastMode ? 50 : 120;
       path.forEach((_, idx) => {
         setTimeout(() => {
           setAnimatedPath(prev => [...prev, path[idx]]);
-        }, idx * 120);
+        }, idx * dropSpeed);
       });
     }
-  }, [dropping, path]);
+  }, [dropping, path, fastMode]);
 
   const getBallPosition = () => {
     if (!dropping || animatedPath.length === 0) return null;
@@ -79,7 +80,7 @@ const PlinkoBoard = ({ rows = 12, path = [], dropping = false, finalBucket = nul
             }}
             exit={{ scale: 0 }}
             transition={{ 
-              duration: 0.12,
+              duration: fastMode ? 0.05 : 0.12,
               ease: 'easeInOut'
             }}
           />
@@ -153,6 +154,7 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
   const [clientSeed, setClientSeed] = useState(Math.random().toString(36).substring(7));
   const [animatingPath, setAnimatingPath] = useState([]);
   const [finalBucket, setFinalBucket] = useState(null);
+  const [fastMode, setFastMode] = useState(false);
 
   const rows = houseConfig?.plinko_rows || 12;
   const minBet = houseConfig?.plinko_min_bet || 1;
@@ -185,6 +187,9 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
       // Animate the drop
       setAnimatingPath(result.path);
       
+      const dropDelay = fastMode ? 50 : 120;
+      const finalDelay = fastMode ? 200 : 500;
+      
       setTimeout(() => {
         setFinalBucket(result.bucket_index);
         setLastResult(result);
@@ -194,7 +199,7 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
 
         // Generate new client seed
         setClientSeed(Math.random().toString(36).substring(7));
-      }, result.path.length * 120 + 500);
+      }, result.path.length * dropDelay + finalDelay);
 
     } catch (error) {
       console.error('Drop error:', error);
@@ -214,7 +219,18 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
           <p className="text-slate-400 text-xs sm:text-sm">Drop the ball • Choose your risk</p>
         </div>
         
-        <Dialog>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setFastMode(!fastMode)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              fastMode 
+                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
+                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+            }`}
+          >
+            ⚡ {fastMode ? 'Fast' : 'Normal'}
+          </button>
+          <Dialog>
           <DialogTrigger asChild>
             <Button variant="ghost" size="icon" className="text-slate-400">
               <Info className="w-5 h-5" />
@@ -257,6 +273,7 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
         dropping={dropping}
         finalBucket={finalBucket}
         riskMode={riskMode}
+        fastMode={fastMode}
       />
 
       {/* Result Display - Overlay */}

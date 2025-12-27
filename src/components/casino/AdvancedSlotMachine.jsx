@@ -29,7 +29,7 @@ const Symbol = ({ symbol, highlight = false, delay = 0 }) => {
   );
 };
 
-const ReelColumn = ({ symbols, spinning, delay, highlightRows = [] }) => {
+const ReelColumn = ({ symbols, spinning, delay, highlightRows = [], fastMode = false }) => {
   const [displaySymbols, setDisplaySymbols] = useState(symbols);
   const [spinningState, setSpinningState] = useState(false);
 
@@ -38,6 +38,8 @@ const ReelColumn = ({ symbols, spinning, delay, highlightRows = [] }) => {
   useEffect(() => {
     if (spinning) {
       setSpinningState(true);
+      const spinDuration = fastMode ? 300 : 1500;
+      
       const interval = setInterval(() => {
         setDisplaySymbols(
           Array(3).fill(0).map(() => allSymbols[Math.floor(Math.random() * allSymbols.length)])
@@ -48,7 +50,7 @@ const ReelColumn = ({ symbols, spinning, delay, highlightRows = [] }) => {
         clearInterval(interval);
         setDisplaySymbols(symbols);
         setSpinningState(false);
-      }, 1500 + delay);
+      }, spinDuration + delay);
 
       return () => {
         clearInterval(interval);
@@ -58,7 +60,7 @@ const ReelColumn = ({ symbols, spinning, delay, highlightRows = [] }) => {
       setDisplaySymbols(symbols);
       setSpinningState(false);
     }
-  }, [spinning, symbols, delay]);
+  }, [spinning, symbols, delay, fastMode]);
 
   return (
     <div className="flex flex-col gap-1">
@@ -121,6 +123,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
   const [clientSeed, setClientSeed] = useState(Math.random().toString(36).substring(7));
   const [lastResult, setLastResult] = useState(null);
   const [highlightedLines, setHighlightedLines] = useState([]);
+  const [fastMode, setFastMode] = useState(false);
 
   useEffect(() => {
     if (houseConfig?.min_bet_per_line && betPerLine < houseConfig.min_bet_per_line) {
@@ -154,8 +157,12 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
 
       const result = response.data;
 
-      // Set grid and stop spinning after animation
-      setGrid(result.grid);
+      const animationDuration = fastMode ? 500 : 2000;
+
+      // Set grid immediately to prevent double-spin
+      setTimeout(() => {
+        setGrid(result.grid);
+      }, 100);
       
       setTimeout(() => {
         setSpinning(false);
@@ -170,7 +177,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
 
         // Generate new client seed for next spin
         setClientSeed(Math.random().toString(36).substring(7));
-      }, 2000);
+      }, animationDuration);
     } catch (error) {
       console.error('Spin error:', error);
       alert(error.response?.data?.error || 'Spin failed');
@@ -189,7 +196,18 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
           <p className="text-slate-400 text-xs sm:text-sm">Provably fair • {lines} {lines === 1 ? 'line' : 'lines'}</p>
         </div>
         
-        <Dialog>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setFastMode(!fastMode)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              fastMode 
+                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
+                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+            }`}
+          >
+            ⚡ {fastMode ? 'Fast' : 'Normal'}
+          </button>
+          <Dialog>
           <DialogTrigger asChild>
             <Button variant="ghost" size="icon" className="text-slate-400">
               <Info className="w-5 h-5" />
@@ -270,6 +288,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
               spinning={spinning}
               delay={idx * 100}
               highlightRows={[]}
+              fastMode={fastMode}
             />
           ))}
         </div>
