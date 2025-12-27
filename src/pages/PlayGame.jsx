@@ -9,6 +9,7 @@ import { createPageUrl } from '@/utils';
 // Game component imports
 import AdvancedSlotMachine from '@/components/casino/AdvancedSlotMachine';
 import BlackjackGame from '@/components/casino/BlackjackGame';
+import PlinkoGame from '@/components/casino/PlinkoGame';
 
 export default function PlayGame() {
   const [lastChange, setLastChange] = useState(0);
@@ -152,6 +153,14 @@ export default function PlayGame() {
     await refetchPlayer();
   };
 
+  const handlePlinkoComplete = async (result) => {
+    if (!player) return;
+    
+    setLastChange(result.net_result);
+    await refetchPlayer();
+    queryClient.invalidateQueries({ queryKey: ['plinkoSessions'] });
+  };
+
   const renderGame = () => {
     if (!currentGame || !currentGame.enabled) {
       return (
@@ -177,6 +186,15 @@ export default function PlayGame() {
             balance={player?.points_balance || 0}
             onGameEnd={handleBlackjackEnd}
             disabled={updatePlayer.isPending}
+          />
+        );
+      
+      case 'PlinkoGame':
+        return (
+          <PlinkoGame
+            balance={player?.points_balance || 0}
+            onDropComplete={handlePlinkoComplete}
+            houseConfig={houseConfig}
           />
         );
       
