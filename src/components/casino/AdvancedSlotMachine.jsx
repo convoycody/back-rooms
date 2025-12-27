@@ -158,13 +158,9 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
       const result = response.data;
 
       const animationDuration = fastMode ? 500 : 2000;
-
-      // Set grid immediately to prevent double-spin
-      setTimeout(() => {
-        setGrid(result.grid);
-      }, 100);
       
       setTimeout(() => {
+        setGrid(result.grid);
         setSpinning(false);
         setLastResult(result);
 
