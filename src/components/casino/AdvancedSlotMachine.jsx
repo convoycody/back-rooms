@@ -330,22 +330,35 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
       <div className="space-y-4">
         {/* Bet Per Line */}
         <div>
-          <div className="flex justify-between text-sm mb-2">
+          <div className="flex justify-between items-center text-sm mb-2">
             <span className="text-slate-400">Bet Per Line</span>
-            <span className="text-white font-bold">{betPerLine} pts</span>
+            <input
+              type="number"
+              value={betPerLine}
+              onChange={(e) => {
+                const val = parseInt(e.target.value) || minBet;
+                if (!spinning && val >= minBet && val <= maxBet) {
+                  setBetPerLine(val);
+                }
+              }}
+              disabled={spinning}
+              className="w-24 px-3 py-1 bg-slate-800 border border-slate-600 rounded-lg text-white font-bold text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
+              min={minBet}
+              max={maxBet}
+            />
           </div>
-          <div className="flex gap-2 mb-2">
+          <div className="flex gap-2 mb-3">
             {[1, 5, 10, 25, 50, 100].map((amount) => (
               <button
                 key={amount}
                 onClick={() => !spinning && setBetPerLine(Math.min(amount, maxBet))}
                 disabled={spinning || amount > balance}
-                className={`flex-1 py-1.5 rounded-lg font-semibold text-sm transition-all ${
+                className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
                   betPerLine === amount
-                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30 scale-105'
                     : amount > balance
                     ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:scale-105'
                 }`}
               >
                 {amount}
@@ -355,25 +368,31 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
               <button
                 onClick={() => !spinning && setBetPerLine(maxBet)}
                 disabled={spinning || maxBet > balance}
-                className={`px-3 py-1.5 rounded-lg font-bold text-sm transition-all ${
+                className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
                   betPerLine === maxBet
-                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30'
-                    : 'bg-slate-800 text-amber-400 hover:bg-slate-700 border border-amber-500/30'
+                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30 scale-105'
+                    : 'bg-slate-800 text-amber-400 hover:bg-slate-700 border border-amber-500/30 hover:scale-105'
                 }`}
               >
                 MAX
               </button>
             )}
           </div>
-          <Slider
-            value={[betPerLine]}
-            onValueChange={([val]) => !spinning && setBetPerLine(val)}
-            min={minBet}
-            max={maxBet}
-            step={1}
-            disabled={spinning}
-            className="cursor-pointer"
-          />
+          <div className="relative">
+            <Slider
+              value={[betPerLine]}
+              onValueChange={([val]) => !spinning && setBetPerLine(val)}
+              min={minBet}
+              max={maxBet}
+              step={1}
+              disabled={spinning}
+              className="cursor-pointer [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:bg-purple-500 [&_[role=slider]]:border-2 [&_[role=slider]]:border-purple-300 [&_[role=slider]]:shadow-lg"
+            />
+            <div className="flex justify-between mt-1 text-xs text-slate-500">
+              <span>{minBet}</span>
+              <span>{maxBet}</span>
+            </div>
+          </div>
         </div>
 
         {/* Paylines */}

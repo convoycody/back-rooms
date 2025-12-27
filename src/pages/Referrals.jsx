@@ -50,7 +50,7 @@ export default function Referrals() {
   });
 
   const referralUrl = player?.referral_code 
-    ? `${window.location.origin}${createPageUrl('GameGallery')}?ref=${player.referral_code}`
+    ? `${window.location.origin}/#${createPageUrl('GameGallery')}?ref=${player.referral_code}`
     : '';
 
   const copyToClipboard = () => {

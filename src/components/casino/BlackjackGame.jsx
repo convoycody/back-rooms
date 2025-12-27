@@ -258,11 +258,11 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
       </div>
 
       {/* Table */}
-      <div className="relative bg-gradient-to-b from-emerald-900/50 to-emerald-950/50 rounded-2xl p-6 mb-6 border border-emerald-700/30 min-h-[320px]">
+      <div className="relative bg-gradient-to-b from-emerald-900/50 to-emerald-950/50 rounded-2xl p-6 border border-emerald-700/30" style={{ minHeight: '480px' }}>
         <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/5 to-transparent pointer-events-none" />
         
         {gameState === 'betting' ? (
-          <div className="flex flex-col items-center justify-center h-64">
+          <div className="flex flex-col items-center justify-center" style={{ minHeight: '380px' }}>
             <div className="text-6xl mb-4">🃏</div>
             <p className="text-slate-400 mb-4">Select your bet and deal</p>
             <div className="flex flex-wrap justify-center gap-2 mb-6">
@@ -294,13 +294,6 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
                 MAX
               </button>
             </div>
-            <Button
-              onClick={startGame}
-              disabled={disabled || balance < betAmount}
-              className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black rounded-xl shadow-lg shadow-emerald-500/30"
-            >
-              Deal - {betAmount} pts
-            </Button>
           </div>
         ) : (
           <div className="space-y-8">
@@ -330,77 +323,88 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
         )}
       </div>
 
-      {/* Result Display */}
-      <AnimatePresence>
-        {result && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="text-center mb-6"
-          >
-            <div className={`inline-block px-6 py-3 rounded-xl ${
-              result.payout > betAmount 
-                ? 'bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-emerald-500/20 border border-emerald-400/30' 
-                : result.payout === betAmount
-                ? 'bg-amber-500/20 border border-amber-500/30'
-                : 'bg-red-500/20 border border-red-500/30'
-            }`}>
-              <p className={`font-bold text-lg ${
-                result.payout > betAmount ? 'text-emerald-400' : 
-                result.payout === betAmount ? 'text-amber-400' : 'text-red-400'
+      {/* Fixed Action Area */}
+      <div className="mt-6" style={{ minHeight: '88px' }}>
+        {/* Result Display */}
+        <AnimatePresence mode="wait">
+          {result && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="text-center mb-4"
+            >
+              <div className={`inline-block px-6 py-3 rounded-xl ${
+                result.payout > betAmount 
+                  ? 'bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-emerald-500/20 border border-emerald-400/30' 
+                  : result.payout === betAmount
+                  ? 'bg-amber-500/20 border border-amber-500/30'
+                  : 'bg-red-500/20 border border-red-500/30'
               }`}>
-                {result.text}
-              </p>
-              <p className={`text-2xl font-black ${
-                result.payout > betAmount ? 'text-emerald-300' : 
-                result.payout === betAmount ? 'text-amber-300' : 'text-red-300'
-              }`}>
-                {result.payout > 0 ? `+${result.payout - betAmount}` : `-${betAmount}`} points
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                <p className={`font-bold text-lg ${
+                  result.payout > betAmount ? 'text-emerald-400' : 
+                  result.payout === betAmount ? 'text-amber-400' : 'text-red-400'
+                }`}>
+                  {result.text}
+                </p>
+                <p className={`text-2xl font-black ${
+                  result.payout > betAmount ? 'text-emerald-300' : 
+                  result.payout === betAmount ? 'text-amber-300' : 'text-red-300'
+                }`}>
+                  {result.payout > 0 ? `+${result.payout - betAmount}` : `-${betAmount}`} points
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* Action Buttons */}
-      {gameState === 'playing' && !isDealing && (
+        {/* Action Buttons - Fixed Position */}
         <div className="flex gap-4 justify-center">
-          <Button
-            onClick={hit}
-            disabled={playerValue >= 21}
-            className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-xl"
-          >
-            Hit
-          </Button>
-          <Button
-            onClick={() => stand()}
-            className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black rounded-xl"
-          >
-            Stand
-          </Button>
-        </div>
-      )}
+          {gameState === 'betting' && (
+            <Button
+              onClick={startGame}
+              disabled={disabled || balance < betAmount}
+              className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black rounded-xl shadow-lg shadow-emerald-500/30"
+            >
+              Deal - {betAmount} pts
+            </Button>
+          )}
 
-      {gameState === 'dealerTurn' && (
-        <div className="flex justify-center">
-          <div className="flex items-center gap-2 text-slate-400">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span>Dealer's turn...</span>
-          </div>
-        </div>
-      )}
+          {gameState === 'playing' && !isDealing && (
+            <>
+              <Button
+                onClick={hit}
+                disabled={playerValue >= 21}
+                className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-xl"
+              >
+                Hit
+              </Button>
+              <Button
+                onClick={() => stand()}
+                className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black rounded-xl"
+              >
+                Stand
+              </Button>
+            </>
+          )}
 
-      {gameState === 'ended' && (
-        <div className="flex justify-center">
-          <Button
-            onClick={resetGame}
-            className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black rounded-xl shadow-lg shadow-emerald-500/30"
-          >
-            Play Again
-          </Button>
+          {gameState === 'dealerTurn' && (
+            <div className="flex items-center gap-2 text-slate-400 py-3">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>Dealer's turn...</span>
+            </div>
+          )}
+
+          {gameState === 'ended' && (
+            <Button
+              onClick={resetGame}
+              className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black rounded-xl shadow-lg shadow-emerald-500/30"
+            >
+              Play Again
+            </Button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

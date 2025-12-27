@@ -316,22 +316,35 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
 
         {/* Bet Amount */}
         <div>
-          <div className="flex justify-between text-sm mb-2">
+          <div className="flex justify-between items-center text-sm mb-2">
             <span className="text-slate-400">Bet Amount</span>
-            <span className="text-white font-bold">{betAmount} pts</span>
+            <input
+              type="number"
+              value={betAmount}
+              onChange={(e) => {
+                const val = parseInt(e.target.value) || minBet;
+                if (!dropping && val >= minBet && val <= maxBet) {
+                  setBetAmount(val);
+                }
+              }}
+              disabled={dropping}
+              className="w-24 px-3 py-1 bg-slate-800 border border-slate-600 rounded-lg text-white font-bold text-right focus:outline-none focus:ring-2 focus:ring-orange-500"
+              min={minBet}
+              max={maxBet}
+            />
           </div>
-          <div className="flex gap-2 mb-2">
+          <div className="flex gap-2 mb-3">
             {[1, 5, 10, 25, 50, 100].map((amount) => (
               <button
                 key={amount}
                 onClick={() => !dropping && setBetAmount(Math.min(amount, maxBet))}
                 disabled={dropping || amount > balance}
-                className={`flex-1 py-1.5 rounded-lg font-semibold text-sm transition-all ${
+                className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
                   betAmount === amount
-                    ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/30'
+                    ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/30 scale-105'
                     : amount > balance
                     ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:scale-105'
                 }`}
               >
                 {amount}
@@ -341,25 +354,31 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
               <button
                 onClick={() => !dropping && setBetAmount(maxBet)}
                 disabled={dropping || maxBet > balance}
-                className={`px-3 py-1.5 rounded-lg font-bold text-sm transition-all ${
+                className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
                   betAmount === maxBet
-                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30'
-                    : 'bg-slate-800 text-amber-400 hover:bg-slate-700 border border-amber-500/30'
+                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30 scale-105'
+                    : 'bg-slate-800 text-amber-400 hover:bg-slate-700 border border-amber-500/30 hover:scale-105'
                 }`}
               >
                 MAX
               </button>
             )}
           </div>
-          <Slider
-            value={[betAmount]}
-            onValueChange={([val]) => !dropping && setBetAmount(val)}
-            min={minBet}
-            max={maxBet}
-            step={1}
-            disabled={dropping}
-            className="cursor-pointer"
-          />
+          <div className="relative">
+            <Slider
+              value={[betAmount]}
+              onValueChange={([val]) => !dropping && setBetAmount(val)}
+              min={minBet}
+              max={maxBet}
+              step={1}
+              disabled={dropping}
+              className="cursor-pointer [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:bg-orange-500 [&_[role=slider]]:border-2 [&_[role=slider]]:border-orange-300 [&_[role=slider]]:shadow-lg"
+            />
+            <div className="flex justify-between mt-1 text-xs text-slate-500">
+              <span>{minBet}</span>
+              <span>{maxBet}</span>
+            </div>
+          </div>
         </div>
 
         {/* Drop Button */}
