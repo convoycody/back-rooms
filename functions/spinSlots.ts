@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import { createHash } from 'node:crypto';
+import * as crypto from 'node:crypto';
 
 // Symbol definitions
 const SYMBOLS = {
@@ -98,7 +98,7 @@ const PAYLINES = [
 
 // Generate deterministic random number from hash
 function seededRandom(serverSeed, clientSeed, nonce, index) {
-  const hash = createHash('sha256')
+  const hash = crypto.createHash('sha256')
     .update(`${serverSeed}:${clientSeed}:${nonce}:${index}`)
     .digest('hex');
   
@@ -239,11 +239,11 @@ Deno.serve(async (req) => {
     }
     
     // Generate server seed (in production, store this securely per player)
-    const serverSeed = createHash('sha256')
+    const serverSeed = crypto.createHash('sha256')
       .update(`${player.id}:${Date.now()}:${Math.random()}`)
       .digest('hex');
     
-    const serverSeedHash = createHash('sha256')
+    const serverSeedHash = crypto.createHash('sha256')
       .update(serverSeed)
       .digest('hex');
     
@@ -256,7 +256,7 @@ Deno.serve(async (req) => {
     const nonce = lastSession[0]?.nonce ? lastSession[0].nonce + 1 : 0;
     
     // Spin the reels
-    const grid = spinReels(serverSeed, clientSeed, nonce);
+    const grid = spinReels(serverSeed, client_seed, nonce);
     
     // Evaluate wins
     const lineWins = [];

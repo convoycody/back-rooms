@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import { createHash } from 'node:crypto';
+import * as crypto from 'node:crypto';
 
 // Payout multipliers for each risk mode (9 buckets)
 const PAYOUT_TABLES = {
@@ -13,7 +13,7 @@ function generatePath(combinedSeed, rows) {
   let hash = combinedSeed;
   
   for (let i = 0; i < rows; i++) {
-    hash = createHash('sha256').update(hash).digest('hex');
+    hash = crypto.createHash('sha256').update(hash).digest('hex');
     const value = parseInt(hash.substring(0, 8), 16);
     path.push(value % 2 === 0 ? 'L' : 'R');
   }
@@ -87,13 +87,13 @@ Deno.serve(async (req) => {
 
     // Generate server seed and hash
     const serverSeed = crypto.randomUUID();
-    const serverSeedHash = createHash('sha256').update(serverSeed).digest('hex');
+    const serverSeedHash = crypto.createHash('sha256').update(serverSeed).digest('hex');
 
     // Get or initialize nonce
     const nonce = (player.plinko_nonce || 0) + 1;
 
     // Generate path
-    const combinedSeed = createHash('sha256')
+    const combinedSeed = crypto.createHash('sha256')
       .update(`${serverSeed}:${client_seed}:${nonce}`)
       .digest('hex');
     
@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
       risk_mode,
       rows,
       path,
-      bucket_index,
+      bucket_index: bucketIndex,
       multiplier,
       payout,
       net_result: netResult,
