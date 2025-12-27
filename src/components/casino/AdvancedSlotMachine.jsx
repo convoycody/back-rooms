@@ -118,7 +118,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
   const [spinning, setSpinning] = useState(false);
   const [betPerLine, setBetPerLine] = useState(5);
   const [lines, setLines] = useState(1);
-  const [clientSeed, setClientSeed] = useState(() => Math.random().toString(36).substring(7));
+  const [clientSeed, setClientSeed] = useState(Math.random().toString(36).substring(7));
   const [lastResult, setLastResult] = useState(null);
   const [highlightedLines, setHighlightedLines] = useState([]);
 
@@ -139,11 +139,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
       return;
     }
 
-    // Ensure client seed exists
-    const seedToUse = clientSeed || Math.random().toString(36).substring(7);
-    if (!clientSeed) {
-      setClientSeed(seedToUse);
-    }
+    const seedToUse = clientSeed;
 
     setSpinning(true);
     setLastResult(null);

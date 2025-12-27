@@ -150,7 +150,7 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
   const [dropping, setDropping] = useState(false);
   const [lastResult, setLastResult] = useState(null);
   const [recentDrops, setRecentDrops] = useState([]);
-  const [clientSeed, setClientSeed] = useState(() => Math.random().toString(36).substring(7));
+  const [clientSeed, setClientSeed] = useState(Math.random().toString(36).substring(7));
   const [animatingPath, setAnimatingPath] = useState([]);
   const [finalBucket, setFinalBucket] = useState(null);
 
@@ -165,11 +165,7 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
       return;
     }
 
-    // Ensure client seed exists
-    const seedToUse = clientSeed || Math.random().toString(36).substring(7);
-    if (!clientSeed) {
-      setClientSeed(seedToUse);
-    }
+    const seedToUse = clientSeed;
 
     setDropping(true);
     setLastResult(null);
@@ -277,9 +273,9 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
                 : 'bg-red-500/20 border-red-500/30'
             }`}>
               <CardContent className="p-4 text-center">
-                <p className="text-sm text-slate-300 mb-1">Landed in bucket {lastResult.bucket_index}</p>
+                <p className="text-sm text-slate-300 mb-1">Landed in bucket {lastResult?.bucket_index ?? 0}</p>
                 <p className={`text-3xl font-black ${lastResult.net_result > 0 ? 'text-green-300' : 'text-red-300'}`}>
-                  {lastResult.multiplier}x • {lastResult.net_result > 0 ? '+' : ''}{lastResult.net_result} points
+                  {lastResult?.multiplier ?? 0}x • {lastResult.net_result > 0 ? '+' : ''}{lastResult?.net_result ?? 0} points
                 </p>
               </CardContent>
             </Card>
