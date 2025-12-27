@@ -14,7 +14,7 @@ const DEVOPS_ENDPOINTS = {
   error: 'https://preview-sandbox--08aa848c2c6112c212d7b47df9e77830.base44.app/api/functions/reportAppError'
 };
 
-const APP_ID = 'YOUR_APP_ID_FROM_DEVOPS';
+const APP_ID = 'the-backrooms';
 
 export default function DevOpsTest() {
   const [loading, setLoading] = useState({
