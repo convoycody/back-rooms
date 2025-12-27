@@ -20,7 +20,7 @@ const PAYOUT_TABLES = {
   high: [10, 5, 2, 0.5, 0.2, 0.5, 2, 5, 10]
 };
 
-const PlinkoBoard = ({ rows = 12, path = [], dropping = false, finalBucket = null }) => {
+const PlinkoBoard = ({ rows = 12, path = [], dropping = false, finalBucket = null, riskMode = 'medium' }) => {
   const [animatedPath, setAnimatedPath] = useState([]);
   const bucketCount = 9;
 
@@ -89,7 +89,7 @@ const PlinkoBoard = ({ rows = 12, path = [], dropping = false, finalBucket = nul
       {/* Buckets */}
       <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1 px-4">
         {Array.from({ length: bucketCount }).map((_, idx) => {
-          const multipliers = PAYOUT_TABLES[path.length > 0 ? 'medium' : 'medium'];
+          const multipliers = PAYOUT_TABLES[riskMode] || PAYOUT_TABLES.medium;
           const mult = multipliers[idx];
           const isActive = finalBucket === idx;
           const isHigh = mult >= 3;
@@ -256,6 +256,7 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
         path={animatingPath} 
         dropping={dropping}
         finalBucket={finalBucket}
+        riskMode={riskMode}
       />
 
       {/* Result Display */}
@@ -333,28 +334,25 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
             {[1, 5, 10, 25, 50, 100].map((amount) => (
               <button
                 key={amount}
-                onClick={() => !dropping && setBetAmount(Math.min(amount, maxBet))}
-                disabled={dropping || amount > balance}
-                className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
-                  betAmount === amount
-                    ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/30 scale-105'
-                    : amount > balance
-                    ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:scale-105'
-                }`}
+                onClick={() => !dropping && setBetAmount(Math.min(betAmount + amount, maxBet, balance))}
+                disabled={dropping}
+                className="flex-1 py-2 rounded-lg font-semibold text-sm transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 hover:scale-105"
               >
-                {amount}
+                +{amount}
               </button>
             ))}
+            <button
+              onClick={() => !dropping && setBetAmount(minBet)}
+              disabled={dropping}
+              className="px-3 py-2 rounded-lg font-bold text-sm transition-all bg-slate-800 text-slate-400 hover:bg-slate-700 hover:scale-105"
+            >
+              CLR
+            </button>
             {houseConfig?.max_bet_button_enabled && (
               <button
-                onClick={() => !dropping && setBetAmount(maxBet)}
-                disabled={dropping || maxBet > balance}
-                className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
-                  betAmount === maxBet
-                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30 scale-105'
-                    : 'bg-slate-800 text-amber-400 hover:bg-slate-700 border border-amber-500/30 hover:scale-105'
-                }`}
+                onClick={() => !dropping && setBetAmount(Math.min(balance, maxBet))}
+                disabled={dropping}
+                className="px-4 py-2 rounded-lg font-bold text-sm transition-all bg-slate-800 text-amber-400 hover:bg-slate-700 border border-amber-500/30 hover:scale-105"
               >
                 MAX
               </button>

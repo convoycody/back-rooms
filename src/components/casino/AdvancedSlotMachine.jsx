@@ -349,28 +349,25 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
             {[1, 5, 10, 25, 50, 100].map((amount) => (
               <button
                 key={amount}
-                onClick={() => !spinning && setBetPerLine(Math.min(amount, maxBet))}
-                disabled={spinning || amount > balance}
-                className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
-                  betPerLine === amount
-                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30 scale-105'
-                    : amount > balance
-                    ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:scale-105'
-                }`}
+                onClick={() => !spinning && setBetPerLine(Math.min(betPerLine + amount, maxBet, Math.floor(balance / lines)))}
+                disabled={spinning}
+                className="flex-1 py-2 rounded-lg font-semibold text-sm transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 hover:scale-105"
               >
-                {amount}
+                +{amount}
               </button>
             ))}
+            <button
+              onClick={() => !spinning && setBetPerLine(minBet)}
+              disabled={spinning}
+              className="px-3 py-2 rounded-lg font-bold text-sm transition-all bg-slate-800 text-slate-400 hover:bg-slate-700 hover:scale-105"
+            >
+              CLR
+            </button>
             {houseConfig?.max_bet_button_enabled && (
               <button
-                onClick={() => !spinning && setBetPerLine(maxBet)}
-                disabled={spinning || maxBet > balance}
-                className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
-                  betPerLine === maxBet
-                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30 scale-105'
-                    : 'bg-slate-800 text-amber-400 hover:bg-slate-700 border border-amber-500/30 hover:scale-105'
-                }`}
+                onClick={() => !spinning && setBetPerLine(Math.min(Math.floor(balance / lines), maxBet))}
+                disabled={spinning}
+                className="px-4 py-2 rounded-lg font-bold text-sm transition-all bg-slate-800 text-amber-400 hover:bg-slate-700 border border-amber-500/30 hover:scale-105"
               >
                 MAX
               </button>
