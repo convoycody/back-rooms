@@ -234,7 +234,12 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
     }
     
     setResult({ outcome, text: resultText, payout });
-    
+
+    // Auto-dismiss result after 1.2 seconds
+    setTimeout(() => {
+      setResult(null);
+    }, 1200);
+
     onGameEnd({
       bet: betAmount,
       outcome,
@@ -278,7 +283,35 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
       {/* Table */}
       <div className="relative bg-gradient-to-b from-emerald-900/50 to-emerald-950/50 rounded-2xl p-6 border border-emerald-700/30" style={{ minHeight: '480px' }}>
         <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/5 to-transparent pointer-events-none" />
-        
+
+        {/* Result Display - Overlay */}
+        <AnimatePresence mode="wait">
+          {result && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-11/12 max-w-md"
+            >
+              <div className={`backdrop-blur-sm rounded-2xl px-6 py-6 border-2 shadow-2xl ${
+                result.payout > betAmount 
+                  ? 'bg-gradient-to-r from-emerald-500/90 via-green-500/90 to-emerald-500/90 border-emerald-400 shadow-emerald-500/50' 
+                  : result.payout === betAmount
+                  ? 'bg-gradient-to-r from-amber-500/90 via-yellow-500/90 to-amber-500/90 border-amber-400 shadow-amber-500/50'
+                  : 'bg-gradient-to-r from-red-500/90 via-red-600/90 to-red-500/90 border-red-400 shadow-red-500/50'
+              }`}>
+                <p className="font-black text-2xl text-white mb-2">
+                  {result.text}
+                </p>
+                <p className="text-4xl font-black text-white">
+                  {result.payout > 0 ? `+${result.payout - betAmount}` : `-${betAmount}`} points
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {gameState === 'betting' ? (
           <div className="flex flex-col items-center justify-center" style={{ minHeight: '380px' }}>
             <div className="text-6xl mb-4">🃏</div>
@@ -340,36 +373,8 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
               fastMode={fastMode}
             />
           </div>
-        )}
-      </div>
-
-      {/* Result Display - Overlay */}
-      <AnimatePresence mode="wait">
-        {result && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-11/12 max-w-md"
-          >
-            <div className={`backdrop-blur-sm rounded-2xl px-6 py-6 border-2 shadow-2xl ${
-              result.payout > betAmount 
-                ? 'bg-gradient-to-r from-emerald-500/90 via-green-500/90 to-emerald-500/90 border-emerald-400 shadow-emerald-500/50' 
-                : result.payout === betAmount
-                ? 'bg-gradient-to-r from-amber-500/90 via-yellow-500/90 to-amber-500/90 border-amber-400 shadow-amber-500/50'
-                : 'bg-gradient-to-r from-red-500/90 via-red-600/90 to-red-500/90 border-red-400 shadow-red-500/50'
-            }`}>
-              <p className="font-black text-2xl text-white mb-2">
-                {result.text}
-              </p>
-              <p className="text-4xl font-black text-white">
-                {result.payout > 0 ? `+${result.payout - betAmount}` : `-${betAmount}`} points
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+          </div>
 
       {/* Fixed Action Area */}
       <div className="mt-6" style={{ minHeight: '88px' }}>

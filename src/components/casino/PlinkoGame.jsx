@@ -199,6 +199,12 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
 
         // Generate new client seed
         setClientSeed(Math.random().toString(36).substring(7));
+
+        // Auto-dismiss result after 1.2 seconds
+        setTimeout(() => {
+          setLastResult(null);
+          setFinalBucket(null);
+        }, 1200);
       }, result.path.length * dropDelay + finalDelay);
 
     } catch (error) {
@@ -289,25 +295,26 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
       </div>
 
       {/* Plinko Board */}
-      <PlinkoBoard 
-        rows={rows} 
-        path={animatingPath} 
-        dropping={dropping}
-        finalBucket={finalBucket}
-        riskMode={riskMode}
-        fastMode={fastMode}
-      />
+      <div className="relative">
+        <PlinkoBoard 
+          rows={rows} 
+          path={animatingPath} 
+          dropping={dropping}
+          finalBucket={finalBucket}
+          riskMode={riskMode}
+          fastMode={fastMode}
+        />
 
-      {/* Result Display - Overlay */}
-      <AnimatePresence>
-        {lastResult && !dropping && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-11/12 max-w-md"
-          >
+        {/* Result Display - Overlay */}
+        <AnimatePresence>
+          {lastResult && !dropping && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-11/12 max-w-md"
+            >
             <Card className={`${
               lastResult.net_result > 0
                 ? 'bg-gradient-to-r from-green-500/90 via-emerald-500/90 to-green-500/90 border-green-400 shadow-2xl shadow-green-500/50'
@@ -321,11 +328,12 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
                 <p className="text-3xl font-bold text-white">
                   {lastResult.net_result > 0 ? '+' : ''}{lastResult?.net_result ?? 0} points
                 </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Controls */}
       <div className="mt-6 space-y-6">

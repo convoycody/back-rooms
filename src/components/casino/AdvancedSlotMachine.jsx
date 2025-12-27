@@ -177,6 +177,12 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
 
         // Generate new client seed for next spin
         setClientSeed(Math.random().toString(36).substring(7));
+
+        // Auto-dismiss result after 1.2 seconds
+        setTimeout(() => {
+          setLastResult(null);
+          setHighlightedLines([]);
+        }, 1200);
       }, animationDuration);
     } catch (error) {
       console.error('Spin error:', error);
@@ -313,18 +319,17 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
             />
           ))}
         </div>
-      </div>
 
-      {/* Result Display - Overlay */}
-      <AnimatePresence>
-        {lastResult && !spinning && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-11/12 max-w-md"
-          >
+        {/* Result Display - Overlay */}
+        <AnimatePresence>
+          {lastResult && !spinning && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-11/12 max-w-md"
+            >
             <Card className={`${
               lastResult.jackpot_won
                 ? 'bg-gradient-to-r from-amber-500/90 to-yellow-500/90 border-amber-400 shadow-2xl shadow-amber-500/50'
@@ -357,11 +362,12 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
                     Scatter: {lastResult.scatter_win.count}× 💰 = {lastResult.scatter_win.payout}pts
                   </p>
                 )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Controls */}
       <div className="space-y-4">
