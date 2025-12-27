@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Loader2, Users, Coins, RefreshCw, Plus, Minus, Gift, Shield, ArrowLeft, Settings } from 'lucide-react';
+import { Loader2, Users, Coins, RefreshCw, Plus, Minus, Gift, Shield, ArrowLeft, Settings, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
@@ -278,6 +278,12 @@ export default function Admin() {
             <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold">
               <Settings className="w-4 h-4 mr-2" />
               House Controls
+            </Button>
+          </Link>
+          <Link to={createPageUrl('DevOpsTest')}>
+            <Button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold">
+              <Zap className="w-4 h-4 mr-2" />
+              DevOps Testing
             </Button>
           </Link>
           <Button 
