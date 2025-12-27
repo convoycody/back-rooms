@@ -341,17 +341,27 @@ export default function Admin() {
                       {(player.total_won || 0).toLocaleString()}
                     </TableCell>
                     <TableCell>
-                      <Dialog open={selectedPlayer?.id === player.id} onOpenChange={(open) => !open && setSelectedPlayer(null)}>
-                        <DialogTrigger asChild>
+                      <div className="flex gap-2">
+                        <Link to={createPageUrl('PlayerProfile') + `?id=${player.id}`}>
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => setSelectedPlayer(player)}
-                            className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                            className="border-purple-600 text-purple-400 hover:bg-purple-500/10"
                           >
-                            Adjust Points
+                            View Profile
                           </Button>
-                        </DialogTrigger>
+                        </Link>
+                        <Dialog open={selectedPlayer?.id === player.id} onOpenChange={(open) => !open && setSelectedPlayer(null)}>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => setSelectedPlayer(player)}
+                              className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                            >
+                              Adjust
+                            </Button>
+                          </DialogTrigger>
                         <DialogContent className="bg-slate-900 border-slate-700">
                           <DialogHeader>
                             <DialogTitle className="text-white">
