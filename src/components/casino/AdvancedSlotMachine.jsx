@@ -300,9 +300,9 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
                   </div>
                 )}
                 <p className={`text-3xl font-black ${
-                  lastResult.total_win > 0 ? 'text-green-400' : 'text-red-400'
+                  lastResult.net_result > 0 ? 'text-green-400' : 'text-red-400'
                 }`}>
-                  {lastResult.total_win > 0 ? '+' : ''}{lastResult.net_result.toLocaleString()} pts
+                  {lastResult.net_result > 0 ? '+' : ''}{lastResult.net_result.toLocaleString()} pts
                 </p>
                 {lastResult.line_wins?.length > 0 && (
                   <div className="mt-2 space-y-1">
