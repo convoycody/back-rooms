@@ -173,17 +173,19 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
     let currentDeck = [...deck];
     let dHand = [...dealerHand];
     
+    const dealDelay = fastMode ? 150 : 600;
+    const finalDelay = fastMode ? 100 : 500;
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     
     while (calculateHand(dHand) < 17) {
-      await delay(600);
+      await delay(dealDelay);
       const newCard = currentDeck.pop();
       dHand = [...dHand, newCard];
       setDealerHand(dHand);
       setDeck([...currentDeck]);
     }
     
-    await delay(500);
+    await delay(finalDelay);
     
     const pValue = calculateHand(pHand);
     const dValue = calculateHand(dHand);
