@@ -362,7 +362,7 @@ export default function Admin() {
                               Adjust
                             </Button>
                           </DialogTrigger>
-                        <DialogContent className="bg-slate-900 border-slate-700">
+                          <DialogContent className="bg-slate-900 border-slate-700">
                           <DialogHeader>
                             <DialogTitle className="text-white">
                               Adjust Points - {player.display_name}
@@ -434,8 +434,9 @@ export default function Admin() {
                               </Button>
                             </div>
                           </div>
-                        </DialogContent>
-                      </Dialog>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
