@@ -18,6 +18,7 @@ import BTCPaySetup from './pages/BTCPaySetup';
 import PlayerProfile from './pages/PlayerProfile';
 import Referrals from './pages/Referrals';
 import GameStandards from './pages/GameStandards';
+import DevOpsTest from './pages/DevOpsTest';
 import __Layout from './Layout.jsx';
 
 
@@ -42,6 +43,7 @@ export const PAGES = {
     "PlayerProfile": PlayerProfile,
     "Referrals": Referrals,
     "GameStandards": GameStandards,
+    "DevOpsTest": DevOpsTest,
 }
 
 export const pagesConfig = {
