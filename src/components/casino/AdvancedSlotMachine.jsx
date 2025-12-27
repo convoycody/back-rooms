@@ -123,7 +123,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
   const [highlightedLines, setHighlightedLines] = useState([]);
 
   useEffect(() => {
-    if (houseConfig?.min_bet_per_line) {
+    if (houseConfig?.min_bet_per_line && betPerLine < houseConfig.min_bet_per_line) {
       setBetPerLine(houseConfig.min_bet_per_line);
     }
   }, [houseConfig]);
@@ -154,11 +154,9 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
 
       const result = response.data;
 
-      // Animate the reels
-      setTimeout(() => {
-        setGrid(result.grid);
-      }, 500);
-
+      // Set grid and stop spinning after animation
+      setGrid(result.grid);
+      
       setTimeout(() => {
         setSpinning(false);
         setLastResult(result);
@@ -172,7 +170,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
 
         // Generate new client seed for next spin
         setClientSeed(Math.random().toString(36).substring(7));
-      }, 2500);
+      }, 2000);
     } catch (error) {
       console.error('Spin error:', error);
       alert(error.response?.data?.error || 'Spin failed');
@@ -277,9 +275,9 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
         </div>
       </div>
 
-      {/* Win Display */}
+      {/* Result Display */}
       <AnimatePresence>
-        {lastResult && lastResult.total_win > 0 && (
+        {lastResult && !spinning && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -289,7 +287,9 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
             <Card className={`${
               lastResult.jackpot_won
                 ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-amber-400'
-                : 'bg-green-500/20 border-green-500/50'
+                : lastResult.total_win > 0
+                ? 'bg-green-500/20 border-green-500/50'
+                : 'bg-red-500/20 border-red-500/50'
             }`}>
               <CardContent className="p-4 text-center">
                 {lastResult.jackpot_won && (
@@ -299,8 +299,10 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
                     <Sparkles className="w-6 h-6 text-amber-400 animate-pulse" />
                   </div>
                 )}
-                <p className="text-3xl font-black text-white">
-                  +{lastResult.total_win.toLocaleString()} pts
+                <p className={`text-3xl font-black ${
+                  lastResult.total_win > 0 ? 'text-green-400' : 'text-red-400'
+                }`}>
+                  {lastResult.total_win > 0 ? '+' : ''}{lastResult.net_result.toLocaleString()} pts
                 </p>
                 {lastResult.line_wins?.length > 0 && (
                   <div className="mt-2 space-y-1">
