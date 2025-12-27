@@ -314,7 +314,7 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
         {/* Bet Amount */}
         <div>
           <div className="flex justify-between items-center text-sm mb-2">
-            <span className="text-slate-400">Bet Amount</span>
+            <span className="text-slate-400">Bet Amount <span className="text-slate-500 text-xs">(Max: {maxBet})</span></span>
             <input
               type="number"
               value={betAmount}
@@ -330,6 +330,9 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
               max={maxBet}
             />
           </div>
+          {betAmount >= maxBet && (
+            <p className="text-amber-400 text-xs mb-2">Max bet limit reached</p>
+          )}
           <div className="flex gap-2 mb-3">
             {[1, 5, 10, 25, 50, 100].map((amount) => (
               <button

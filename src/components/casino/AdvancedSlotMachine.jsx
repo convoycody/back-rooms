@@ -329,7 +329,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
         {/* Bet Per Line */}
         <div>
           <div className="flex justify-between items-center text-sm mb-2">
-            <span className="text-slate-400">Bet Per Line</span>
+            <span className="text-slate-400">Bet Per Line <span className="text-slate-500 text-xs">(Max: {maxBet})</span></span>
             <input
               type="number"
               value={betPerLine}
@@ -345,6 +345,9 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
               max={maxBet}
             />
           </div>
+          {betPerLine >= maxBet && (
+            <p className="text-amber-400 text-xs mb-2">Max bet limit reached</p>
+          )}
           <div className="flex gap-2 mb-3">
             {[1, 5, 10, 25, 50, 100].map((amount) => (
               <button
