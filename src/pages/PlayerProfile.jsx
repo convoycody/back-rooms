@@ -343,6 +343,84 @@ export default function PlayerProfile() {
           </Card>
         </div>
 
+        {/* Game-Specific Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Slots Stats */}
+          <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-700/50">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                🎰 Slots Stats
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <p className="text-slate-400 text-sm">Games Played</p>
+                <p className="text-2xl font-bold text-purple-400">{player.slots_games_played || 0}</p>
+              </div>
+              <div>
+                <p className="text-slate-400 text-sm">Total Wagered</p>
+                <p className="text-xl font-semibold text-purple-300">
+                  {(player.slots_total_bet || 0).toLocaleString()}
+                </p>
+              </div>
+              <div>
+                <p className="text-slate-400 text-sm">Avg Bet Per Spin</p>
+                <p className="text-lg text-purple-200">
+                  {player.slots_games_played > 0 
+                    ? Math.round((player.slots_total_bet || 0) / player.slots_games_played) 
+                    : 0}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Blackjack Stats */}
+          <Card className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-green-700/50">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                🃏 Blackjack Stats
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <p className="text-slate-400 text-sm">Games Played</p>
+                <p className="text-2xl font-bold text-green-400">{player.blackjack_games_played || 0}</p>
+              </div>
+              <div>
+                <p className="text-slate-400 text-sm">Wins</p>
+                <p className="text-xl font-semibold text-green-300">{player.blackjack_wins || 0}</p>
+              </div>
+              <div>
+                <p className="text-slate-400 text-sm">Win Rate</p>
+                <p className="text-lg text-green-200">
+                  {player.blackjack_games_played > 0 
+                    ? ((player.blackjack_wins || 0) / player.blackjack_games_played * 100).toFixed(1)
+                    : 0}%
+                </p>
+              </div>
+              <div>
+                <p className="text-slate-400 text-sm">Longest Win Streak</p>
+                <p className="text-lg font-bold text-yellow-400">🔥 {player.blackjack_longest_streak || 0}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Plinko Stats */}
+          <Card className="bg-gradient-to-br from-orange-900/30 to-amber-900/30 border-orange-700/50">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                ⚪ Plinko Stats
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <p className="text-slate-400 text-sm">Total Drops</p>
+                <p className="text-2xl font-bold text-orange-400">{player.plinko_drops || 0}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Tabs for History */}
         <Tabs defaultValue="transactions" className="w-full">
           <TabsList className="bg-slate-800/50 border border-slate-700/50 p-1 mb-6">

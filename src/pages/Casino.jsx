@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
 import AdvancedSlotMachine from '@/components/casino/AdvancedSlotMachine';
 import BlackjackGame from '@/components/casino/BlackjackGame';
 import BalanceDisplay from '@/components/casino/BalanceDisplay';
-import Leaderboard from '@/components/casino/Leaderboard';
+import EnhancedLeaderboard from '@/components/casino/EnhancedLeaderboard';
 import RecentGames from '@/components/casino/RecentGames';
 import DailyBonusCard from '@/components/casino/DailyBonusCard';
 import TopUpCard from '@/components/casino/TopUpCard';
@@ -143,6 +143,10 @@ export default function Casino() {
     const newXp = player.xp + xpGain;
     const newLevel = Math.floor(newXp / 500) + 1;
     
+    const isWin = pointsDelta > 0;
+    const currentStreak = isWin ? (player.blackjack_current_streak || 0) + 1 : 0;
+    const longestStreak = Math.max(player.blackjack_longest_streak || 0, currentStreak);
+    
     setLastChange(pointsDelta);
     
     await updatePlayer.mutateAsync({
@@ -154,6 +158,10 @@ export default function Casino() {
         total_won: player.total_won + (pointsDelta > 0 ? result.payout : 0),
         games_played: player.games_played + 1,
         biggest_win: Math.max(player.biggest_win || 0, result.payout),
+        blackjack_games_played: (player.blackjack_games_played || 0) + 1,
+        blackjack_wins: (player.blackjack_wins || 0) + (isWin ? 1 : 0),
+        blackjack_current_streak: currentStreak,
+        blackjack_longest_streak: longestStreak,
       },
       session: {
         player_id: player.id,
@@ -298,7 +306,7 @@ export default function Casino() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Leaderboard players={allPlayers} currentPlayerId={player?.id} />
+              <EnhancedLeaderboard currentPlayerId={player?.id} />
             </motion.div>
 
             <motion.div

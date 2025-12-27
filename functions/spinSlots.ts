@@ -335,7 +335,9 @@ Deno.serve(async (req) => {
       total_won: player.total_won + totalWin,
       games_played: player.games_played + 1,
       biggest_win: Math.max(player.biggest_win || 0, totalWin),
-      xp: player.xp + Math.floor(totalBet / 10) + (netResult > 0 ? 15 : 0)
+      xp: player.xp + Math.floor(totalBet / 10) + (netResult > 0 ? 15 : 0),
+      slots_games_played: (player.slots_games_played || 0) + 1,
+      slots_total_bet: (player.slots_total_bet || 0) + totalBet
     });
     
     // Create ledger entries

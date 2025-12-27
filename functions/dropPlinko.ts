@@ -120,7 +120,8 @@ Deno.serve(async (req) => {
       total_won: player.total_won + (netResult > 0 ? payout : 0),
       games_played: player.games_played + 1,
       biggest_win: Math.max(player.biggest_win || 0, payout),
-      plinko_nonce: nonce
+      plinko_nonce: nonce,
+      plinko_drops: (player.plinko_drops || 0) + 1
     });
 
     // Create session record
