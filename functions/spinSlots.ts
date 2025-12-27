@@ -308,85 +308,52 @@ Deno.serve(async (req) => {
     }
     
     const netResult = totalWin - totalBet;
-    
-    // Create slot session using service role
-    const session = await base44.asServiceRole.entities.SlotSession.create({
-      player_id: player.id,
-      bet_per_line,
-      lines_played: lines,
-      total_bet: totalBet,
-      total_win: totalWin,
-      net_result: netResult,
-      jackpot_contribution: jackpotContribution,
-      jackpot_won: jackpotWon,
-      client_seed,
-      server_seed_hash: serverSeedHash,
-      nonce,
-      reel_results: grid,
-      line_wins: lineWins,
-      scatter_win: scatterWin ? { count: scatterWin.count, payout: scatterPayout } : null
-    });
-    
-    // Update player balance
     const newBalance = player.points_balance + netResult - jackpotContribution;
-    await base44.asServiceRole.entities.Player.update(player.id, {
-      points_balance: newBalance,
-      total_wagered: player.total_wagered + totalBet,
-      total_won: player.total_won + totalWin,
-      games_played: player.games_played + 1,
-      biggest_win: Math.max(player.biggest_win || 0, totalWin),
-      xp: player.xp + Math.floor(totalBet / 10) + (netResult > 0 ? 15 : 0),
-      slots_games_played: (player.slots_games_played || 0) + 1,
-      slots_total_bet: (player.slots_total_bet || 0) + totalBet
-    });
     
-    // Create ledger entries
-    await base44.asServiceRole.entities.Ledger.create({
-      player_id: player.id,
-      change: -totalBet,
-      reason: 'slot_bet',
-      session_id: session.id,
-      balance_after: player.points_balance - totalBet,
-      note: `Bet ${bet_per_line} per line × ${lines} lines`
-    });
-    
-    if (totalWin > 0) {
-      await base44.asServiceRole.entities.Ledger.create({
+    // Batch all database operations in parallel for speed
+    const updates = [
+      // Create slot session
+      base44.asServiceRole.entities.SlotSession.create({
         player_id: player.id,
-        change: totalWin,
-        reason: 'slot_payout',
-        session_id: session.id,
-        balance_after: player.points_balance - totalBet + totalWin,
-        note: `Won ${totalWin} points`
-      });
-    }
-    
-    if (jackpotContribution > 0) {
-      await base44.asServiceRole.entities.Ledger.create({
-        player_id: player.id,
-        change: -jackpotContribution,
-        reason: 'jackpot_contrib',
-        session_id: session.id,
-        balance_after: newBalance,
-        note: `Jackpot contribution`
-      });
+        bet_per_line,
+        lines_played: lines,
+        total_bet: totalBet,
+        total_win: totalWin,
+        net_result: netResult,
+        jackpot_contribution: jackpotContribution,
+        jackpot_won: jackpotWon,
+        client_seed,
+        server_seed_hash: serverSeedHash,
+        nonce,
+        reel_results: grid,
+        line_wins: lineWins,
+        scatter_win: scatterWin ? { count: scatterWin.count, payout: scatterPayout } : null
+      }),
       
-      // Update jackpot pool
-      await base44.asServiceRole.entities.HouseConfig.update(houseConfig.id, {
-        jackpot_pool: jackpotWon ? 0 : houseConfig.jackpot_pool + jackpotContribution
-      });
+      // Update player stats
+      base44.asServiceRole.entities.Player.update(player.id, {
+        points_balance: newBalance,
+        total_wagered: player.total_wagered + totalBet,
+        total_won: player.total_won + totalWin,
+        games_played: player.games_played + 1,
+        biggest_win: Math.max(player.biggest_win || 0, totalWin),
+        xp: player.xp + Math.floor(totalBet / 10) + (netResult > 0 ? 15 : 0),
+        slots_games_played: (player.slots_games_played || 0) + 1,
+        slots_total_bet: (player.slots_total_bet || 0) + totalBet
+      })
+    ];
+    
+    // Add jackpot pool update if needed
+    if (jackpotContribution > 0) {
+      updates.push(
+        base44.asServiceRole.entities.HouseConfig.update(houseConfig.id, {
+          jackpot_pool: jackpotWon ? 0 : houseConfig.jackpot_pool + jackpotContribution
+        })
+      );
     }
     
-    if (jackpotWon) {
-      await base44.asServiceRole.entities.Ledger.create({
-        player_id: player.id,
-        change: houseConfig.jackpot_pool,
-        reason: 'jackpot_win',
-        session_id: session.id,
-        balance_after: newBalance + houseConfig.jackpot_pool,
-        note: `JACKPOT WON!`
-      });
-    }
+    // Execute all updates in parallel
+    const [session] = await Promise.all(updates);
     
     return Response.json({
       success: true,
