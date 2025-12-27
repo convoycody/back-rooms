@@ -349,7 +349,15 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
             {[1, 5, 10, 25, 50, 100].map((amount) => (
               <button
                 key={amount}
-                onClick={() => !spinning && setBetPerLine(Math.min(betPerLine + amount, maxBet, Math.floor(balance / lines)))}
+                onClick={() => {
+                  if (!spinning) {
+                    const newAmount = betPerLine + amount;
+                    const totalBet = newAmount * lines;
+                    if (totalBet <= balance && newAmount <= maxBet) {
+                      setBetPerLine(newAmount);
+                    }
+                  }
+                }}
                 disabled={spinning}
                 className="flex-1 py-2 rounded-lg font-semibold text-sm transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 hover:scale-105"
               >

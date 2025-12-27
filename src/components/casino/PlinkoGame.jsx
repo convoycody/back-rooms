@@ -334,7 +334,14 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
             {[1, 5, 10, 25, 50, 100].map((amount) => (
               <button
                 key={amount}
-                onClick={() => !dropping && setBetAmount(Math.min(betAmount + amount, maxBet, balance))}
+                onClick={() => {
+                  if (!dropping) {
+                    const newAmount = betAmount + amount;
+                    if (newAmount <= balance && newAmount <= maxBet) {
+                      setBetAmount(newAmount);
+                    }
+                  }
+                }}
                 disabled={dropping}
                 className="flex-1 py-2 rounded-lg font-semibold text-sm transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 hover:scale-105"
               >
