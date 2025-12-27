@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Settings, TrendingUp, TrendingDown, Users, Coins, Trophy, Clock, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
+import { Loader2, Settings, TrendingUp, TrendingDown, Users, Coins, Trophy, Clock, CheckCircle2, XCircle, ArrowLeft, Gift, Fuel } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import moment from 'moment';
@@ -117,6 +117,23 @@ export default function HouseControls() {
   const todayPaidOut = todaySessions.reduce((sum, s) => sum + s.total_win, 0);
   const todayNet = todayWagered - todayPaidOut;
 
+  // Bonus stats
+  const todayBonuses = ledgerEntries.filter(e => {
+    const entryDate = new Date(e.created_date);
+    return entryDate >= todayStart && e.reason === 'daily_bonus';
+  });
+  const todayBonusTotal = todayBonuses.reduce((sum, e) => sum + e.change, 0);
+  const todayBonusClaims = todayBonuses.length;
+
+  const todayTopUps = ledgerEntries.filter(e => {
+    const entryDate = new Date(e.created_date);
+    return entryDate >= todayStart && e.reason === 'auto_topup';
+  });
+  const todayTopUpTotal = todayTopUps.reduce((sum, e) => sum + e.change, 0);
+
+  const totalIssued = ledgerEntries.filter(e => e.change > 0).reduce((sum, e) => sum + e.change, 0);
+  const totalBurned = ledgerEntries.filter(e => e.change < 0).reduce((sum, e) => sum + Math.abs(e.change), 0);
+
   if (configLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -185,9 +202,143 @@ export default function HouseControls() {
         <Tabs defaultValue="controls" className="space-y-6">
           <TabsList className="bg-slate-800/50 border border-slate-700/50">
             <TabsTrigger value="controls">Game Settings</TabsTrigger>
+            <TabsTrigger value="bonuses">Daily Bonuses</TabsTrigger>
             <TabsTrigger value="economy">Economy Stats</TabsTrigger>
             <TabsTrigger value="purchases">Pack Requests ({pendingPurchases.length})</TabsTrigger>
           </TabsList>
+
+          {/* Daily Bonuses Tab */}
+          <TabsContent value="bonuses" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Daily Bonus */}
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Gift className="w-5 h-5 text-purple-400" />
+                    Daily Bonus
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-white">Daily Bonus Enabled</Label>
+                      <p className="text-slate-400 text-sm">Players can claim once per day</p>
+                    </div>
+                    <Switch
+                      checked={houseConfig.daily_bonus_enabled}
+                      onCheckedChange={(checked) => updateConfigMutation.mutate({ daily_bonus_enabled: checked })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Bonus Amount: {houseConfig.daily_bonus_amount?.toLocaleString()}</Label>
+                    <Slider
+                      value={[houseConfig.daily_bonus_amount || 10000]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ daily_bonus_amount: val })}
+                      min={1000}
+                      max={50000}
+                      step={1000}
+                      disabled={!houseConfig.daily_bonus_enabled}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-700">
+                    <p className="text-slate-400 text-sm mb-2">Today's Stats</p>
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-slate-300">Claims:</span>
+                        <span className="text-white font-bold">{todayBonusClaims}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-300">Total Paid:</span>
+                        <span className="text-purple-400 font-bold">{todayBonusTotal.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Top-Up System */}
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Fuel className="w-5 h-5 text-amber-400" />
+                    Auto Top-Up
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-white">Top-Up Enabled</Label>
+                      <p className="text-slate-400 text-sm">Emergency balance refills</p>
+                    </div>
+                    <Switch
+                      checked={houseConfig.topup_enabled}
+                      onCheckedChange={(checked) => updateConfigMutation.mutate({ topup_enabled: checked })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Threshold: {houseConfig.topup_threshold}</Label>
+                    <Slider
+                      value={[houseConfig.topup_threshold || 10]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ topup_threshold: val })}
+                      min={1}
+                      max={100}
+                      step={1}
+                      disabled={!houseConfig.topup_enabled}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Top-Up Amount: {houseConfig.topup_amount}</Label>
+                    <Slider
+                      value={[houseConfig.topup_amount || 500]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ topup_amount: val })}
+                      min={100}
+                      max={2000}
+                      step={100}
+                      disabled={!houseConfig.topup_enabled}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Max Per Day: {houseConfig.topup_max_per_day}</Label>
+                    <Slider
+                      value={[houseConfig.topup_max_per_day || 3]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ topup_max_per_day: val })}
+                      min={1}
+                      max={10}
+                      step={1}
+                      disabled={!houseConfig.topup_enabled}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Cooldown (min): {houseConfig.topup_cooldown_minutes}</Label>
+                    <Slider
+                      value={[houseConfig.topup_cooldown_minutes || 30]}
+                      onValueChange={([val]) => updateConfigMutation.mutate({ topup_cooldown_minutes: val })}
+                      min={5}
+                      max={120}
+                      step={5}
+                      disabled={!houseConfig.topup_enabled}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-700">
+                    <p className="text-slate-400 text-sm mb-1">Today's Top-Ups</p>
+                    <p className="text-amber-400 font-bold text-xl">{todayTopUpTotal.toLocaleString()}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
           {/* Game Controls */}
           <TabsContent value="controls" className="space-y-6">
@@ -401,6 +552,37 @@ export default function HouseControls() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-black text-amber-400">{actualRTP}%</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-400 flex items-center gap-2">
+                    <Gift className="w-4 h-4" />
+                    Daily Bonuses
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-black text-purple-400">{todayBonusTotal.toLocaleString()}</p>
+                  <p className="text-slate-500 text-xs mt-1">{todayBonusClaims} claims</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-400">Total Issued</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-black text-green-400">{totalIssued.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-900/50 border-slate-700/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-400">Total Burned</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-black text-red-400">{totalBurned.toLocaleString()}</p>
                 </CardContent>
               </Card>
             </div>

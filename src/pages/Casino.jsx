@@ -10,6 +10,8 @@ import BlackjackGame from '@/components/casino/BlackjackGame';
 import BalanceDisplay from '@/components/casino/BalanceDisplay';
 import Leaderboard from '@/components/casino/Leaderboard';
 import RecentGames from '@/components/casino/RecentGames';
+import DailyBonusCard from '@/components/casino/DailyBonusCard';
+import TopUpCard from '@/components/casino/TopUpCard';
 
 export default function Casino() {
   const [lastChange, setLastChange] = useState(0);
@@ -302,6 +304,24 @@ export default function Casino() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            <DailyBonusCard 
+              playerId={player?.id}
+              balance={player?.points_balance || 0}
+              onClaimed={(amount) => {
+                setLastChange(amount);
+                refetchPlayer();
+              }}
+            />
+
+            <TopUpCard
+              playerId={player?.id}
+              balance={player?.points_balance || 0}
+              onTopUp={(amount) => {
+                setLastChange(amount);
+                refetchPlayer();
+              }}
+            />
+
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
