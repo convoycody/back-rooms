@@ -197,28 +197,88 @@ export default function BTCPaySetup() {
             <CardTitle className="text-white">Step 3: Add Secrets to Base44</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-slate-400 text-sm">
-              Go to your Base44 dashboard → Settings → Environment Variables and add these secrets:
-            </p>
-            <div className="space-y-2">
-              {['BTCPAY_SERVER_URL', 'BTCPAY_STORE_ID', 'BTCPAY_API_KEY', 'BTCPAY_WEBHOOK_SECRET'].map(secret => (
-                <div key={secret} className="flex items-center gap-2 p-2 bg-slate-800 rounded">
-                  <code className="flex-1 text-sm text-green-400">{secret}</code>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(secret)}
-                    className="text-slate-400 hover:text-white"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
+            <Alert className="bg-purple-500/10 border-purple-500/30 mb-4">
+              <AlertDescription className="text-purple-300">
+                <p className="font-semibold mb-2">📍 Where to set secrets:</p>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  <li>Click your app name in the top-left corner</li>
+                  <li>Go to <strong>"Settings"</strong> tab</li>
+                  <li>Scroll to <strong>"Environment Variables"</strong> section</li>
+                  <li>Click <strong>"+ Add Variable"</strong></li>
+                  <li>Enter each secret name and value below</li>
+                </ol>
+              </AlertDescription>
+            </Alert>
+
+            <div className="space-y-3">
+              <p className="text-slate-400 text-sm font-semibold">Secrets to add:</p>
+              
+              <div className="space-y-2">
+                <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
+                  <div className="flex items-center justify-between mb-2">
+                    <code className="text-sm text-green-400 font-mono">BTCPAY_SERVER_URL</code>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => copyToClipboard('BTCPAY_SERVER_URL')}
+                      className="text-slate-400 hover:text-white h-6 px-2"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-slate-400">Your BTCPay Server URL (e.g., https://btcpay.yourdomain.com)</p>
                 </div>
-              ))}
+
+                <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
+                  <div className="flex items-center justify-between mb-2">
+                    <code className="text-sm text-green-400 font-mono">BTCPAY_STORE_ID</code>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => copyToClipboard('BTCPAY_STORE_ID')}
+                      className="text-slate-400 hover:text-white h-6 px-2"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-slate-400">Found in BTCPay: Stores → Settings → Store ID (at top)</p>
+                </div>
+
+                <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
+                  <div className="flex items-center justify-between mb-2">
+                    <code className="text-sm text-green-400 font-mono">BTCPAY_API_KEY</code>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => copyToClipboard('BTCPAY_API_KEY')}
+                      className="text-slate-400 hover:text-white h-6 px-2"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-slate-400">Create in BTCPay: Account → API Keys → Create (needs invoice permission)</p>
+                </div>
+
+                <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
+                  <div className="flex items-center justify-between mb-2">
+                    <code className="text-sm text-green-400 font-mono">BTCPAY_WEBHOOK_SECRET</code>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => copyToClipboard('BTCPAY_WEBHOOK_SECRET')}
+                      className="text-slate-400 hover:text-white h-6 px-2"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-slate-400">Generate a random secure string (like a password)</p>
+                </div>
+              </div>
             </div>
 
             <Alert className="bg-blue-500/10 border-blue-500/30">
               <AlertDescription className="text-blue-300 text-sm">
-                After adding secrets, your backend functions will have access to them via Deno.env.get()
+                💡 After adding all secrets in the dashboard, come back here and test the connection below!
               </AlertDescription>
             </Alert>
           </CardContent>
