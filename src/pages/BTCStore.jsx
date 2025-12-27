@@ -67,6 +67,27 @@ export default function BTCStore() {
         setCheckoutUrl(response.data.checkout_url);
         setCurrentInvoiceId(response.data.invoice_id);
         
+        // Report revenue event to Dev Center Ops
+        try {
+          await base44.functions.invoke('reportRevenueEvent', {
+            app_name: 'The Backrooms',
+            app_id: 'the-backrooms',
+            amount: pack.price_usd,
+            currency: 'USD',
+            category: 'in_app_purchases',
+            customer_email: currentUser.email,
+            stream_name: pack.name,
+            metadata: {
+              item_purchased: pack.name,
+              item_id: pack.id,
+              points_amount: pack.points_amount,
+              invoice_id: response.data.invoice_id
+            }
+          });
+        } catch (err) {
+          console.error('Failed to report revenue event:', err);
+        }
+        
         // Open BTCPay checkout in new window
         window.open(response.data.checkout_url, '_blank', 'width=800,height=800');
         
