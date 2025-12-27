@@ -204,7 +204,7 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
   };
 
   return (
-    <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 backdrop-blur-xl rounded-3xl p-4 sm:p-8 border border-orange-500/20 shadow-2xl">
+    <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 backdrop-blur-xl rounded-3xl p-4 sm:p-8 border border-orange-500/20 shadow-2xl relative">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -259,24 +259,28 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
         riskMode={riskMode}
       />
 
-      {/* Result Display */}
+      {/* Result Display - Overlay */}
       <AnimatePresence>
         {lastResult && !dropping && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="mt-6"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-11/12 max-w-md"
           >
             <Card className={`${
               lastResult.net_result > 0
-                ? 'bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-green-500/20 border-green-400/30'
-                : 'bg-red-500/20 border-red-500/30'
-            }`}>
-              <CardContent className="p-4 text-center">
-                <p className="text-sm text-slate-300 mb-1">Landed in bucket {lastResult?.bucket_index ?? 0}</p>
-                <p className={`text-3xl font-black ${lastResult.net_result > 0 ? 'text-green-300' : 'text-red-300'}`}>
-                  {lastResult?.multiplier ?? 0}x • {lastResult.net_result > 0 ? '+' : ''}{lastResult?.net_result ?? 0} points
+                ? 'bg-gradient-to-r from-green-500/90 via-emerald-500/90 to-green-500/90 border-green-400 shadow-2xl shadow-green-500/50'
+                : 'bg-gradient-to-r from-red-500/90 via-red-600/90 to-red-500/90 border-red-400 shadow-2xl shadow-red-500/50'
+            } backdrop-blur-sm`}>
+              <CardContent className="p-6 text-center">
+                <p className="text-sm text-white/80 mb-2">Landed in bucket {lastResult?.bucket_index ?? 0}</p>
+                <p className="text-4xl font-black text-white mb-1">
+                  {lastResult?.multiplier ?? 0}x
+                </p>
+                <p className="text-3xl font-bold text-white">
+                  {lastResult.net_result > 0 ? '+' : ''}{lastResult?.net_result ?? 0} points
                 </p>
               </CardContent>
             </Card>

@@ -179,7 +179,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
   };
 
   return (
-    <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 backdrop-blur-xl rounded-3xl p-4 sm:p-8 border border-purple-500/20 shadow-2xl">
+    <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 backdrop-blur-xl rounded-3xl p-4 sm:p-8 border border-purple-500/20 shadow-2xl relative">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -275,46 +275,45 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
         </div>
       </div>
 
-      {/* Result Display */}
+      {/* Result Display - Overlay */}
       <AnimatePresence>
         {lastResult && !spinning && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            className="mb-6"
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-11/12 max-w-md"
           >
             <Card className={`${
               lastResult.jackpot_won
-                ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-amber-400'
+                ? 'bg-gradient-to-r from-amber-500/90 to-yellow-500/90 border-amber-400 shadow-2xl shadow-amber-500/50'
                 : lastResult.total_win > 0
-                ? 'bg-green-500/20 border-green-500/50'
-                : 'bg-red-500/20 border-red-500/50'
-            }`}>
-              <CardContent className="p-4 text-center">
+                ? 'bg-gradient-to-r from-green-500/90 to-emerald-500/90 border-green-400 shadow-2xl shadow-green-500/50'
+                : 'bg-gradient-to-r from-red-500/90 to-red-600/90 border-red-400 shadow-2xl shadow-red-500/50'
+            } backdrop-blur-sm`}>
+              <CardContent className="p-6 text-center">
                 {lastResult.jackpot_won && (
                   <div className="flex items-center justify-center gap-2 mb-2">
-                    <Sparkles className="w-6 h-6 text-amber-400 animate-pulse" />
-                    <p className="text-2xl font-black text-amber-400">JACKPOT!!!</p>
-                    <Sparkles className="w-6 h-6 text-amber-400 animate-pulse" />
+                    <Sparkles className="w-6 h-6 text-white animate-pulse" />
+                    <p className="text-2xl font-black text-white">JACKPOT!!!</p>
+                    <Sparkles className="w-6 h-6 text-white animate-pulse" />
                   </div>
                 )}
-                <p className={`text-3xl font-black ${
-                  lastResult.net_result > 0 ? 'text-green-400' : 'text-red-400'
-                }`}>
+                <p className="text-4xl font-black text-white">
                   {lastResult.net_result > 0 ? '+' : ''}{lastResult.net_result.toLocaleString()} pts
                 </p>
                 {lastResult.line_wins?.length > 0 && (
-                  <div className="mt-2 space-y-1">
+                  <div className="mt-3 space-y-1">
                     {lastResult.line_wins.map((win, idx) => (
-                      <p key={idx} className="text-sm text-slate-300">
+                      <p key={idx} className="text-sm text-white/80">
                         Line {win.line}: {win.symbol} ×{win.count} = {win.payout}pts
                       </p>
                     ))}
                   </div>
                 )}
                 {lastResult.scatter_win && (
-                  <p className="text-sm text-purple-300 mt-1">
+                  <p className="text-sm text-white/80 mt-2">
                     Scatter: {lastResult.scatter_win.count}× 💰 = {lastResult.scatter_win.payout}pts
                   </p>
                 )}
