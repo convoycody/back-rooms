@@ -30,7 +30,7 @@ const PlinkoBoard = ({ rows = 12, path = [], dropping = false, finalBucket = nul
       path.forEach((_, idx) => {
         setTimeout(() => {
           setAnimatedPath(prev => [...prev, path[idx]]);
-        }, idx * 80);
+        }, idx * 120);
       });
     }
   }, [dropping, path]);
@@ -79,8 +79,8 @@ const PlinkoBoard = ({ rows = 12, path = [], dropping = false, finalBucket = nul
             }}
             exit={{ scale: 0 }}
             transition={{ 
-              duration: 0.08,
-              ease: 'linear'
+              duration: 0.12,
+              ease: 'easeInOut'
             }}
           />
         )}
@@ -191,10 +191,10 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
         setRecentDrops(prev => [result, ...prev].slice(0, 10));
         onDropComplete(result);
         setDropping(false);
-        
+
         // Generate new client seed
         setClientSeed(Math.random().toString(36).substring(7));
-      }, result.path.length * 80 + 500);
+      }, result.path.length * 120 + 500);
 
     } catch (error) {
       console.error('Drop error:', error);
@@ -290,6 +290,23 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
 
       {/* Controls */}
       <div className="mt-6 space-y-6">
+        {/* Drop Button - Top Position */}
+        <Button
+          onClick={drop}
+          disabled={dropping || balance < betAmount || !houseConfig?.plinko_enabled}
+          className="w-full h-14 text-xl font-black bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-400 hover:via-amber-400 hover:to-orange-400 text-black rounded-xl shadow-lg shadow-orange-500/30 disabled:opacity-50"
+        >
+          {dropping ? (
+            <Loader2 className="w-6 h-6 animate-spin" />
+          ) : (
+            `DROP - ${betAmount} pts`
+          )}
+        </Button>
+
+        {balance < betAmount && (
+          <p className="text-red-400 text-sm text-center -mt-4">Insufficient balance</p>
+        )}
+
         {/* Risk Mode */}
         <div>
           <p className="text-slate-400 text-sm mb-3">Risk Level</p>
