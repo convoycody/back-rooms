@@ -51,8 +51,8 @@ export default function RecentGames({ sessions }) {
               </p>
             </div>
             
-            <div className="text-right">
-              <p className={`font-bold ${
+            <div className="text-right flex-shrink-0 min-w-[60px]">
+              <p className={`font-bold text-sm ${
                 session.points_delta > 0 
                   ? 'text-green-400' 
                   : session.points_delta === 0 
@@ -61,7 +61,7 @@ export default function RecentGames({ sessions }) {
               }`}>
                 {session.points_delta > 0 ? '+' : ''}{session.points_delta}
               </p>
-              <p className="text-slate-500 text-xs">
+              <p className="text-slate-500 text-xs truncate">
                 {moment(session.created_date).fromNow()}
               </p>
             </div>
