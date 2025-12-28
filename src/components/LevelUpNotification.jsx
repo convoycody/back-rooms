@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Trophy } from 'lucide-react';
 
-export default function LevelUpNotification({ level, bonus, tier_name, onClose }) {
+export default function LevelUpNotification({ tier, bonus, tier_name, onClose }) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {

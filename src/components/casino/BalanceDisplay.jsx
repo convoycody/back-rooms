@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Coins, TrendingUp, TrendingDown } from 'lucide-react';
 import VIPBadge from '@/components/VIPBadge';
 
-export default function BalanceDisplay({ balance, lastChange, vipTier, vipPoints }) {
+export default function BalanceDisplay({ balance, lastChange, vipTier, xp }) {
   const VIP_TIERS = [
     { tier: 0, name: 'Player', threshold: 0 },
     { tier: 1, name: 'Regular', threshold: 5000 },
@@ -16,7 +16,7 @@ export default function BalanceDisplay({ balance, lastChange, vipTier, vipPoints
   const currentTier = VIP_TIERS[vipTier || 0];
   const nextTier = (vipTier || 0) < 5 ? VIP_TIERS[(vipTier || 0) + 1] : null;
   const vipProgress = nextTier 
-    ? (((vipPoints || 0) - currentTier.threshold) / (nextTier.threshold - currentTier.threshold)) * 100
+    ? (((xp || 0) - currentTier.threshold) / (nextTier.threshold - currentTier.threshold)) * 100
     : 100;
 
   return (
@@ -74,7 +74,7 @@ export default function BalanceDisplay({ balance, lastChange, vipTier, vipPoints
               />
             </div>
             <p className="text-slate-500 text-xs mt-1">
-              {(vipPoints || 0).toLocaleString()} XP
+              {(xp || 0).toLocaleString()} XP
               {nextTier && ` / ${nextTier.threshold.toLocaleString()}`}
             </p>
           </div>

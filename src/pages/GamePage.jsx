@@ -154,7 +154,7 @@ export default function GamePage() {
 
       if (vipResponse.data.tier_up) {
         setLevelUpData({
-          new_level: vipResponse.data.new_tier,
+          new_tier: vipResponse.data.new_tier,
           bonus_awarded: vipResponse.data.bonus_awarded,
           tier_name: vipResponse.data.tier_name
         });
@@ -213,7 +213,7 @@ export default function GamePage() {
 
       {showLevelUp && levelUpData && (
         <LevelUpNotification
-          level={levelUpData.new_level}
+          tier={levelUpData.new_tier}
           bonus={levelUpData.bonus_awarded}
           tier_name={levelUpData.tier_name}
           onClose={() => setShowLevelUp(false)}
