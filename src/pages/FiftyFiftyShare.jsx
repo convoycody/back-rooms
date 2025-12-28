@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Copy, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import moment from 'moment-timezone';
+import moment from 'moment';
 
 export default function FiftyFiftyShare() {
   const [referralCode, setReferralCode] = useState('');
@@ -40,7 +40,7 @@ export default function FiftyFiftyShare() {
   const { data: activePool } = useQuery({
     queryKey: ['activeFiftyPool'],
     queryFn: async () => {
-      const today = moment().tz('America/New_York').format('YYYY-MM-DD');
+      const today = moment().format('YYYY-MM-DD');
       const pools = await base44.entities.FiftyFiftyPool.filter({ pool_date: today });
       return pools[0] || null;
     },
@@ -61,7 +61,7 @@ export default function FiftyFiftyShare() {
     );
   }
 
-  const nextDrawTime = activePool?.draw_at ? moment(activePool.draw_at).tz('America/New_York').format('h:mm A') : `${config.draw_hour_et || 21}:00`;
+  const nextDrawTime = activePool?.draw_at ? moment(activePool.draw_at).format('h:mm A') : `${config.draw_hour_et || 21}:00`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-950 via-emerald-900 to-slate-950">

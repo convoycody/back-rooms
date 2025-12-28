@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Copy, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import moment from 'moment-timezone';
+import moment from 'moment';
 
 export default function NumbersLotteryShare() {
   const [referralCode, setReferralCode] = useState('');
@@ -61,7 +61,7 @@ export default function NumbersLotteryShare() {
   }
 
   const jackpot = activeDraw ? (activeDraw.total_pot + (config.rollover_pot || 0)) : (config.rollover_pot || 0);
-  const nextDrawTime = activeDraw?.draw_at ? moment(activeDraw.draw_at).tz('America/New_York').format('MMM D, h:mm A') : 'TBA';
+  const nextDrawTime = activeDraw?.draw_at ? moment(activeDraw.draw_at).format('MMM D, h:mm A') : 'TBA';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-950 via-pink-900 to-slate-950">
