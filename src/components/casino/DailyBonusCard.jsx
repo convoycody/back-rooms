@@ -75,15 +75,22 @@ export default function DailyBonusCard({ playerId, balance, onClaimed }) {
     enabled: !!playerId
   });
 
-  const indyTime = new Date().toLocaleString('en-US', { 
-    timeZone: 'America/Indiana/Indianapolis' 
-  });
-  const indyDate = new Date(indyTime);
-  const todayKey = indyDate.toISOString().split('T')[0];
+  // Get today's date in Eastern Time (matching backend)
+  const today = new Date().toLocaleString('en-US', { 
+    timeZone: 'America/Indiana/Indianapolis',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).split(',')[0].split('/');
+  const todayKey = `${today[2]}-${today[0].padStart(2, '0')}-${today[1].padStart(2, '0')}`;
   
   const alreadyClaimed = player?.daily_last_claim_date === todayKey;
 
   // Calculate next eligible time
+  const indyTime = new Date().toLocaleString('en-US', { 
+    timeZone: 'America/Indiana/Indianapolis' 
+  });
+  const indyDate = new Date(indyTime);
   const tomorrow = new Date(indyDate);
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(0, 0, 0, 0);
