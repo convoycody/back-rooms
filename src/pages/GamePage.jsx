@@ -215,6 +215,7 @@ export default function GamePage() {
         <LevelUpNotification
           level={levelUpData.new_level}
           bonus={levelUpData.bonus_awarded}
+          tier_name={levelUpData.tier_name}
           onClose={() => setShowLevelUp(false)}
         />
       )}

@@ -2,19 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Trophy } from 'lucide-react';
 
-export default function LevelUpNotification({ show, level, bonus, onClose }) {
-  const [visible, setVisible] = useState(false);
+export default function LevelUpNotification({ level, bonus, tier_name, onClose }) {
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    if (show) {
-      setVisible(true);
-      const timer = setTimeout(() => {
-        setVisible(false);
-        setTimeout(onClose, 300);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [show, onClose]);
+    const timer = setTimeout(() => {
+      setVisible(false);
+      setTimeout(onClose, 300);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
 
   return (
     <AnimatePresence>
@@ -33,8 +30,8 @@ export default function LevelUpNotification({ show, level, bonus, onClose }) {
                 <Sparkles className="w-8 h-8 text-amber-400 animate-pulse" />
               </div>
               <div className="text-center">
-                <p className="text-amber-400 font-black text-3xl mb-1">LEVEL UP!</p>
-                <p className="text-white text-xl font-bold">Level {level}</p>
+                <p className="text-amber-400 font-black text-3xl mb-1">VIP TIER UP!</p>
+                <p className="text-white text-xl font-bold">{tier_name || `Tier ${level}`}</p>
                 {bonus > 0 && (
                   <p className="text-green-400 text-lg font-semibold mt-2">
                     +{bonus.toLocaleString()} bonus points!

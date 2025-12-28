@@ -1,10 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Coins, TrendingUp, TrendingDown, Sparkles } from 'lucide-react';
+import { Coins, TrendingUp, TrendingDown } from 'lucide-react';
+import VIPBadge from '@/components/VIPBadge';
 
-export default function BalanceDisplay({ balance, lastChange, level, xp }) {
-  const xpForNextLevel = level * 500;
-  const xpProgress = (xp % 500) / 500 * 100;
+export default function BalanceDisplay({ balance, lastChange, vipTier, vipPoints }) {
+  const VIP_TIERS = [
+    { tier: 0, name: 'Player', threshold: 0 },
+    { tier: 1, name: 'Regular', threshold: 5000 },
+    { tier: 2, name: 'Insider', threshold: 15000 },
+    { tier: 3, name: 'High Roller', threshold: 40000 },
+    { tier: 4, name: 'Elite', threshold: 100000 },
+    { tier: 5, name: 'Legend', threshold: 250000 }
+  ];
+
+  const currentTier = VIP_TIERS[vipTier || 0];
+  const nextTier = (vipTier || 0) < 5 ? VIP_TIERS[(vipTier || 0) + 1] : null;
+  const vipProgress = nextTier 
+    ? (((vipPoints || 0) - currentTier.threshold) / (nextTier.threshold - currentTier.threshold)) * 100
+    : 100;
 
   return (
     <div className="bg-gradient-to-r from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-slate-700/50 shadow-xl">
@@ -46,22 +59,24 @@ export default function BalanceDisplay({ balance, lastChange, level, xp }) {
           </div>
         </div>
 
-        {/* Level & XP */}
+        {/* VIP Badge & Progress */}
         <div className="flex items-center gap-4">
           <div className="text-right">
             <div className="flex items-center justify-end gap-2">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span className="text-purple-400 font-bold">Level {level}</span>
+              <VIPBadge tier={vipTier || 0} size="md" showName />
             </div>
             <div className="w-32 h-2 bg-slate-700 rounded-full mt-2 overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
                 initial={{ width: 0 }}
-                animate={{ width: `${xpProgress}%` }}
+                animate={{ width: `${vipProgress}%` }}
                 transition={{ duration: 0.5 }}
               />
             </div>
-            <p className="text-slate-500 text-xs mt-1">{xp % 500}/{500} XP</p>
+            <p className="text-slate-500 text-xs mt-1">
+              {(vipPoints || 0).toLocaleString()} XP
+              {nextTier && ` / ${nextTier.threshold.toLocaleString()}`}
+            </p>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ChevronDown, Coins, Zap, Gift, Fuel } from 'lucide-react';
+import VIPBadge from '@/components/VIPBadge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
 
-export default function WalletDropdown({ balance, level, lastChange }) {
+export default function WalletDropdown({ balance, vipTier, lastChange }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -32,9 +33,7 @@ export default function WalletDropdown({ balance, level, lastChange }) {
             {typeof balance === 'number' ? balance.toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0'}
           </p>
           <div className="flex items-center gap-2 mt-2">
-            <div className="flex items-center gap-1 text-xs text-slate-400">
-              <span className="text-purple-400 font-bold">Lv {level || 1}</span>
-            </div>
+            <VIPBadge tier={vipTier || 0} size="sm" />
             {lastChange !== 0 && (
               <span className={`text-xs font-bold ${lastChange > 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {lastChange > 0 ? '+' : ''}{lastChange}
