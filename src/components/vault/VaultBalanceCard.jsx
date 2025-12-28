@@ -102,7 +102,7 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
               <DialogTrigger asChild>
                 <Button 
                   className="bg-green-600 hover:bg-green-700 text-white font-bold"
-                  disabled={!config?.vault_enabled}
+                  disabled={!config?.vault_enabled || spendableBalance <= 0}
                 >
                   <ArrowDown className="w-4 h-4 mr-2" />
                   Deposit
