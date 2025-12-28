@@ -120,7 +120,7 @@ export default function Home() {
   });
 
   const handlePlayGame = (game) => {
-    navigate(`/games/${game.game_id}`);
+    navigate(createPageUrl('GamePage') + `?slug=${game.game_id}`);
   };
 
   const featuredGames = games.filter(g => g.featured && g.enabled);

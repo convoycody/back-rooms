@@ -33,7 +33,7 @@ export default function AnnouncementDetail() {
     const refCode = announcement?.metadata?.referral_code;
     const gameId = announcement?.game_id;
     if (gameId) {
-      navigate(`/games/${gameId}${refCode ? `?ref=${refCode}` : ''}`);
+      navigate(createPageUrl('GamePage') + `?slug=${gameId}${refCode ? `&ref=${refCode}` : ''}`);
     }
   };
 
