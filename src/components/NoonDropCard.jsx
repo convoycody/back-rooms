@@ -57,7 +57,7 @@ export default function NoonDropCard() {
   const minutes = Math.floor((timeUntilDraw % (1000 * 60 * 60)) / (1000 * 60));
 
   return (
-    <Card className="bg-gradient-to-br from-amber-500/10 to-yellow-500/10 border-amber-400/30 overflow-hidden relative">
+    <Card className="bg-gradient-to-br from-amber-500/10 to-yellow-500/10 border-amber-400/30 overflow-hidden relative w-full">
       {/* Animated background effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-yellow-500/5 animate-pulse" />
       
@@ -85,15 +85,15 @@ export default function NoonDropCard() {
                 <span className="font-bold">Draw Complete!</span>
               </div>
               
-              <div className="bg-slate-900/50 rounded-lg p-4 border border-amber-400/20">
-                <div className="text-sm text-slate-400 mb-1">Today's Winner</div>
-                <div className="text-xl font-black text-white mb-2">
+              <div className="bg-slate-900/50 rounded-lg p-3 sm:p-4 border border-amber-400/20">
+                <div className="text-xs sm:text-sm text-slate-400 mb-1">Today's Winner</div>
+                <div className="text-lg sm:text-xl font-black text-white mb-2 break-all">
                   {todaysDraw?.winner_display_name || 'Anonymous'}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span className="text-2xl font-black text-amber-400">
-                    {prizeAmount.toLocaleString()} points
+                  <span className="text-xl sm:text-2xl font-black text-amber-400 break-all">
+                    {typeof prizeAmount === 'number' ? prizeAmount.toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0'} points
                   </span>
                 </div>
               </div>
@@ -120,12 +120,12 @@ export default function NoonDropCard() {
                 </Badge>
               </div>
               
-              <div className="bg-slate-900/50 rounded-lg p-4 border border-amber-400/20 text-center">
-                <div className="text-sm text-slate-400 mb-2">Prize Pool</div>
-                <div className="flex items-center justify-center gap-2">
-                  <Trophy className="w-5 h-5 text-amber-400" />
-                  <span className="text-3xl font-black bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
-                    {prizeAmount.toLocaleString()}
+              <div className="bg-slate-900/50 rounded-lg p-3 sm:p-4 border border-amber-400/20 text-center">
+                <div className="text-xs sm:text-sm text-slate-400 mb-2">Prize Pool</div>
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
+                  <span className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent break-all">
+                    {typeof prizeAmount === 'number' ? prizeAmount.toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0'}
                   </span>
                 </div>
                 <div className="text-xs text-slate-500 mt-1">points</div>

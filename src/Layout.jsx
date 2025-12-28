@@ -31,36 +31,36 @@ export default function Layout({ children, currentPageName }) {
       {/* Top Navigation Bar */}
       {currentUser && currentPageName !== 'Admin' && (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/50">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <Link to={createPageUrl('GameGallery')} className="flex items-center gap-2">
-              <span className="text-2xl">🚪</span>
-              <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400">
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2">
+            <Link to={createPageUrl('GameGallery')} className="flex items-center gap-1 sm:gap-2">
+              <span className="text-xl sm:text-2xl">🚪</span>
+              <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400 text-sm sm:text-base">
                 THE BACKROOMS
               </span>
             </Link>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
               <Link 
                 to={createPageUrl('GameGallery')}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-500/10 text-slate-300 hover:bg-slate-500/20 transition-colors text-sm font-medium"
+                className="hidden sm:flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-slate-500/10 text-slate-300 hover:bg-slate-500/20 transition-colors text-xs sm:text-sm font-medium"
               >
-                🎮 Games
+                🎮 <span className="hidden lg:inline">Games</span>
               </Link>
 
               <Link 
                 to={createPageUrl('Referrals')}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-500/10 text-slate-300 hover:bg-slate-500/20 transition-colors text-sm font-medium"
+                className="hidden sm:flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-slate-500/10 text-slate-300 hover:bg-slate-500/20 transition-colors text-xs sm:text-sm font-medium"
               >
-                🎁 Referrals
+                🎁 <span className="hidden lg:inline">Referrals</span>
               </Link>
 
               {isAdmin && (
                 <Link 
                   to={createPageUrl('Admin')}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-colors text-sm font-medium"
+                  className="hidden sm:flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-colors text-xs sm:text-sm font-medium"
                 >
-                  <Shield className="w-4 h-4" />
-                  Admin
+                  <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden lg:inline">Admin</span>
                 </Link>
               )}
 
@@ -70,20 +70,20 @@ export default function Layout({ children, currentPageName }) {
                 lastChange={lastChange}
               />
               
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-sm">
+              <div className="hidden md:flex items-center gap-2 lg:gap-3">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-xs sm:text-sm">
                   {currentUser.full_name?.[0]?.toUpperCase() || currentUser.email[0].toUpperCase()}
                 </div>
-                <span className="text-slate-300 text-sm hidden sm:block">
+                <span className="text-slate-300 text-xs sm:text-sm hidden lg:block truncate max-w-[120px]">
                   {currentUser.full_name || currentUser.email}
                 </span>
               </div>
 
               <button
                 onClick={() => base44.auth.logout()}
-                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
             </div>
           </div>

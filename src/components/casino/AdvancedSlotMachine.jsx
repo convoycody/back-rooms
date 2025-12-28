@@ -225,11 +225,11 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
   };
 
   return (
-    <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 backdrop-blur-xl rounded-3xl p-4 sm:p-8 border border-purple-500/20 shadow-2xl relative">
+    <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 lg:p-8 border border-purple-500/20 shadow-2xl relative">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
             5×3 SLOTS
           </h2>
           <p className="text-slate-400 text-xs sm:text-sm">Provably fair • {lines} {lines === 1 ? 'line' : 'lines'}</p>
@@ -304,17 +304,17 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
       {/* Jackpot Display */}
       {houseConfig?.jackpot_enabled && (
         <div className="text-center mb-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-400/30">
-            <Trophy className="w-5 h-5 text-amber-400" />
-            <span className="text-amber-300 font-bold text-lg">
-              Jackpot: {(houseConfig.jackpot_pool || 0).toLocaleString()} pts
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-400/30">
+            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
+            <span className="text-amber-300 font-bold text-sm sm:text-base lg:text-lg break-all">
+              Jackpot: {typeof houseConfig.jackpot_pool === 'number' ? houseConfig.jackpot_pool.toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0'} pts
             </span>
           </div>
         </div>
       )}
 
       {/* Slot Grid */}
-      <div className="relative bg-gradient-to-b from-slate-800/50 to-slate-900/50 rounded-2xl p-4 mb-6 border border-slate-700">
+      <div className="relative bg-gradient-to-b from-slate-800/50 to-slate-900/50 rounded-xl sm:rounded-2xl p-2 sm:p-4 mb-4 sm:mb-6 border border-slate-700">
         {/* Payline overlays */}
         {[1, 2, 3, 4, 5].map(line => (
           <PaylineIndicator 

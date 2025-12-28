@@ -259,14 +259,14 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
   };
 
   return (
-    <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-emerald-500/20 shadow-2xl shadow-emerald-500/5 relative">
+    <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 lg:p-8 border border-emerald-500/20 shadow-2xl shadow-emerald-500/5 relative">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-2">
         <div className="flex-1">
-          <h2 className="text-3xl font-black bg-gradient-to-r from-emerald-400 via-green-300 to-emerald-400 bg-clip-text text-transparent tracking-tight">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black bg-gradient-to-r from-emerald-400 via-green-300 to-emerald-400 bg-clip-text text-transparent tracking-tight">
             BLACKJACK
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Get 21 or beat the dealer!</p>
+          <p className="text-slate-400 text-xs sm:text-sm mt-1">Get 21 or beat the dealer!</p>
         </div>
         <button
           onClick={() => setFastMode(!fastMode)}

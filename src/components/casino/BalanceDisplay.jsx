@@ -21,9 +21,9 @@ export default function BalanceDisplay({ balance, lastChange, level, xp }) {
                 key={balance}
                 initial={{ scale: 1.2, color: '#fbbf24' }}
                 animate={{ scale: 1, color: '#ffffff' }}
-                className="text-2xl sm:text-3xl font-black text-white"
+                className="text-xl sm:text-2xl lg:text-3xl font-black text-white break-all"
               >
-                {balance.toLocaleString()}
+                {typeof balance === 'number' ? balance.toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0'}
               </motion.span>
               {lastChange !== 0 && (
                 <motion.span
