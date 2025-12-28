@@ -34,6 +34,7 @@ import VIPStatus from './pages/VIPStatus';
 import Vault from './pages/Vault';
 import Wallet from './pages/Wallet';
 import VaultTickets from './pages/VaultTickets';
+import FiftyFiftyPool from './pages/FiftyFiftyPool';
 import __Layout from './Layout.jsx';
 
 
@@ -74,6 +75,7 @@ export const PAGES = {
     "Vault": Vault,
     "Wallet": Wallet,
     "VaultTickets": VaultTickets,
+    "FiftyFiftyPool": FiftyFiftyPool,
 }
 
 export const pagesConfig = {
