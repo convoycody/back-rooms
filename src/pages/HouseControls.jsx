@@ -18,6 +18,7 @@ import moment from 'moment';
 import { toast } from 'sonner';
 
 export default function HouseControls() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -218,6 +219,7 @@ export default function HouseControls() {
             <TabsTrigger value="referrals">Referral System</TabsTrigger>
             <TabsTrigger value="economy">Economy Stats</TabsTrigger>
             <TabsTrigger value="purchases">Pack Requests ({pendingPurchases.length})</TabsTrigger>
+            <TabsTrigger value="scratchers">Scratchers</TabsTrigger>
           </TabsList>
 
           {/* Referral System Tab */}
@@ -1055,35 +1057,33 @@ export default function HouseControls() {
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-white font-medium">Scratchers Enabled</p>
+                    <Label className="text-white">Scratchers Enabled</Label>
                     <p className="text-slate-400 text-sm">Master toggle for scratch cards</p>
                   </div>
-                  <input
-                    type="checkbox"
-                    checked={config?.scratchers_enabled}
-                    onChange={(e) => updateConfig.mutate({ scratchers_enabled: e.target.checked })}
-                    className="w-12 h-6"
+                  <Switch
+                    checked={houseConfig.scratchers_enabled}
+                    onCheckedChange={(checked) => updateConfigMutation.mutate({ scratchers_enabled: checked })}
                   />
                 </div>
 
                 <div>
-                  <label className="text-white font-medium block mb-2">Card Cost</label>
-                  <input
+                  <Label className="text-white">Card Cost: {houseConfig.scratchers_cost || 1000}</Label>
+                  <Input
                     type="number"
-                    value={config?.scratchers_cost || 1000}
-                    onChange={(e) => updateConfig.mutate({ scratchers_cost: parseInt(e.target.value) || 1000 })}
-                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                    value={houseConfig.scratchers_cost || 1000}
+                    onChange={(e) => updateConfigMutation.mutate({ scratchers_cost: parseInt(e.target.value) || 1000 })}
+                    className="bg-slate-800 border-slate-700 text-white mt-2"
                   />
                 </div>
 
                 <div>
-                  <label className="text-white font-medium block mb-2">Announcement Threshold</label>
+                  <Label className="text-white">Announcement Threshold: {houseConfig.announcement_threshold?.toLocaleString() || 250000}</Label>
                   <p className="text-slate-400 text-sm mb-2">Minimum win to create announcement</p>
-                  <input
+                  <Input
                     type="number"
-                    value={config?.announcement_threshold || 250000}
-                    onChange={(e) => updateConfig.mutate({ announcement_threshold: parseInt(e.target.value) || 250000 })}
-                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                    value={houseConfig.announcement_threshold || 250000}
+                    onChange={(e) => updateConfigMutation.mutate({ announcement_threshold: parseInt(e.target.value) || 250000 })}
+                    className="bg-slate-800 border-slate-700 text-white mt-2"
                   />
                 </div>
 
