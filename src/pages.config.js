@@ -35,6 +35,7 @@ import Vault from './pages/Vault';
 import Wallet from './pages/Wallet';
 import VaultTickets from './pages/VaultTickets';
 import PoolGame from './pages/PoolGame';
+import LotteryGame from './pages/LotteryGame';
 import __Layout from './Layout.jsx';
 
 
@@ -76,6 +77,7 @@ export const PAGES = {
     "Wallet": Wallet,
     "VaultTickets": VaultTickets,
     "PoolGame": PoolGame,
+    "LotteryGame": LotteryGame,
 }
 
 export const pagesConfig = {
