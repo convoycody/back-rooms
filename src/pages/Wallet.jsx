@@ -11,6 +11,7 @@ import moment from 'moment';
 import DailyBonusCard from '@/components/casino/DailyBonusCard';
 import NoonDropCard from '@/components/NoonDropCard';
 import TopUpCard from '@/components/casino/TopUpCard';
+import VaultBalanceCard from '@/components/vault/VaultBalanceCard';
 
 export default function Wallet() {
   const { data: currentUser } = useQuery({
@@ -31,6 +32,20 @@ export default function Wallet() {
   const { data: ledger = [], isLoading } = useQuery({
     queryKey: ['ledger', player?.id],
     queryFn: () => base44.entities.Ledger.filter({ player_id: player.id }, '-created_date', 50),
+    enabled: !!player,
+  });
+
+  const { data: vaultConfig } = useQuery({
+    queryKey: ['vaultConfig'],
+    queryFn: async () => {
+      const configs = await base44.entities.VaultConfig.list();
+      return configs[0] || null;
+    },
+  });
+
+  const { data: vaultTransactions = [] } = useQuery({
+    queryKey: ['vaultTransactions', player?.id],
+    queryFn: () => base44.entities.VaultTransaction.filter({ player_id: player.id }, '-created_date', 25),
     enabled: !!player,
   });
 
@@ -56,8 +71,28 @@ export default function Wallet() {
     if (reason === 'referral_bonus') return '👥';
     if (reason === 'jackpot_win') return '💰';
     if (reason === 'admin_adjustment') return '⚙️';
+    if (reason === 'vault_deposit') return '📥';
+    if (reason === 'vault_withdraw') return '📤';
     return '💵';
   };
+
+  // Combine ledger and vault transactions for unified view
+  const allTransactions = [
+    ...ledger.map(l => ({ ...l, source: 'ledger' })),
+    ...vaultTransactions.map(vt => ({
+      id: vt.id,
+      created_date: vt.created_date,
+      reason: vt.transaction_type === 'deposit' ? 'vault_deposit' : 
+              vt.transaction_type === 'withdraw' ? 'vault_withdraw' : 
+              vt.transaction_type,
+      change: vt.transaction_type === 'deposit' ? 0 : 0, // Show as neutral for vault moves
+      balance_after: vt.spendable_balance_after,
+      note: vt.note,
+      source: 'vault',
+      vault_amount: vt.amount
+    }))
+  ].sort((a, b) => new Date(b.created_date) - new Date(a.created_date))
+   .slice(0, 50);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -81,45 +116,52 @@ export default function Wallet() {
         </div>
 
         {/* Balance Overview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <Card className="bg-gradient-to-br from-slate-900/90 to-slate-950/90 border-slate-700/50">
-            <CardContent className="p-8">
-              <div className="text-center mb-6">
-                <p className="text-slate-400 text-sm mb-2">Current Balance</p>
-                <p className="text-6xl font-black bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
-                  {player.points_balance?.toLocaleString() || 0}
-                </p>
-                <p className="text-slate-400 text-sm mt-1">points</p>
-              </div>
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Card className="bg-gradient-to-br from-slate-900/90 to-slate-950/90 border-slate-700/50">
+              <CardContent className="p-6">
+                <div className="text-center mb-4">
+                  <p className="text-slate-400 text-sm mb-2">Spendable Balance</p>
+                  <p className="text-5xl font-black bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
+                    {player.points_balance?.toLocaleString() || 0}
+                  </p>
+                  <p className="text-slate-400 text-sm mt-1">points</p>
+                </div>
 
-              <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800">
-                <div className="text-center">
-                  <p className="text-slate-400 text-xs mb-1">Total Wagered</p>
-                  <p className="text-white font-bold">{player.total_wagered?.toLocaleString() || 0}</p>
+                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-800">
+                  <div className="text-center">
+                    <p className="text-slate-400 text-xs mb-1">Wagered</p>
+                    <p className="text-white font-bold text-sm">{player.total_wagered?.toLocaleString() || 0}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-slate-400 text-xs mb-1">Won</p>
+                    <p className="text-green-400 font-bold text-sm">{player.total_won?.toLocaleString() || 0}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-slate-400 text-xs mb-1">Games</p>
+                    <p className="text-white font-bold text-sm">{player.games_played || 0}</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-slate-400 text-xs mb-1">Total Won</p>
-                  <p className="text-green-400 font-bold">{player.total_won?.toLocaleString() || 0}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-slate-400 text-xs mb-1">Games Played</p>
-                  <p className="text-white font-bold">{player.games_played || 0}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <VaultBalanceCard 
+            player={player} 
+            config={vaultConfig}
+            onUpdate={refetchPlayer}
+          />
+        </div>
 
         {/* Bonus Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid md:grid-cols-3 gap-4 mb-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"
         >
           <DailyBonusCard 
             playerId={player.id} 
@@ -132,6 +174,34 @@ export default function Wallet() {
             onTopUp={() => refetchPlayer()}
           />
           <NoonDropCard />
+        </motion.div>
+
+        {/* Vault Tickets Preview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mb-8"
+        >
+          <Card className="bg-slate-900/50 border-slate-700/50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <span className="text-2xl">🎫</span>
+                  My Vault Tickets
+                </h3>
+                <Link to={createPageUrl('VaultTickets')}>
+                  <Button variant="outline" size="sm" className="border-slate-600 text-slate-300">
+                    View All
+                  </Button>
+                </Link>
+              </div>
+              <div className="text-center py-8">
+                <p className="text-slate-500 text-sm">No active tickets</p>
+                <p className="text-slate-600 text-xs mt-1">Purchase tickets for vault games to see them here</p>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Noon Drop History */}
@@ -183,28 +253,41 @@ export default function Wallet() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {ledger.map((entry) => (
+                {allTransactions.map((entry) => (
                   <div 
                     key={entry.id}
-                    className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700"
+                    className="flex items-center justify-between p-3 sm:p-4 bg-slate-800/50 rounded-lg border border-slate-700"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{getReasonIcon(entry.reason)}</span>
-                      <div>
-                        <p className="text-white font-medium capitalize">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                      <span className="text-xl sm:text-2xl flex-shrink-0">{getReasonIcon(entry.reason)}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-white font-medium capitalize text-sm sm:text-base truncate">
                           {entry.reason.replace(/_/g, ' ')}
                         </p>
                         <p className="text-slate-400 text-xs">{moment(entry.created_date).fromNow()}</p>
-                        {entry.note && <p className="text-slate-500 text-xs">{entry.note}</p>}
+                        {entry.note && <p className="text-slate-500 text-xs truncate">{entry.note}</p>}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className={`font-bold text-lg ${entry.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {entry.change >= 0 ? '+' : ''}{entry.change.toLocaleString()}
-                      </p>
-                      <p className="text-slate-500 text-xs">
-                        Balance: {entry.balance_after?.toLocaleString() || 0}
-                      </p>
+                    <div className="text-right flex-shrink-0 ml-2">
+                      {entry.source === 'vault' ? (
+                        <>
+                          <p className={`font-bold text-sm sm:text-lg ${entry.vault_amount >= 0 ? 'text-purple-400' : 'text-purple-400'}`}>
+                            {entry.vault_amount >= 0 ? '→' : '←'} Vault
+                          </p>
+                          <p className="text-slate-500 text-xs">
+                            {Math.abs(entry.vault_amount).toLocaleString()} pts
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className={`font-bold text-sm sm:text-lg ${entry.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {entry.change >= 0 ? '+' : ''}{entry.change.toLocaleString()}
+                          </p>
+                          <p className="text-slate-500 text-xs">
+                            {entry.balance_after?.toLocaleString() || 0}
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
