@@ -30,6 +30,7 @@ import Settings from './pages/Settings';
 import Moderation from './pages/Moderation';
 import LargeWinnings from './pages/LargeWinnings';
 import Wallet from './pages/Wallet';
+import ScratchersMetrics from './pages/ScratchersMetrics';
 import __Layout from './Layout.jsx';
 
 
@@ -66,6 +67,7 @@ export const PAGES = {
     "Moderation": Moderation,
     "LargeWinnings": LargeWinnings,
     "Wallet": Wallet,
+    "ScratchersMetrics": ScratchersMetrics,
 }
 
 export const pagesConfig = {
