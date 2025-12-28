@@ -28,6 +28,7 @@ export default function DailyBonusCard({ playerId, balance, onClaimed }) {
       
       if (response.data.success) {
         queryClient.invalidateQueries({ queryKey: ['player'] });
+        queryClient.invalidateQueries({ queryKey: ['allPlayers'] });
         onClaimed?.(response.data.amount);
       }
     } catch (error) {

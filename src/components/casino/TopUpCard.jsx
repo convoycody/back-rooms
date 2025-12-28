@@ -39,6 +39,7 @@ export default function TopUpCard({ playerId, balance, onTopUp }) {
       
       if (response.data.success) {
         queryClient.invalidateQueries({ queryKey: ['player'] });
+        queryClient.invalidateQueries({ queryKey: ['allPlayers'] });
         onTopUp?.(response.data.amount);
       } else if (response.data.error) {
         setError(response.data);
