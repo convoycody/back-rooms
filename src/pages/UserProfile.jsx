@@ -137,8 +137,6 @@ export default function UserProfile() {
     );
   }
 
-  const xpForNextLevel = 500;
-  const xpProgress = ((player.xp % 500) / 500) * 100;
   const completedReferrals = referrals.filter(r => r.status === 'completed').length;
   const pendingReferrals = referrals.filter(r => r.status === 'pending').length;
   const totalReferralEarnings = referrals.reduce((sum, r) => sum + (r.referrer_bonus || 0), 0);
@@ -148,6 +146,9 @@ export default function UserProfile() {
     const achievement = allAchievements.find(a => a.id === pa.achievement_id);
     return achievement?.grants_verified;
   });
+
+  // Calculate level from games played (1 level per 10 games)
+  const calculatedLevel = Math.floor((player.games_played || 0) / 10) + 1;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -251,18 +252,21 @@ export default function UserProfile() {
 
                   <p className="text-slate-400 text-sm mb-2">{currentUser.email}</p>
 
-                  {/* VIP Badge */}
-                  <div className="mb-4">
+                  {/* VIP Badge & Stats */}
+                  <div className="space-y-3">
                     <VIPBadge tier={player.vip_tier} size="md" showName />
-                  </div>
-
-                  {/* Level Progress */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-400">Level {player.level}</span>
-                      <span className="text-slate-400">{player.xp % 500} / {xpForNextLevel} XP</span>
+                    
+                    <div className="flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-400">Level</span>
+                        <span className="text-white font-bold text-lg">{calculatedLevel}</span>
+                      </div>
+                      <div className="h-4 w-px bg-slate-700" />
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-400">VIP Points</span>
+                        <span className="text-purple-400 font-bold">{(player.vip_points || 0).toLocaleString()}</span>
+                      </div>
                     </div>
-                    <Progress value={xpProgress} className="h-2" />
                   </div>
                 </div>
               </div>

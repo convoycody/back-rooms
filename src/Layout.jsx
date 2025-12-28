@@ -96,7 +96,7 @@ export default function Layout({ children, currentPageName }) {
 
               <WalletDropdown 
                 balance={player?.points_balance || 0}
-                level={player?.level || 1}
+                level={Math.floor((player?.games_played || 0) / 10) + 1}
                 lastChange={lastChange}
               />
               
