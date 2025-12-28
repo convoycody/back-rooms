@@ -12,6 +12,7 @@ import EnhancedLeaderboard from '@/components/casino/EnhancedLeaderboard';
 import RecentGames from '@/components/casino/RecentGames';
 import DailyBonusCard from '@/components/casino/DailyBonusCard';
 import TopUpCard from '@/components/casino/TopUpCard';
+import NoonDropCard from '@/components/NoonDropCard';
 
 export default function Casino() {
   const [lastChange, setLastChange] = useState(0);
