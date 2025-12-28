@@ -183,12 +183,19 @@ export default function GameGallery() {
           transition={{ delay: 0.1 }}
           className="mb-8 flex justify-center"
         >
-          <BalanceDisplay
-            balance={player?.points_balance || 0}
-            lastChange={0}
-            level={player?.level || 1}
-            xp={player?.xp || 0}
-          />
+          <div className="bg-gradient-to-br from-slate-900/90 to-slate-950/90 rounded-2xl p-6 border border-slate-700/50">
+            <p className="text-slate-400 text-sm mb-1">Your Balance</p>
+            <p className="text-4xl font-black bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
+              {player?.points_balance?.toLocaleString() || 0}
+            </p>
+            <p className="text-slate-400 text-xs mt-1">points</p>
+            <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between">
+              <p className="text-slate-400 text-xs">XP: {player?.xp?.toLocaleString() || 0}</p>
+              {player?.vip_tier > 0 && (
+                <p className="text-purple-400 text-xs">VIP Tier {player.vip_tier}</p>
+              )}
+            </div>
+          </div>
         </motion.div>
 
         {/* Featured Games */}

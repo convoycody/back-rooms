@@ -174,13 +174,10 @@ export default function Home() {
               </p>
               <p className="text-slate-400 text-xs mt-1">points</p>
               <div className="mt-3 pt-3 border-t border-slate-800">
-                <p className="text-slate-400 text-xs">Level {player?.level || 1}</p>
-                <div className="mt-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
-                    style={{ width: `${((player?.xp || 0) % 500) / 500 * 100}%` }}
-                  />
-                </div>
+                <p className="text-slate-400 text-xs">XP: {player?.xp?.toLocaleString() || 0}</p>
+                {player?.vip_tier > 0 && (
+                  <p className="text-purple-400 text-xs mt-1">VIP Tier {player.vip_tier}</p>
+                )}
               </div>
             </div>
 
