@@ -150,6 +150,10 @@ export default function PlayGame() {
       
       if (levelUpResult.data.levels_gained > 0) {
         setLastChange(result.net_result + levelUpResult.data.bonus_awarded);
+        setLevelUpData({
+          level: levelUpResult.data.new_level,
+          bonus: levelUpResult.data.bonus_awarded
+        });
       }
     } catch (err) {
       console.error('Level up error:', err);
@@ -223,6 +227,10 @@ export default function PlayGame() {
       
       if (levelUpResult.data.levels_gained > 0) {
         setLastChange(pointsDelta + levelUpResult.data.bonus_awarded);
+        setLevelUpData({
+          level: levelUpResult.data.new_level,
+          bonus: levelUpResult.data.bonus_awarded
+        });
       }
     } catch (err) {
       console.error('Level up error:', err);
@@ -248,6 +256,10 @@ export default function PlayGame() {
       
       if (levelUpResult.data.levels_gained > 0) {
         setLastChange(result.net_result + levelUpResult.data.bonus_awarded);
+        setLevelUpData({
+          level: levelUpResult.data.new_level,
+          bonus: levelUpResult.data.bonus_awarded
+        });
       }
     } catch (err) {
       console.error('Level up error:', err);
