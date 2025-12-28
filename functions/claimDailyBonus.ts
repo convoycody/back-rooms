@@ -46,8 +46,14 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Claim the bonus
-    const bonusAmount = config.daily_bonus_amount;
+    // Calculate VIP bonus multiplier
+    const vipTier = player.vip_tier || 0;
+    const vipMultipliers = [1.0, 1.1, 1.2, 1.35, 1.5, 1.75]; // 0%, 10%, 20%, 35%, 50%, 75%
+    const multiplier = vipMultipliers[vipTier] || 1.0;
+    
+    const baseBonusAmount = config.daily_bonus_amount;
+    const bonusAmount = Math.floor(baseBonusAmount * multiplier);
+    const vipBonus = bonusAmount - baseBonusAmount;
     const newBalance = player.points_balance + bonusAmount;
 
     // Update player (atomic operation)
@@ -62,12 +68,17 @@ Deno.serve(async (req) => {
       change: bonusAmount,
       reason: 'daily_bonus',
       balance_after: newBalance,
-      note: `Daily bonus claimed for ${dayKey}`
+      note: vipBonus > 0 
+        ? `Daily bonus claimed for ${dayKey} (Base: ${baseBonusAmount}, VIP Bonus: +${vipBonus})`
+        : `Daily bonus claimed for ${dayKey}`
     });
 
     return Response.json({
       success: true,
       amount: bonusAmount,
+      base_amount: baseBonusAmount,
+      vip_bonus: vipBonus,
+      vip_tier: vipTier,
       new_balance: newBalance,
       day_key: dayKey
     });

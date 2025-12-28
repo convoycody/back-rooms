@@ -34,12 +34,32 @@ export default function DailyBonusCard({ playerId, balance, onClaimed }) {
         queryClient.invalidateQueries({ queryKey: ['player'] });
         queryClient.invalidateQueries({ queryKey: ['allPlayers'] });
         onClaimed?.(response.data.amount);
+        
+        // Track activity
+        try {
+          await base44.functions.invoke('trackActivity', { player_id: playerId });
+        } catch (err) {
+          console.error('Activity tracking failed:', err);
+        }
+        
         setShowReferralPrompt(true);
-        toast.success(`Claimed ${response.data.amount.toLocaleString()} points!`);
+        
+        if (response.data.vip_bonus > 0) {
+          toast.success(
+            `Claimed ${response.data.amount.toLocaleString()} points! (${response.data.base_amount.toLocaleString()} + ${response.data.vip_bonus.toLocaleString()} VIP bonus)`,
+            { duration: 4000 }
+          );
+        } else {
+          toast.success(`Claimed ${response.data.amount.toLocaleString()} points!`);
+        }
       }
     } catch (error) {
       console.error('Claim error:', error);
-      toast.error('Failed to claim bonus');
+      if (error.response?.data?.already_claimed) {
+        toast.error('Already claimed today');
+      } else {
+        toast.error('Failed to claim bonus');
+      }
     } finally {
       setClaiming(false);
     }
@@ -120,9 +140,22 @@ export default function DailyBonusCard({ playerId, balance, onClaimed }) {
               <div>
                 <p className="text-slate-400 text-sm">Claim your daily gift</p>
                 <p className="text-4xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  {(config.daily_bonus_amount || 10000).toLocaleString()}
+                  {(() => {
+                    const vipTier = player?.vip_tier || 0;
+                    const vipMultipliers = [1.0, 1.1, 1.2, 1.35, 1.5, 1.75];
+                    const multiplier = vipMultipliers[vipTier] || 1.0;
+                    const amount = Math.floor((config.daily_bonus_amount || 10000) * multiplier);
+                    return amount.toLocaleString();
+                  })()}
                 </p>
-                <p className="text-slate-400 text-xs">points</p>
+                <p className="text-slate-400 text-xs">
+                  points
+                  {player?.vip_tier > 0 && (
+                    <span className="text-purple-400 ml-1">
+                      (VIP Tier {player.vip_tier} bonus!)
+                    </span>
+                  )}
+                </p>
               </div>
               
               <Button

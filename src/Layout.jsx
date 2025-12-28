@@ -54,6 +54,14 @@ export default function Layout({ children, currentPageName }) {
                 🎁 <span className="hidden lg:inline">Referrals</span>
               </Link>
 
+              <Link 
+                to={createPageUrl('VIPStatus')}
+                className="hidden sm:flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-colors text-xs sm:text-sm font-medium"
+              >
+                <span className="hidden lg:inline">VIP</span>
+                👑
+              </Link>
+
               {isAdmin && (
                 <Link 
                   to={createPageUrl('Admin')}
@@ -71,11 +79,18 @@ export default function Layout({ children, currentPageName }) {
               />
               
               <Link to={createPageUrl('UserProfile')} className="hidden md:flex items-center gap-2 lg:gap-3 hover:opacity-80 transition-opacity">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs sm:text-sm overflow-hidden">
-                  {player?.avatar_url ? (
-                    <img src={player.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <span>{currentUser.full_name?.[0]?.toUpperCase() || currentUser.email[0].toUpperCase()}</span>
+                <div className="relative">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs sm:text-sm overflow-hidden">
+                    {player?.avatar_url ? (
+                      <img src={player.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{currentUser.full_name?.[0]?.toUpperCase() || currentUser.email[0].toUpperCase()}</span>
+                    )}
+                  </div>
+                  {player?.vip_tier > 0 && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-500 border border-slate-900 flex items-center justify-center">
+                      <span className="text-[8px]">👑</span>
+                    </div>
                   )}
                 </div>
                 <span className="text-slate-300 text-xs sm:text-sm hidden lg:block truncate max-w-[120px]">

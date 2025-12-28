@@ -20,6 +20,7 @@ import Referrals from './pages/Referrals';
 import GameStandards from './pages/GameStandards';
 import DevOpsTest from './pages/DevOpsTest';
 import UserProfile from './pages/UserProfile';
+import VIPStatus from './pages/VIPStatus';
 import __Layout from './Layout.jsx';
 
 
@@ -46,6 +47,7 @@ export const PAGES = {
     "GameStandards": GameStandards,
     "DevOpsTest": DevOpsTest,
     "UserProfile": UserProfile,
+    "VIPStatus": VIPStatus,
 }
 
 export const pagesConfig = {
