@@ -19,6 +19,7 @@ import PlayerProfile from './pages/PlayerProfile';
 import Referrals from './pages/Referrals';
 import GameStandards from './pages/GameStandards';
 import DevOpsTest from './pages/DevOpsTest';
+import UserProfile from './pages/UserProfile';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +45,7 @@ export const PAGES = {
     "Referrals": Referrals,
     "GameStandards": GameStandards,
     "DevOpsTest": DevOpsTest,
+    "UserProfile": UserProfile,
 }
 
 export const pagesConfig = {

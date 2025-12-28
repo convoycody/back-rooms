@@ -70,14 +70,18 @@ export default function Layout({ children, currentPageName }) {
                 lastChange={lastChange}
               />
               
-              <div className="hidden md:flex items-center gap-2 lg:gap-3">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-xs sm:text-sm">
-                  {currentUser.full_name?.[0]?.toUpperCase() || currentUser.email[0].toUpperCase()}
+              <Link to={createPageUrl('UserProfile')} className="hidden md:flex items-center gap-2 lg:gap-3 hover:opacity-80 transition-opacity">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs sm:text-sm overflow-hidden">
+                  {player?.avatar_url ? (
+                    <img src={player.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{currentUser.full_name?.[0]?.toUpperCase() || currentUser.email[0].toUpperCase()}</span>
+                  )}
                 </div>
                 <span className="text-slate-300 text-xs sm:text-sm hidden lg:block truncate max-w-[120px]">
-                  {currentUser.full_name || currentUser.email}
+                  {player?.display_name || currentUser.full_name || currentUser.email}
                 </span>
-              </div>
+              </Link>
 
               <button
                 onClick={() => base44.auth.logout()}
