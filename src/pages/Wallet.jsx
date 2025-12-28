@@ -197,8 +197,13 @@ export default function Wallet() {
                 </Link>
               </div>
               <div className="text-center py-8">
-                <p className="text-slate-500 text-sm">No active tickets</p>
-                <p className="text-slate-600 text-xs mt-1">Purchase tickets for vault games to see them here</p>
+                <p className="text-slate-500 text-sm mb-3">No active tickets</p>
+                <p className="text-slate-600 text-xs mb-4">Purchase tickets for vault games to see them here</p>
+                <a href={createPageUrl('GameGallery') + '#vault-games'}>
+                  <Button variant="outline" size="sm" className="border-purple-600 text-purple-300 hover:bg-purple-500/10">
+                    🎰 Browse Vault Games
+                  </Button>
+                </a>
               </div>
             </CardContent>
           </Card>

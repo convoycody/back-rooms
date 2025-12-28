@@ -25,8 +25,19 @@ export default function VaultTickets() {
     enabled: !!currentUser,
   });
 
-  // For now, placeholder - we'll add actual ticket queries in Phase 2 & 3
-  const tickets = [];
+  const { data: fiftyTickets = [] } = useQuery({
+    queryKey: ['fiftyTickets', player?.id],
+    queryFn: () => base44.entities.FiftyFiftyTicket.filter({ player_id: player.id }, '-created_date'),
+    enabled: !!player,
+  });
+
+  const { data: numbersTickets = [] } = useQuery({
+    queryKey: ['numbersTickets', player?.id],
+    queryFn: () => base44.entities.NumbersLotteryTicket.filter({ player_id: player.id }, '-created_date'),
+    enabled: !!player,
+  });
+
+  const tickets = [...fiftyTickets, ...numbersTickets];
 
   if (!player) {
     return (
@@ -71,9 +82,9 @@ export default function VaultTickets() {
                   Purchase tickets for vault games to see them here
                 </p>
                 <div className="flex gap-3 justify-center">
-                  <Link to={createPageUrl('Home')}>
+                  <Link to={createPageUrl('GameGallery') + '#vault-games'}>
                     <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold">
-                      Browse Games
+                      Browse Vault Games
                     </Button>
                   </Link>
                 </div>
@@ -82,7 +93,104 @@ export default function VaultTickets() {
           </motion.div>
         )}
 
-        {/* Tickets will be displayed here in Phase 2 & 3 */}
+        {/* Display Tickets */}
+        {tickets.length > 0 && (
+          <div className="space-y-4">
+            {/* 50/50 Tickets */}
+            {fiftyTickets.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                  🎯 50/50 Pool Tickets
+                </h2>
+                <div className="space-y-3">
+                  {fiftyTickets.map((ticket) => (
+                    <Card key={ticket.id} className="bg-slate-900/50 border-green-700/30">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-white font-semibold">Pool: {ticket.pool_date}</p>
+                            <p className="text-slate-400 text-sm">Ticket Price: {ticket.ticket_price.toLocaleString()} pts</p>
+                            <p className="text-slate-500 text-xs">{moment(ticket.purchased_at).format('MMM D, YYYY h:mm A')}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                              ticket.status === 'won' ? 'bg-green-500/20 text-green-400' :
+                              ticket.status === 'lost' ? 'bg-red-500/20 text-red-400' :
+                              ticket.status === 'refunded' ? 'bg-slate-500/20 text-slate-400' :
+                              'bg-blue-500/20 text-blue-400'
+                            }`}>
+                              {ticket.status}
+                            </span>
+                            {ticket.payout > 0 && (
+                              <p className="text-green-400 font-bold mt-1">+{ticket.payout.toLocaleString()} pts</p>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Numbers Lottery Tickets */}
+            {numbersTickets.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                  🎱 Numbers Lottery Tickets
+                </h2>
+                <div className="space-y-3">
+                  {numbersTickets.map((ticket) => (
+                    <Card key={ticket.id} className="bg-slate-900/50 border-purple-700/30">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="text-white font-semibold mb-2">Draw: {ticket.draw_date}</p>
+                            <div className="flex gap-2 mb-2">
+                              {ticket.main_numbers.map((num, i) => (
+                                <div key={i} className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                                  {num}
+                                </div>
+                              ))}
+                              <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-black text-sm font-bold">
+                                {ticket.power_number}
+                              </div>
+                            </div>
+                            <p className="text-slate-400 text-sm">Price: {ticket.ticket_price.toLocaleString()} pts</p>
+                            <p className="text-slate-500 text-xs">{moment(ticket.purchased_at).format('MMM D, YYYY h:mm A')}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                              ticket.status === 'winner' ? 'bg-green-500/20 text-green-400' :
+                              ticket.status === 'loser' ? 'bg-red-500/20 text-red-400' :
+                              ticket.status === 'refunded' ? 'bg-slate-500/20 text-slate-400' :
+                              'bg-blue-500/20 text-blue-400'
+                            }`}>
+                              {ticket.status}
+                            </span>
+                            {ticket.payout > 0 && (
+                              <>
+                                <p className="text-green-400 font-bold mt-1">+{ticket.payout.toLocaleString()} pts</p>
+                                <p className="text-slate-400 text-xs">{ticket.win_tier}</p>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

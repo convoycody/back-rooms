@@ -37,6 +37,8 @@ import VaultTickets from './pages/VaultTickets';
 import FiftyFiftyPool from './pages/FiftyFiftyPool';
 import NumbersLottery from './pages/NumbersLottery';
 import VaultGamesAdmin from './pages/VaultGamesAdmin';
+import FiftyFiftyShare from './pages/FiftyFiftyShare';
+import NumbersLotteryShare from './pages/NumbersLotteryShare';
 import __Layout from './Layout.jsx';
 
 
@@ -80,6 +82,8 @@ export const PAGES = {
     "FiftyFiftyPool": FiftyFiftyPool,
     "NumbersLottery": NumbersLottery,
     "VaultGamesAdmin": VaultGamesAdmin,
+    "FiftyFiftyShare": FiftyFiftyShare,
+    "NumbersLotteryShare": NumbersLotteryShare,
 }
 
 export const pagesConfig = {

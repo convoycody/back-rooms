@@ -235,12 +235,42 @@ export default function GameGallery() {
           </motion.div>
         )}
 
+        {/* Vault Games Section */}
+        <motion.div
+          id="vault-games"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mb-12"
+        >
+          <h2 className="text-2xl font-black text-white mb-4">🎰 Vault Games</h2>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <button
+              onClick={() => navigate(createPageUrl('FiftyFiftyPool'))}
+              className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border border-green-700/50 rounded-xl p-6 text-left hover:scale-105 transition-transform"
+            >
+              <span className="text-4xl mb-3 block">🎯</span>
+              <h3 className="text-white font-bold mb-1">50/50 Pool</h3>
+              <p className="text-slate-400 text-sm">Win 50% of the total pot</p>
+            </button>
+
+            <button
+              onClick={() => navigate(createPageUrl('NumbersLottery'))}
+              className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border border-purple-700/50 rounded-xl p-6 text-left hover:scale-105 transition-transform"
+            >
+              <span className="text-4xl mb-3 block">🎱</span>
+              <h3 className="text-white font-bold mb-1">Numbers Lottery</h3>
+              <p className="text-slate-400 text-sm">Pick numbers, win big prizes</p>
+            </button>
+          </div>
+        </motion.div>
+
         {/* Coming Soon */}
         {comingSoon.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.5 }}
           >
             <h2 className="text-2xl font-black text-white mb-4">Coming Soon</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
