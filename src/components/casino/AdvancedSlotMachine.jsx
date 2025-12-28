@@ -71,9 +71,9 @@ const ReelColumn = ({ symbols, spinning, delay, highlightRows = [], fastMode = f
       {displaySymbols.map((symbol, idx) => (
         <div
           key={idx}
-          className={`w-16 sm:w-20 h-16 sm:h-20 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 border-2 flex items-center justify-center relative overflow-hidden ${
+          className={`w-16 sm:w-20 h-16 sm:h-20 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 border-2 flex items-center justify-center relative overflow-hidden transition-all duration-300 ${
             highlightRows.includes(idx)
-              ? 'border-amber-400 shadow-lg shadow-amber-400/50'
+              ? 'border-amber-400 shadow-lg shadow-amber-400/50 scale-105'
               : 'border-slate-700'
           }`}
         >
@@ -140,6 +140,18 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
   const [lastResult, setLastResult] = useState(null);
   const [highlightedLines, setHighlightedLines] = useState([]);
   const [fastMode, setFastMode] = useState(false);
+
+  const getHighlightedRows = (reelIdx) => {
+    const rows = [];
+    highlightedLines.forEach(line => {
+      if (line === 1) rows.push(1); // middle
+      else if (line === 2) rows.push(0); // top
+      else if (line === 3) rows.push(2); // bottom
+      else if (line === 4) rows.push(reelIdx === 0 || reelIdx === 4 ? 2 : reelIdx === 1 || reelIdx === 3 ? 1 : 0); // V
+      else if (line === 5) rows.push(reelIdx === 0 || reelIdx === 4 ? 0 : reelIdx === 1 || reelIdx === 3 ? 1 : 2); // inverted V
+    });
+    return [...new Set(rows)];
+  };
 
   useEffect(() => {
     if (houseConfig?.min_bet_per_line && betPerLine < houseConfig.min_bet_per_line) {
@@ -323,28 +335,28 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
 
       {/* Slot Grid */}
       <div className="relative bg-gradient-to-b from-slate-800/50 to-slate-900/50 rounded-xl sm:rounded-2xl p-2 sm:p-4 mb-4 sm:mb-6 border border-slate-700">
-        {/* Payline overlays */}
-        {[1, 2, 3, 4, 5].map(line => (
-          <PaylineIndicator 
-            key={line} 
-            line={line} 
-            active={lines >= line}
-            isWinning={highlightedLines.includes(line)}
+      {/* Payline overlays */}
+      {[1, 2, 3, 4, 5].map(line => (
+        <PaylineIndicator 
+          key={line} 
+          line={line} 
+          active={lines >= line}
+          isWinning={highlightedLines.includes(line)}
+        />
+      ))}
+
+      <div className="flex justify-center gap-2 relative z-10">
+        {grid.map((reel, idx) => (
+          <ReelColumn
+            key={`reel-${idx}`}
+            symbols={reel}
+            spinning={spinning}
+            delay={idx * 100}
+            highlightRows={highlightedLines.length > 0 ? getHighlightedRows(idx) : []}
+            fastMode={fastMode}
           />
         ))}
-
-        <div className="flex justify-center gap-2 relative z-10">
-          {grid.map((reel, idx) => (
-            <ReelColumn
-              key={idx}
-              symbols={reel}
-              spinning={spinning}
-              delay={idx * 100}
-              highlightRows={[]}
-              fastMode={fastMode}
-            />
-          ))}
-        </div>
+      </div>
 
         {/* Result Display - Overlay */}
         <AnimatePresence>

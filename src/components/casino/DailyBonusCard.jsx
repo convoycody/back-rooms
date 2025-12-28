@@ -3,12 +3,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, Loader2, CheckCircle2, Clock } from 'lucide-react';
+import { Gift, Loader2, CheckCircle2, Clock, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import moment from 'moment';
+import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
 export default function DailyBonusCard({ playerId, balance, onClaimed }) {
   const [claiming, setClaiming] = useState(false);
+  const [showReferralPrompt, setShowReferralPrompt] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: config } = useQuery({
@@ -30,9 +34,12 @@ export default function DailyBonusCard({ playerId, balance, onClaimed }) {
         queryClient.invalidateQueries({ queryKey: ['player'] });
         queryClient.invalidateQueries({ queryKey: ['allPlayers'] });
         onClaimed?.(response.data.amount);
+        setShowReferralPrompt(true);
+        toast.success(`Claimed ${response.data.amount.toLocaleString()} points!`);
       }
     } catch (error) {
       console.error('Claim error:', error);
+      toast.error('Failed to claim bonus');
     } finally {
       setClaiming(false);
     }
@@ -82,7 +89,7 @@ export default function DailyBonusCard({ playerId, balance, onClaimed }) {
         </CardHeader>
         
         <CardContent className="relative">
-          {alreadyClaimed ? (
+          {alreadyClaimed && !showReferralPrompt ? (
             <div className="text-center space-y-2">
               <CheckCircle2 className="w-12 h-12 mx-auto text-green-400" />
               <p className="text-green-400 font-semibold">Claimed Today!</p>
@@ -90,6 +97,23 @@ export default function DailyBonusCard({ playerId, balance, onClaimed }) {
                 <Clock className="w-3 h-3" />
                 Next: {moment(tomorrow).fromNow()}
               </p>
+            </div>
+          ) : showReferralPrompt ? (
+            <div className="text-center space-y-3">
+              <Share2 className="w-12 h-12 mx-auto text-purple-400" />
+              <p className="text-white font-semibold">Invite friends & earn more!</p>
+              <p className="text-slate-400 text-sm">Get 10,000 points instantly + 25,000 more after they play 10 games</p>
+              <Link to={createPageUrl('Referrals')}>
+                <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold">
+                  Share Referral Link
+                </Button>
+              </Link>
+              <button 
+                onClick={() => setShowReferralPrompt(false)}
+                className="text-slate-500 text-xs hover:text-slate-400"
+              >
+                Maybe later
+              </button>
             </div>
           ) : (
             <div className="text-center space-y-3">
