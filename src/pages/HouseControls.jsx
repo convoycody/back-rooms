@@ -208,6 +208,7 @@ export default function HouseControls() {
           <TabsList className="bg-slate-800/50 border border-slate-700/50">
             <TabsTrigger value="controls">Game Settings</TabsTrigger>
             <TabsTrigger value="bonuses">Daily Bonuses</TabsTrigger>
+            <TabsTrigger value="noondrop">Noon Drop</TabsTrigger>
             <TabsTrigger value="referrals">Referral System</TabsTrigger>
             <TabsTrigger value="economy">Economy Stats</TabsTrigger>
             <TabsTrigger value="purchases">Pack Requests ({pendingPurchases.length})</TabsTrigger>
