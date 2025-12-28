@@ -48,6 +48,7 @@ const ReelColumn = ({ symbols, spinning, delay, highlightRows = [], fastMode = f
 
       const timeout = setTimeout(() => {
         clearInterval(interval);
+        setDisplaySymbols(symbols);
         setSpinningState(false);
       }, spinDuration + delay);
 
@@ -56,14 +57,7 @@ const ReelColumn = ({ symbols, spinning, delay, highlightRows = [], fastMode = f
         clearTimeout(timeout);
       };
     }
-  }, [spinning, delay, fastMode]);
-
-  // Separate effect to update displayed symbols only when not spinning
-  useEffect(() => {
-    if (!spinning && !spinningState) {
-      setDisplaySymbols(symbols);
-    }
-  }, [spinning, spinningState, symbols]);
+  }, [spinning, delay, fastMode, symbols]);
 
   return (
     <div className="flex flex-col gap-1">
