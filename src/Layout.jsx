@@ -74,8 +74,7 @@ export default function Layout({ children, currentPageName }) {
                 to={createPageUrl('VIPStatus')}
                 className="hidden sm:flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-colors text-xs sm:text-sm font-medium"
               >
-                <span className="hidden lg:inline">VIP</span>
-                👑
+                👑 <span className="hidden lg:inline">VIP</span>
               </Link>
 
               {isAdmin && (

@@ -10,10 +10,13 @@ import BlackjackGame from '@/components/casino/BlackjackGame';
 import PlinkoGame from '@/components/casino/PlinkoGame';
 import LevelUpNotification from '@/components/LevelUpNotification';
 
+import ScratchersGame from '@/components/games/ScratchersGame';
+
 const GAME_COMPONENTS = {
   'slots': AdvancedSlotMachine,
   'blackjack': BlackjackGame,
-  'plinko': PlinkoGame
+  'plinko': PlinkoGame,
+  'scratchers': ScratchersGame
 };
 
 export default function GamePage() {
@@ -202,8 +205,9 @@ export default function GamePage() {
         <GameComponent
           balance={player.points_balance}
           onSpinComplete={gameSlug === 'slots' ? handleGameResult : undefined}
-          onGameEnd={gameSlug === 'blackjack' ? handleGameResult : undefined}
+          onGameEnd={gameSlug === 'blackjack' || gameSlug === 'scratchers' ? handleGameResult : undefined}
           onDropComplete={gameSlug === 'plinko' ? handleGameResult : undefined}
+          onGameEnd={gameSlug === 'scratchers' ? handleGameResult : undefined}
           houseConfig={houseConfig}
         />
       </GameShell>

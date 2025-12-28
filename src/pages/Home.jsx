@@ -10,6 +10,7 @@ import GameCard from '@/components/games/GameCard';
 import DailyBonusCard from '@/components/casino/DailyBonusCard';
 import NoonDropCard from '@/components/NoonDropCard';
 import EnhancedLeaderboard from '@/components/casino/EnhancedLeaderboard';
+import AnnouncementsStrip from '@/components/home/AnnouncementsStrip';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -187,12 +188,21 @@ export default function Home() {
           </div>
         </motion.div>
 
+        {/* Announcements Strip */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <AnnouncementsStrip />
+        </motion.div>
+
         {/* Featured Games */}
         {featuredGames.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
+            transition={{ delay: 0.2 }}
             className="mb-8"
           >
             <div className="flex items-center justify-between mb-4">
@@ -220,7 +230,7 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.3 }}
           className="mb-8"
         >
           <div className="flex items-center justify-between mb-4">
@@ -243,7 +253,7 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.4 }}
         >
           <div className="grid md:grid-cols-3 gap-4">
             <button

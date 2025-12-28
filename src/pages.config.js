@@ -26,6 +26,8 @@ import GamePage from './pages/GamePage';
 import Leaderboards from './pages/Leaderboards';
 import Announcements from './pages/Announcements';
 import Receipt from './pages/Receipt';
+import Settings from './pages/Settings';
+import Moderation from './pages/Moderation';
 import __Layout from './Layout.jsx';
 
 
@@ -58,6 +60,8 @@ export const PAGES = {
     "Leaderboards": Leaderboards,
     "Announcements": Announcements,
     "Receipt": Receipt,
+    "Settings": Settings,
+    "Moderation": Moderation,
 }
 
 export const pagesConfig = {
