@@ -1,4 +1,3 @@
-import Casino from './pages/Casino';
 import Admin from './pages/Admin';
 import HouseControls from './pages/HouseControls';
 import BTCStore from './pages/BTCStore';
@@ -36,7 +35,6 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Casino": Casino,
     "Admin": Admin,
     "HouseControls": HouseControls,
     "BTCStore": BTCStore,
@@ -73,7 +71,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "Casino",
+    mainPage: "Admin",
     Pages: PAGES,
     Layout: __Layout,
 };
