@@ -292,17 +292,18 @@ export default function HouseControls() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label className="text-white">Bonus for Referred User: {houseConfig.referral_new_user_bonus?.toLocaleString() || 0}</Label>
+                    <Label className="text-white text-sm mb-1 block">Bonus for Referred User</Label>
                     <p className="text-slate-400 text-xs mb-2">Points given on signup</p>
-                    <Slider
-                      value={[houseConfig.referral_new_user_bonus || 15000]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ referral_new_user_bonus: val })}
-                      min={0}
-                      max={50000}
-                      step={1000}
-                      disabled={!houseConfig.referral_enabled}
-                      className="mt-2"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={houseConfig.referral_new_user_bonus || 15000}
+                        onChange={(e) => updateConfigMutation.mutate({ referral_new_user_bonus: Math.max(0, parseInt(e.target.value) || 15000) })}
+                        disabled={!houseConfig.referral_enabled}
+                        className="bg-slate-800 border-slate-600 text-white font-bold"
+                      />
+                      <span className="text-slate-400 text-sm">pts</span>
+                    </div>
                   </div>
                   <div className="pt-4 border-t border-slate-700">
                     <p className="text-slate-400 text-sm mb-1">Today's Signups</p>
@@ -325,17 +326,18 @@ export default function HouseControls() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label className="text-white">Bonus for Inviter: {houseConfig.referral_inviter_bonus?.toLocaleString() || 0}</Label>
+                    <Label className="text-white text-sm mb-1 block">Bonus for Inviter</Label>
                     <p className="text-slate-400 text-xs mb-2">Points given after qualification</p>
-                    <Slider
-                      value={[houseConfig.referral_inviter_bonus || 25000]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ referral_inviter_bonus: val })}
-                      min={0}
-                      max={100000}
-                      step={1000}
-                      disabled={!houseConfig.referral_enabled}
-                      className="mt-2"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={houseConfig.referral_inviter_bonus || 25000}
+                        onChange={(e) => updateConfigMutation.mutate({ referral_inviter_bonus: Math.max(0, parseInt(e.target.value) || 25000) })}
+                        disabled={!houseConfig.referral_enabled}
+                        className="bg-slate-800 border-slate-600 text-white font-bold"
+                      />
+                      <span className="text-slate-400 text-sm">pts</span>
+                    </div>
                   </div>
                   <div className="pt-4 border-t border-slate-700">
                     <p className="text-slate-400 text-sm mb-1">Completed Today</p>
@@ -359,16 +361,14 @@ export default function HouseControls() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label className="text-white">Minimum Games: {houseConfig.referral_min_spins || 10}</Label>
+                    <Label className="text-white text-sm mb-1 block">Minimum Games Required</Label>
                     <p className="text-slate-400 text-xs mb-2">Games before referrer gets bonus</p>
-                    <Slider
-                      value={[houseConfig.referral_min_spins || 10]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ referral_min_spins: val })}
-                      min={1}
-                      max={100}
-                      step={1}
+                    <Input
+                      type="number"
+                      value={houseConfig.referral_min_spins || 10}
+                      onChange={(e) => updateConfigMutation.mutate({ referral_min_spins: Math.max(1, parseInt(e.target.value) || 10) })}
                       disabled={!houseConfig.referral_enabled}
-                      className="mt-2"
+                      className="bg-slate-800 border-slate-600 text-white font-bold"
                     />
                   </div>
                   <div className="pt-4 border-t border-slate-700">
@@ -425,17 +425,18 @@ export default function HouseControls() {
                 </div>
 
                 <div>
-                  <Label className="text-white">Eligibility Window: {houseConfig.noon_drop_eligibility_days || 7} days</Label>
+                  <Label className="text-white text-sm mb-1 block">Eligibility Window</Label>
                   <p className="text-slate-400 text-xs mb-2">Players must have been active within this period</p>
-                  <Slider
-                    value={[houseConfig.noon_drop_eligibility_days || 7]}
-                    onValueChange={([val]) => updateConfigMutation.mutate({ noon_drop_eligibility_days: val })}
-                    min={1}
-                    max={30}
-                    step={1}
-                    disabled={!houseConfig.noon_drop_enabled}
-                    className="mt-2"
-                  />
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      value={houseConfig.noon_drop_eligibility_days || 7}
+                      onChange={(e) => updateConfigMutation.mutate({ noon_drop_eligibility_days: Math.max(1, parseInt(e.target.value) || 7) })}
+                      disabled={!houseConfig.noon_drop_enabled}
+                      className="bg-slate-800 border-slate-600 text-white font-bold"
+                    />
+                    <span className="text-slate-400 text-sm">days</span>
+                  </div>
                 </div>
 
                 <div className="pt-4 border-t border-amber-700/30">
@@ -562,16 +563,17 @@ export default function HouseControls() {
                   </div>
 
                   <div>
-                    <Label className="text-white">Bonus Amount: {houseConfig.daily_bonus_amount?.toLocaleString()}</Label>
-                    <Slider
-                      value={[houseConfig.daily_bonus_amount || 10000]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ daily_bonus_amount: val })}
-                      min={1000}
-                      max={50000}
-                      step={1000}
-                      disabled={!houseConfig.daily_bonus_enabled}
-                      className="mt-2"
-                    />
+                    <Label className="text-white text-sm mb-2 block">Bonus Amount</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={houseConfig.daily_bonus_amount || 10000}
+                        onChange={(e) => updateConfigMutation.mutate({ daily_bonus_amount: Math.max(0, parseInt(e.target.value) || 10000) })}
+                        disabled={!houseConfig.daily_bonus_enabled}
+                        className="bg-slate-800 border-slate-600 text-white font-bold"
+                      />
+                      <span className="text-slate-400 text-sm">pts</span>
+                    </div>
                   </div>
 
                   <div className="pt-4 border-t border-slate-700">
@@ -611,55 +613,56 @@ export default function HouseControls() {
                   </div>
 
                   <div>
-                    <Label className="text-white">Threshold: {houseConfig.topup_threshold}</Label>
-                    <Slider
-                      value={[houseConfig.topup_threshold || 10]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ topup_threshold: val })}
-                      min={1}
-                      max={100}
-                      step={1}
+                    <Label className="text-white text-sm mb-2 block">Balance Threshold</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={houseConfig.topup_threshold || 10}
+                        onChange={(e) => updateConfigMutation.mutate({ topup_threshold: Math.max(0, parseInt(e.target.value) || 10) })}
+                        disabled={!houseConfig.topup_enabled}
+                        className="bg-slate-800 border-slate-600 text-white font-bold"
+                      />
+                      <span className="text-slate-400 text-sm">pts</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-white text-sm mb-2 block">Top-Up Amount</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={houseConfig.topup_amount || 500}
+                        onChange={(e) => updateConfigMutation.mutate({ topup_amount: Math.max(0, parseInt(e.target.value) || 500) })}
+                        disabled={!houseConfig.topup_enabled}
+                        className="bg-slate-800 border-slate-600 text-white font-bold"
+                      />
+                      <span className="text-slate-400 text-sm">pts</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-white text-sm mb-2 block">Max Top-Ups Per Day</Label>
+                    <Input
+                      type="number"
+                      value={houseConfig.topup_max_per_day || 3}
+                      onChange={(e) => updateConfigMutation.mutate({ topup_max_per_day: Math.max(1, parseInt(e.target.value) || 3) })}
                       disabled={!houseConfig.topup_enabled}
-                      className="mt-2"
+                      className="bg-slate-800 border-slate-600 text-white font-bold"
                     />
                   </div>
 
                   <div>
-                    <Label className="text-white">Top-Up Amount: {houseConfig.topup_amount}</Label>
-                    <Slider
-                      value={[houseConfig.topup_amount || 500]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ topup_amount: val })}
-                      min={100}
-                      max={2000}
-                      step={100}
-                      disabled={!houseConfig.topup_enabled}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-white">Max Per Day: {houseConfig.topup_max_per_day}</Label>
-                    <Slider
-                      value={[houseConfig.topup_max_per_day || 3]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ topup_max_per_day: val })}
-                      min={1}
-                      max={10}
-                      step={1}
-                      disabled={!houseConfig.topup_enabled}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-white">Cooldown (min): {houseConfig.topup_cooldown_minutes}</Label>
-                    <Slider
-                      value={[houseConfig.topup_cooldown_minutes || 30]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ topup_cooldown_minutes: val })}
-                      min={5}
-                      max={120}
-                      step={5}
-                      disabled={!houseConfig.topup_enabled}
-                      className="mt-2"
-                    />
+                    <Label className="text-white text-sm mb-2 block">Cooldown Period</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={houseConfig.topup_cooldown_minutes || 30}
+                        onChange={(e) => updateConfigMutation.mutate({ topup_cooldown_minutes: Math.max(1, parseInt(e.target.value) || 30) })}
+                        disabled={!houseConfig.topup_enabled}
+                        className="bg-slate-800 border-slate-600 text-white font-bold"
+                      />
+                      <span className="text-slate-400 text-sm">min</span>
+                    </div>
                   </div>
 
                   <div className="pt-4 border-t border-slate-700">
@@ -692,27 +695,29 @@ export default function HouseControls() {
                   </div>
 
                   <div>
-                    <Label className="text-white">Min Bet Per Line: {houseConfig.min_bet_per_line}</Label>
-                    <Slider
-                      value={[houseConfig.min_bet_per_line]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ min_bet_per_line: val })}
-                      min={1}
-                      max={50}
-                      step={1}
-                      className="mt-2"
-                    />
+                    <Label className="text-white text-sm mb-2 block">Min Bet Per Line</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={houseConfig.min_bet_per_line}
+                        onChange={(e) => updateConfigMutation.mutate({ min_bet_per_line: Math.max(1, parseInt(e.target.value) || 1) })}
+                        className="bg-slate-800 border-slate-600 text-white font-bold"
+                      />
+                      <span className="text-slate-400 text-sm">pts</span>
+                    </div>
                   </div>
 
                   <div>
-                    <Label className="text-white">Max Bet Per Line: {houseConfig.max_bet_per_line}</Label>
-                    <Slider
-                      value={[houseConfig.max_bet_per_line]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ max_bet_per_line: val })}
-                      min={10}
-                      max={500}
-                      step={10}
-                      className="mt-2"
-                    />
+                    <Label className="text-white text-sm mb-2 block">Max Bet Per Line</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={houseConfig.max_bet_per_line}
+                        onChange={(e) => updateConfigMutation.mutate({ max_bet_per_line: Math.max(1, parseInt(e.target.value) || 100) })}
+                        className="bg-slate-800 border-slate-600 text-white font-bold"
+                      />
+                      <span className="text-slate-400 text-sm">pts</span>
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -727,16 +732,18 @@ export default function HouseControls() {
                   </div>
 
                   <div>
-                    <Label className="text-white">Target RTP: {houseConfig.target_rtp}%</Label>
+                    <Label className="text-white text-sm mb-1 block">Target RTP</Label>
                     <p className="text-slate-500 text-xs mb-2">Display only - actual RTP: {actualRTP}%</p>
-                    <Slider
-                      value={[houseConfig.target_rtp]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ target_rtp: val })}
-                      min={85}
-                      max={99}
-                      step={0.5}
-                      className="mt-2"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        step="0.5"
+                        value={houseConfig.target_rtp}
+                        onChange={(e) => updateConfigMutation.mutate({ target_rtp: Math.max(0, Math.min(100, parseFloat(e.target.value) || 96.5)) })}
+                        className="bg-slate-800 border-slate-600 text-white font-bold"
+                      />
+                      <span className="text-slate-400 text-sm">%</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -762,16 +769,18 @@ export default function HouseControls() {
                   </div>
 
                   <div>
-                    <Label className="text-white">Contribution: {houseConfig.jackpot_contribution_pct}%</Label>
-                    <Slider
-                      value={[houseConfig.jackpot_contribution_pct]}
-                      onValueChange={([val]) => updateConfigMutation.mutate({ jackpot_contribution_pct: val })}
-                      min={0.5}
-                      max={5}
-                      step={0.5}
-                      disabled={!houseConfig.jackpot_enabled}
-                      className="mt-2"
-                    />
+                    <Label className="text-white text-sm mb-2 block">Contribution Percentage</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        step="0.1"
+                        value={houseConfig.jackpot_contribution_pct}
+                        onChange={(e) => updateConfigMutation.mutate({ jackpot_contribution_pct: Math.max(0, parseFloat(e.target.value) || 1) })}
+                        disabled={!houseConfig.jackpot_enabled}
+                        className="bg-slate-800 border-slate-600 text-white font-bold"
+                      />
+                      <span className="text-slate-400 text-sm">%</span>
+                    </div>
                   </div>
 
                   <div>

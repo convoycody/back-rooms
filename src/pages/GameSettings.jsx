@@ -113,35 +113,43 @@ export default function GameSettings() {
                   </h3>
                   
                   <div>
-                    <Label className="text-white">Minimum Bet: {game.min_bet}</Label>
-                    <Slider
-                      value={[game.min_bet || 1]}
-                      onValueChange={([val]) => updateGameMutation.mutate({ 
-                        gameId: game.id, 
-                        updates: { min_bet: val } 
-                      })}
-                      min={1}
-                      max={100}
-                      step={1}
-                      disabled={!game.enabled}
-                      className="mt-2"
-                    />
+                    <Label className="text-white text-sm mb-2 block">Minimum Bet</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={game.min_bet || 1}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 1;
+                          updateGameMutation.mutate({ 
+                            gameId: game.id, 
+                            updates: { min_bet: Math.max(1, val) } 
+                          });
+                        }}
+                        disabled={!game.enabled}
+                        className="bg-slate-800 border-slate-600 text-white font-bold text-lg"
+                      />
+                      <span className="text-slate-400 text-sm">pts</span>
+                    </div>
                   </div>
 
                   <div>
-                    <Label className="text-white">Maximum Bet: {game.max_bet}</Label>
-                    <Slider
-                      value={[game.max_bet || 1000]}
-                      onValueChange={([val]) => updateGameMutation.mutate({ 
-                        gameId: game.id, 
-                        updates: { max_bet: val } 
-                      })}
-                      min={100}
-                      max={10000}
-                      step={100}
-                      disabled={!game.enabled}
-                      className="mt-2"
-                    />
+                    <Label className="text-white text-sm mb-2 block">Maximum Bet</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={game.max_bet || 1000}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 1000;
+                          updateGameMutation.mutate({ 
+                            gameId: game.id, 
+                            updates: { max_bet: Math.max(1, val) } 
+                          });
+                        }}
+                        disabled={!game.enabled}
+                        className="bg-slate-800 border-slate-600 text-white font-bold text-lg"
+                      />
+                      <span className="text-slate-400 text-sm">pts</span>
+                    </div>
                   </div>
                 </div>
 
