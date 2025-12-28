@@ -48,7 +48,6 @@ const ReelColumn = ({ symbols, spinning, delay, highlightRows = [], fastMode = f
 
       const timeout = setTimeout(() => {
         clearInterval(interval);
-        setDisplaySymbols(symbols);
         setSpinningState(false);
       }, spinDuration + delay);
 
@@ -56,11 +55,15 @@ const ReelColumn = ({ symbols, spinning, delay, highlightRows = [], fastMode = f
         clearInterval(interval);
         clearTimeout(timeout);
       };
-    } else {
-      setDisplaySymbols(symbols);
-      setSpinningState(false);
     }
-  }, [spinning, symbols, delay, fastMode]);
+  }, [spinning, delay, fastMode]);
+
+  // Separate effect to update displayed symbols only when not spinning
+  useEffect(() => {
+    if (!spinning && !spinningState) {
+      setDisplaySymbols(symbols);
+    }
+  }, [spinning, spinningState, symbols]);
 
   return (
     <div className="flex flex-col gap-1">
@@ -91,7 +94,7 @@ const ReelColumn = ({ symbols, spinning, delay, highlightRows = [], fastMode = f
   );
 };
 
-const PaylineIndicator = ({ line, active }) => {
+const PaylineIndicator = ({ line, active, isWinning }) => {
   const lineStyles = [
     'middle', // Line 1: middle row
     'top',    // Line 2: top row
@@ -100,16 +103,28 @@ const PaylineIndicator = ({ line, active }) => {
     'invV'    // Line 5: inverted V
   ];
 
+  const winColors = [
+    'from-transparent via-amber-400 to-transparent shadow-[0_0_20px_rgba(251,191,36,0.8)]',
+    'from-transparent via-cyan-400 to-transparent shadow-[0_0_20px_rgba(34,211,238,0.8)]',
+    'from-transparent via-green-400 to-transparent shadow-[0_0_20px_rgba(74,222,128,0.8)]',
+    'from-transparent via-pink-400 to-transparent shadow-[0_0_20px_rgba(244,114,182,0.8)]',
+    'from-transparent via-purple-400 to-transparent shadow-[0_0_20px_rgba(192,132,252,0.8)]',
+  ];
+
+  const randomColor = winColors[line % winColors.length];
+  const colorClass = isWinning ? randomColor : 'from-transparent via-slate-400 to-transparent';
+  const heightClass = isWinning ? 'h-1' : 'h-0.5';
+
   return (
-    <div className={`absolute inset-0 pointer-events-none ${active ? 'opacity-100' : 'opacity-30'}`}>
+    <div className={`absolute inset-0 pointer-events-none ${active ? 'opacity-100' : 'opacity-30'} ${isWinning ? 'animate-pulse' : ''}`}>
       {lineStyles[line - 1] === 'middle' && (
-        <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+        <div className={`absolute left-0 right-0 top-1/2 -translate-y-1/2 ${heightClass} bg-gradient-to-r ${colorClass}`} />
       )}
       {lineStyles[line - 1] === 'top' && (
-        <div className="absolute left-0 right-0 top-[16.66%] h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+        <div className={`absolute left-0 right-0 top-[16.66%] ${heightClass} bg-gradient-to-r ${colorClass}`} />
       )}
       {lineStyles[line - 1] === 'bottom' && (
-        <div className="absolute left-0 right-0 bottom-[16.66%] h-0.5 bg-gradient-to-r from-transparent via-green-400 to-transparent" />
+        <div className={`absolute left-0 right-0 bottom-[16.66%] ${heightClass} bg-gradient-to-r ${colorClass}`} />
       )}
     </div>
   );
@@ -159,8 +174,10 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
 
       const animationDuration = fastMode ? 500 : 2000;
       
+      // Set final grid immediately but keep spinning true until animation completes
+      setGrid(result.grid);
+      
       setTimeout(() => {
-        setGrid(result.grid);
         setSpinning(false);
         setLastResult(result);
 
@@ -300,7 +317,12 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
       <div className="relative bg-gradient-to-b from-slate-800/50 to-slate-900/50 rounded-2xl p-4 mb-6 border border-slate-700">
         {/* Payline overlays */}
         {[1, 2, 3, 4, 5].map(line => (
-          <PaylineIndicator key={line} line={line} active={lines >= line} />
+          <PaylineIndicator 
+            key={line} 
+            line={line} 
+            active={lines >= line}
+            isWinning={highlightedLines.includes(line)}
+          />
         ))}
 
         <div className="flex justify-center gap-2 relative z-10">

@@ -62,6 +62,11 @@ export default function HouseControls() {
     queryFn: () => base44.entities.Referral.list('-created_date'),
   });
 
+  const { data: noonDropDraws = [] } = useQuery({
+    queryKey: ['noonDropDraws'],
+    queryFn: () => base44.entities.NoonDropDraw.list('-draw_time', 50),
+  });
+
   const updateConfigMutation = useMutation({
     mutationFn: async (updates) => {
       await base44.entities.HouseConfig.update(houseConfig.id, updates);
@@ -461,6 +466,71 @@ export default function HouseControls() {
                     <li>All draws are logged and auditable</li>
                   </ul>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Noon Drop History */}
+            <Card className="bg-slate-900/50 border-slate-700/50">
+              <CardHeader>
+                <CardTitle className="text-white">Noon Drop History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {noonDropDraws.length === 0 ? (
+                  <div className="text-center py-8 text-slate-400">
+                    <Clock className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p>No draws yet</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-slate-700">
+                        <TableHead className="text-slate-400">Date</TableHead>
+                        <TableHead className="text-slate-400">Winner</TableHead>
+                        <TableHead className="text-slate-400">Prize</TableHead>
+                        <TableHead className="text-slate-400">Eligible</TableHead>
+                        <TableHead className="text-slate-400">Status</TableHead>
+                        <TableHead className="text-slate-400">Seed</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {noonDropDraws.map((draw) => (
+                        <TableRow key={draw.id} className="border-slate-700">
+                          <TableCell className="text-slate-400 text-sm">
+                            {moment(draw.draw_time).format('MMM DD, YYYY')}
+                          </TableCell>
+                          <TableCell className="text-white">
+                            {draw.winner_display_name || 'N/A'}
+                          </TableCell>
+                          <TableCell className="text-amber-400 font-bold">
+                            {draw.prize_amount?.toLocaleString() || '0'}
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {draw.eligible_player_count || 0} players
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={draw.status === 'executed' ? 'default' : draw.status === 'failed' ? 'destructive' : 'secondary'}
+                              className={
+                                draw.status === 'executed' 
+                                  ? 'bg-green-500/20 text-green-400' 
+                                  : draw.status === 'failed' 
+                                  ? 'bg-red-500/20 text-red-400' 
+                                  : ''
+                              }
+                            >
+                              {draw.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <code className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">
+                              {draw.seed_hash?.substring(0, 12)}...
+                            </code>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
