@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import GameShell from '@/components/games/GameShell';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import LevelUpNotification from '@/components/LevelUpNotification';
 
 // Game component imports
 import AdvancedSlotMachine from '@/components/casino/AdvancedSlotMachine';
@@ -13,6 +14,7 @@ import PlinkoGame from '@/components/casino/PlinkoGame';
 
 export default function PlayGame() {
   const [lastChange, setLastChange] = useState(0);
+  const [levelUpData, setLevelUpData] = useState(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -135,6 +137,24 @@ export default function PlayGame() {
     if (!player) return;
     
     setLastChange(result.net_result);
+    
+    // Calculate XP gain: 1 XP per 10 points wagered + bonus for wins
+    const xpGain = Math.floor(result.total_bet / 10) + (result.net_result > 0 ? 20 : 0);
+    
+    // Award XP and check for level up
+    try {
+      const levelUpResult = await base44.functions.invoke('calculateLevelUp', {
+        player_id: player.id,
+        xp_to_add: xpGain
+      });
+      
+      if (levelUpResult.data.levels_gained > 0) {
+        setLastChange(result.net_result + levelUpResult.data.bonus_awarded);
+      }
+    } catch (err) {
+      console.error('Level up error:', err);
+    }
+    
     await refetchPlayer();
     queryClient.invalidateQueries({ queryKey: ['slotSessions'] });
     queryClient.invalidateQueries({ queryKey: ['houseConfig'] });
@@ -154,21 +174,19 @@ export default function PlayGame() {
     
     const pointsDelta = result.payout - result.bet;
     const newBalance = player.points_balance + pointsDelta;
-    const xpGain = Math.floor(result.bet / 10) + (pointsDelta > 0 ? 15 : 0);
-    const newXp = player.xp + xpGain;
-    const newLevel = Math.floor(newXp / 500) + 1;
+    const xpGain = Math.floor(result.bet / 10) + (pointsDelta > 0 ? 20 : 0);
     
     setLastChange(pointsDelta);
     
     await updatePlayer.mutateAsync({
       updates: {
         points_balance: newBalance,
-        xp: newXp,
-        level: newLevel,
         total_wagered: player.total_wagered + result.bet,
         total_won: player.total_won + (pointsDelta > 0 ? result.payout : 0),
         games_played: player.games_played + 1,
         biggest_win: Math.max(player.biggest_win || 0, result.payout),
+        blackjack_games_played: (player.blackjack_games_played || 0) + 1,
+        blackjack_wins: (player.blackjack_wins || 0) + (pointsDelta > 0 ? 1 : 0),
       },
       session: {
         player_id: player.id,
@@ -196,6 +214,20 @@ export default function PlayGame() {
       },
     });
     
+    // Calculate XP and check for level up
+    try {
+      const levelUpResult = await base44.functions.invoke('calculateLevelUp', {
+        player_id: player.id,
+        xp_to_add: xpGain
+      });
+      
+      if (levelUpResult.data.levels_gained > 0) {
+        setLastChange(pointsDelta + levelUpResult.data.bonus_awarded);
+      }
+    } catch (err) {
+      console.error('Level up error:', err);
+    }
+    
     await refetchPlayer();
   };
 
@@ -203,6 +235,24 @@ export default function PlayGame() {
     if (!player) return;
     
     setLastChange(result.net_result);
+    
+    // Calculate XP gain: 1 XP per 10 points wagered + bonus for wins
+    const xpGain = Math.floor(result.bet_amount / 10) + (result.net_result > 0 ? 15 : 0);
+    
+    // Award XP and check for level up
+    try {
+      const levelUpResult = await base44.functions.invoke('calculateLevelUp', {
+        player_id: player.id,
+        xp_to_add: xpGain
+      });
+      
+      if (levelUpResult.data.levels_gained > 0) {
+        setLastChange(result.net_result + levelUpResult.data.bonus_awarded);
+      }
+    } catch (err) {
+      console.error('Level up error:', err);
+    }
+    
     await refetchPlayer();
     queryClient.invalidateQueries({ queryKey: ['plinkoSessions'] });
     
@@ -276,17 +326,25 @@ export default function PlayGame() {
   }
 
   return (
-    <GameShell
-      currentGame={currentGame}
-      allGames={games}
-      onGameChange={handleGameChange}
-      balance={player?.points_balance || 0}
-      lastChange={lastChange}
-      level={player?.level || 1}
-      xp={player?.xp || 0}
-      key={player?.id}
-    >
-      {renderGame()}
-    </GameShell>
+    <>
+      <LevelUpNotification
+        show={!!levelUpData}
+        level={levelUpData?.level}
+        bonus={levelUpData?.bonus}
+        onClose={() => setLevelUpData(null)}
+      />
+      <GameShell
+        currentGame={currentGame}
+        allGames={games}
+        onGameChange={handleGameChange}
+        balance={player?.points_balance || 0}
+        lastChange={lastChange}
+        level={player?.level || 1}
+        xp={player?.xp || 0}
+        key={player?.id}
+      >
+        {renderGame()}
+      </GameShell>
+    </>
   );
 }
