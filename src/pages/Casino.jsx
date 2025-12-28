@@ -167,6 +167,7 @@ export default function Casino() {
     
     // Just refetch - the backend function already updated everything
     await refetchPlayer();
+    queryClient.invalidateQueries({ queryKey: ['player'] });
     queryClient.invalidateQueries({ queryKey: ['slotSessions'] });
     queryClient.invalidateQueries({ queryKey: ['allPlayers'] });
     queryClient.invalidateQueries({ queryKey: ['houseConfig'] });
@@ -237,6 +238,7 @@ export default function Casino() {
     });
     
     await refetchPlayer();
+    queryClient.invalidateQueries({ queryKey: ['player'] });
     
     // Check referral bonus eligibility
     if (player.referred_by && !player.referral_bonus_claimed) {
