@@ -48,8 +48,8 @@ const ReelColumn = ({ symbols, spinning, delay, highlightRows = [], fastMode = f
 
       const timeout = setTimeout(() => {
         clearInterval(interval);
-        setDisplaySymbols(symbols);
         setSpinningState(false);
+        // Symbols will update from props after spinning stops
       }, spinDuration + delay);
 
       return () => {
@@ -57,7 +57,14 @@ const ReelColumn = ({ symbols, spinning, delay, highlightRows = [], fastMode = f
         clearTimeout(timeout);
       };
     }
-  }, [spinning, delay, fastMode, symbols]);
+  }, [spinning, delay, fastMode]);
+
+  // Update display symbols when not spinning and symbols prop changes
+  useEffect(() => {
+    if (!spinningState) {
+      setDisplaySymbols(symbols);
+    }
+  }, [symbols, spinningState]);
 
   return (
     <div className="flex flex-col gap-1">
@@ -166,13 +173,19 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
 
       const result = response.data;
 
-      // Calculate animation duration: spin time + max reel delay (400ms for 5th reel)
+      // Wait for all reels to finish spinning before showing result
       const spinDuration = fastMode ? 300 : 1500;
-      const maxReelDelay = 400; // 5th reel delay: 4 * 100ms
-      const animationDuration = spinDuration + maxReelDelay + 100; // +100ms buffer
+      const lastReelDelay = 400; // 5th reel starts 400ms after first
+      const totalAnimationTime = lastReelDelay + spinDuration;
       
+      // Update grid immediately so ReelColumn animations can use final values
+      // but keep spinning=true to prevent interaction
       setTimeout(() => {
         setGrid(result.grid);
+      }, 0);
+      
+      // Only after ALL reels have finished, show the result
+      setTimeout(() => {
         setSpinning(false);
         setLastResult(result);
 
@@ -191,7 +204,7 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
           setLastResult(null);
           setHighlightedLines([]);
         }, 1200);
-      }, animationDuration);
+      }, totalAnimationTime);
     } catch (error) {
       console.error('Spin error:', error);
       
