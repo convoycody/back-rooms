@@ -4,13 +4,14 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
-import { Loader2, Sparkles, Trophy, MessageSquare, Gift } from 'lucide-react';
+import { Loader2, Sparkles, Trophy, MessageSquare, Gift, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import GameCard from '@/components/games/GameCard';
 import DailyBonusCard from '@/components/casino/DailyBonusCard';
 import NoonDropCard from '@/components/NoonDropCard';
 import EnhancedLeaderboard from '@/components/casino/EnhancedLeaderboard';
 import AnnouncementsStrip from '@/components/home/AnnouncementsStrip';
+import LargeWinningsPreview from '@/components/home/LargeWinningsPreview';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -226,27 +227,32 @@ export default function Home() {
           </motion.div>
         )}
 
-        {/* Leaderboard Preview */}
+        {/* Large Winnings + Leaderboard */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="mb-8"
+          className="mb-8 grid md:grid-cols-2 gap-6"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-black text-white flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-amber-400" />
-              Top Players
-            </h2>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate(createPageUrl('Leaderboards'))}
-              className="border-slate-600 text-slate-300"
-            >
-              View All
-            </Button>
+          <LargeWinningsPreview />
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-black text-white flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-amber-400" />
+                Top Players
+              </h2>
+              <Button 
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(createPageUrl('Leaderboards'))}
+                className="text-slate-400 hover:text-white"
+              >
+                View All
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+            <EnhancedLeaderboard />
           </div>
-          <EnhancedLeaderboard />
         </motion.div>
 
         {/* Quick Actions */}

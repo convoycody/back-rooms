@@ -84,8 +84,11 @@ export default function GamePage() {
     const payout = result.payout || result.total_win || 0;
     const net = payout - bet;
 
-    // Check for announcement-worthy wins (>= 250k)
+    // Create ledger entry with share slug for big wins
+    let shareSlug = null;
     if (payout >= 250000) {
+      shareSlug = Math.random().toString(36).substring(2, 10).toUpperCase();
+      
       try {
         await base44.functions.invoke('createAnnouncement', {
           player_id: player.id,

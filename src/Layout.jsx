@@ -57,10 +57,10 @@ export default function Layout({ children, currentPageName }) {
               </Link>
 
               <Link 
-                to={createPageUrl('Leaderboards')}
+                to={createPageUrl('Wallet')}
                 className="hidden sm:flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-slate-500/10 text-slate-300 hover:bg-slate-500/20 transition-colors text-xs sm:text-sm font-medium"
               >
-                🏆 <span className="hidden lg:inline">Leaderboards</span>
+                💰 <span className="hidden lg:inline">Wallet</span>
               </Link>
 
               <Link 
@@ -194,15 +194,27 @@ export default function Layout({ children, currentPageName }) {
               <div>
                 <h3 className="text-white font-bold mb-3 text-sm">Platform</h3>
                 <div className="space-y-2">
-                  <Link to={createPageUrl('GameGallery')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    Games
-                  </Link>
-                  <Link to={createPageUrl('Store')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    Points Store
-                  </Link>
-                  <Link to={createPageUrl('BTCStore')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    BTC Store
-                  </Link>
+                  <Link to={createPageUrl('Home')} className="block text-slate-400 hover:text-white text-sm transition-colors">
+                      Home
+                    </Link>
+                    <Link to={createPageUrl('GameGallery')} className="block text-slate-400 hover:text-white text-sm transition-colors">
+                      Games
+                    </Link>
+                    <Link to={createPageUrl('Wallet')} className="block text-slate-400 hover:text-white text-sm transition-colors">
+                      Wallet
+                    </Link>
+                    <Link to={createPageUrl('Store')} className="block text-slate-400 hover:text-white text-sm transition-colors">
+                      Points Store
+                    </Link>
+                    <Link to={createPageUrl('BTCStore')} className="block text-slate-400 hover:text-white text-sm transition-colors">
+                      BTC Store
+                    </Link>
+                    <Link to={createPageUrl('Announcements')} className="block text-slate-400 hover:text-white text-sm transition-colors">
+                      Announcements
+                    </Link>
+                    <Link to={createPageUrl('LargeWinnings')} className="block text-slate-400 hover:text-white text-sm transition-colors">
+                      Large Winnings
+                    </Link>
                 </div>
               </div>
             </div>

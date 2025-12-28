@@ -28,6 +28,8 @@ import Announcements from './pages/Announcements';
 import Receipt from './pages/Receipt';
 import Settings from './pages/Settings';
 import Moderation from './pages/Moderation';
+import LargeWinnings from './pages/LargeWinnings';
+import Wallet from './pages/Wallet';
 import __Layout from './Layout.jsx';
 
 
@@ -62,6 +64,8 @@ export const PAGES = {
     "Receipt": Receipt,
     "Settings": Settings,
     "Moderation": Moderation,
+    "LargeWinnings": LargeWinnings,
+    "Wallet": Wallet,
 }
 
 export const pagesConfig = {
