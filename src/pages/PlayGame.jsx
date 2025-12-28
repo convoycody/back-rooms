@@ -284,6 +284,7 @@ export default function PlayGame() {
       lastChange={lastChange}
       level={player?.level || 1}
       xp={player?.xp || 0}
+      key={player?.id}
     >
       {renderGame()}
     </GameShell>

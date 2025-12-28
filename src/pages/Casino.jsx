@@ -284,11 +284,11 @@ export default function Casino() {
         <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
+      <div className="relative z-10 max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
         {/* Main Content */}
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Games Area */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 min-w-0">
             <Tabs value={activeGame} onValueChange={setActiveGame} className="w-full">
               <TabsList className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl p-1 mb-6">
                 <TabsTrigger 
@@ -340,7 +340,7 @@ export default function Casino() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6 min-w-0">
             <NoonDropCard />
             
             <DailyBonusCard 
