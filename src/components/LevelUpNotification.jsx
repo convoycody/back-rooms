@@ -31,7 +31,7 @@ export default function LevelUpNotification({ tier, bonus, tier_name, onClose })
               </div>
               <div className="text-center">
                 <p className="text-amber-400 font-black text-3xl mb-1">VIP TIER UP!</p>
-                <p className="text-white text-xl font-bold">{tier_name || `Tier ${level}`}</p>
+                <p className="text-white text-xl font-bold">{tier_name || `Tier ${tier}`}</p>
                 {bonus > 0 && (
                   <p className="text-green-400 text-lg font-semibold mt-2">
                     +{bonus.toLocaleString()} bonus points!
