@@ -141,19 +141,28 @@ export default function GamePage() {
 
     await updatePlayerMutation.mutateAsync({ playerId: player.id, updates });
 
-    // Check for level up (every 10 games)
+    // Calculate XP and VIP tier (XP = 10% of bet + 5% of net win)
+    const baseXP = Math.floor(bet / 10);
+    const winBonus = net > 0 ? Math.floor(net / 20) : 0;
+    const totalXP = baseXP + winBonus;
+
     try {
-      const levelUpResponse = await base44.functions.invoke('calculateLevelUp', {
-        player_id: player.id
+      const vipResponse = await base44.functions.invoke('calculateVIPTier', {
+        player_id: player.id,
+        xp_to_add: totalXP
       });
 
-      if (levelUpResponse.data.level_up) {
-        setLevelUpData(levelUpResponse.data);
+      if (vipResponse.data.tier_up) {
+        setLevelUpData({
+          new_level: vipResponse.data.new_tier,
+          bonus_awarded: vipResponse.data.bonus_awarded,
+          tier_name: vipResponse.data.tier_name
+        });
         setShowLevelUp(true);
-        toast.success(`Level Up! You're now level ${levelUpResponse.data.new_level}!`);
+        toast.success(`VIP Tier Up! You're now ${vipResponse.data.tier_name}!`);
       }
     } catch (err) {
-      console.error('Level up calculation failed:', err);
+      console.error('VIP tier calculation failed:', err);
     }
 
     // Check referral progression
@@ -163,13 +172,6 @@ export default function GamePage() {
       } catch (err) {
         console.error('Referral check failed:', err);
       }
-    }
-
-    // Calculate VIP tier
-    try {
-      await base44.functions.invoke('calculateVIPTier', { player_id: player.id });
-    } catch (err) {
-      console.error('VIP tier calculation failed:', err);
     }
 
     await refetchPlayer();

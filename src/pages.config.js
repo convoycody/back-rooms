@@ -1,77 +1,77 @@
 import Admin from './pages/Admin';
-import HouseControls from './pages/HouseControls';
-import BTCStore from './pages/BTCStore';
-import GameGallery from './pages/GameGallery';
-import PlayGame from './pages/PlayGame';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import TermsOfUse from './pages/TermsOfUse';
-import GamblingDisclaimer from './pages/GamblingDisclaimer';
-import Jurisdiction from './pages/Jurisdiction';
-import Fairness from './pages/Fairness';
-import HowToPlay from './pages/HowToPlay';
-import HowBettingWorks from './pages/HowBettingWorks';
-import ResponsiblePlay from './pages/ResponsiblePlay';
-import CryptoDisclosure from './pages/CryptoDisclosure';
-import Support from './pages/Support';
+import AnnouncementDetail from './pages/AnnouncementDetail';
+import Announcements from './pages/Announcements';
 import BTCPaySetup from './pages/BTCPaySetup';
-import PlayerProfile from './pages/PlayerProfile';
-import Referrals from './pages/Referrals';
-import GameStandards from './pages/GameStandards';
+import BTCStore from './pages/BTCStore';
+import CryptoDisclosure from './pages/CryptoDisclosure';
 import DevOpsTest from './pages/DevOpsTest';
+import Fairness from './pages/Fairness';
+import GamblingDisclaimer from './pages/GamblingDisclaimer';
+import GameGallery from './pages/GameGallery';
+import GamePage from './pages/GamePage';
+import GameSettings from './pages/GameSettings';
+import GameStandards from './pages/GameStandards';
+import Home from './pages/Home';
+import HouseControls from './pages/HouseControls';
+import HowBettingWorks from './pages/HowBettingWorks';
+import HowToPlay from './pages/HowToPlay';
+import Jurisdiction from './pages/Jurisdiction';
+import LargeWinnings from './pages/LargeWinnings';
+import Leaderboards from './pages/Leaderboards';
+import Moderation from './pages/Moderation';
+import PlayGame from './pages/PlayGame';
+import PlayerProfile from './pages/PlayerProfile';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Receipt from './pages/Receipt';
+import Referrals from './pages/Referrals';
+import ResponsiblePlay from './pages/ResponsiblePlay';
+import ScratchersMetrics from './pages/ScratchersMetrics';
+import Settings from './pages/Settings';
+import Support from './pages/Support';
+import TermsOfUse from './pages/TermsOfUse';
 import UserProfile from './pages/UserProfile';
 import VIPStatus from './pages/VIPStatus';
-import Home from './pages/Home';
-import GamePage from './pages/GamePage';
-import Leaderboards from './pages/Leaderboards';
-import Announcements from './pages/Announcements';
-import Receipt from './pages/Receipt';
-import Settings from './pages/Settings';
-import Moderation from './pages/Moderation';
-import LargeWinnings from './pages/LargeWinnings';
-import Wallet from './pages/Wallet';
-import ScratchersMetrics from './pages/ScratchersMetrics';
-import AnnouncementDetail from './pages/AnnouncementDetail';
-import GameSettings from './pages/GameSettings';
 import Vault from './pages/Vault';
+import Wallet from './pages/Wallet';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Admin": Admin,
-    "HouseControls": HouseControls,
-    "BTCStore": BTCStore,
-    "GameGallery": GameGallery,
-    "PlayGame": PlayGame,
-    "PrivacyPolicy": PrivacyPolicy,
-    "TermsOfUse": TermsOfUse,
-    "GamblingDisclaimer": GamblingDisclaimer,
-    "Jurisdiction": Jurisdiction,
-    "Fairness": Fairness,
-    "HowToPlay": HowToPlay,
-    "HowBettingWorks": HowBettingWorks,
-    "ResponsiblePlay": ResponsiblePlay,
-    "CryptoDisclosure": CryptoDisclosure,
-    "Support": Support,
+    "AnnouncementDetail": AnnouncementDetail,
+    "Announcements": Announcements,
     "BTCPaySetup": BTCPaySetup,
-    "PlayerProfile": PlayerProfile,
-    "Referrals": Referrals,
-    "GameStandards": GameStandards,
+    "BTCStore": BTCStore,
+    "CryptoDisclosure": CryptoDisclosure,
     "DevOpsTest": DevOpsTest,
+    "Fairness": Fairness,
+    "GamblingDisclaimer": GamblingDisclaimer,
+    "GameGallery": GameGallery,
+    "GamePage": GamePage,
+    "GameSettings": GameSettings,
+    "GameStandards": GameStandards,
+    "Home": Home,
+    "HouseControls": HouseControls,
+    "HowBettingWorks": HowBettingWorks,
+    "HowToPlay": HowToPlay,
+    "Jurisdiction": Jurisdiction,
+    "LargeWinnings": LargeWinnings,
+    "Leaderboards": Leaderboards,
+    "Moderation": Moderation,
+    "PlayGame": PlayGame,
+    "PlayerProfile": PlayerProfile,
+    "PrivacyPolicy": PrivacyPolicy,
+    "Receipt": Receipt,
+    "Referrals": Referrals,
+    "ResponsiblePlay": ResponsiblePlay,
+    "ScratchersMetrics": ScratchersMetrics,
+    "Settings": Settings,
+    "Support": Support,
+    "TermsOfUse": TermsOfUse,
     "UserProfile": UserProfile,
     "VIPStatus": VIPStatus,
-    "Home": Home,
-    "GamePage": GamePage,
-    "Leaderboards": Leaderboards,
-    "Announcements": Announcements,
-    "Receipt": Receipt,
-    "Settings": Settings,
-    "Moderation": Moderation,
-    "LargeWinnings": LargeWinnings,
-    "Wallet": Wallet,
-    "ScratchersMetrics": ScratchersMetrics,
-    "AnnouncementDetail": AnnouncementDetail,
-    "GameSettings": GameSettings,
     "Vault": Vault,
+    "Wallet": Wallet,
 }
 
 export const pagesConfig = {

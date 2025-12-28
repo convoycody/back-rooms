@@ -1,48 +1,14 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-// VIP Tier thresholds
+// VIP Tier thresholds based on vip_points (XP)
 const VIP_TIERS = [
-  { tier: 0, name: 'Player', min_vip_points: 0 },
-  { tier: 1, name: 'Regular', min_vip_points: 100 },
-  { tier: 2, name: 'Insider', min_vip_points: 500 },
-  { tier: 3, name: 'High Roller', min_vip_points: 2000 },
-  { tier: 4, name: 'Elite', min_vip_points: 10000 },
-  { tier: 5, name: 'Legend', min_vip_points: 50000 }
+  { tier: 0, name: 'Player', threshold: 0, bonus: 0 },
+  { tier: 1, name: 'Regular', threshold: 5000, bonus: 5000 },
+  { tier: 2, name: 'Insider', threshold: 15000, bonus: 10000 },
+  { tier: 3, name: 'High Roller', threshold: 40000, bonus: 20000 },
+  { tier: 4, name: 'Elite', threshold: 100000, bonus: 50000 },
+  { tier: 5, name: 'Legend', threshold: 250000, bonus: 100000 }
 ];
-
-// Calculate VIP points from player metrics
-function calculateVIPPoints(player) {
-  let vipPoints = 0;
-  
-  // XP contribution (1 VIP point per 50 XP)
-  vipPoints += Math.floor((player.xp || 0) / 50);
-  
-  // Active days contribution (10 VIP points per day)
-  vipPoints += (player.active_days || 0) * 10;
-  
-  // Games played contribution (1 VIP point per 5 games)
-  vipPoints += Math.floor((player.games_played || 0) / 5);
-  
-  // Wagered contribution (1 VIP point per 1000 wagered)
-  vipPoints += Math.floor((player.total_wagered || 0) / 1000);
-  
-  // Streak bonus (5 VIP points per day in current streak)
-  vipPoints += (player.current_streak || 0) * 5;
-  
-  // Referral bonus (50 VIP points per completed referral)
-  // This would need to be passed in separately, for now we'll skip it
-  
-  return vipPoints;
-}
-
-function getTierFromPoints(vipPoints) {
-  for (let i = VIP_TIERS.length - 1; i >= 0; i--) {
-    if (vipPoints >= VIP_TIERS[i].min_vip_points) {
-      return VIP_TIERS[i];
-    }
-  }
-  return VIP_TIERS[0];
-}
 
 Deno.serve(async (req) => {
   try {
@@ -53,10 +19,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { player_id } = await req.json();
+    const { player_id, xp_to_add } = await req.json();
 
     if (!player_id) {
-      return Response.json({ error: 'Player ID required' }, { status: 400 });
+      return Response.json({ error: 'Invalid input' }, { status: 400 });
     }
 
     // Get player
@@ -66,60 +32,66 @@ Deno.serve(async (req) => {
     }
 
     const player = players[0];
+    const oldVipPoints = player.vip_points || 0;
     const oldTier = player.vip_tier || 0;
     
-    // Calculate VIP points
-    const vipPoints = calculateVIPPoints(player);
-    const newTierInfo = getTierFromPoints(vipPoints);
-    const newTier = newTierInfo.tier;
+    // Add XP if provided
+    const newVipPoints = oldVipPoints + (xp_to_add || 0);
     
-    // Calculate next tier info
-    const nextTierInfo = VIP_TIERS.find(t => t.tier === newTier + 1);
-    const progressToNext = nextTierInfo 
-      ? ((vipPoints - newTierInfo.min_vip_points) / (nextTierInfo.min_vip_points - newTierInfo.min_vip_points)) * 100
-      : 100;
-
-    // Update player if tier changed
-    let tierUpBonus = 0;
-    if (newTier > oldTier) {
-      // Award bonus for tier increase (5000 points per tier)
-      const tiersGained = newTier - oldTier;
-      tierUpBonus = tiersGained * 5000;
-      
-      await base44.asServiceRole.entities.Player.update(player_id, {
-        vip_tier: newTier,
-        vip_points: vipPoints,
-        points_balance: player.points_balance + tierUpBonus
-      });
-      
-      // Create ledger entry
-      if (tierUpBonus > 0) {
-        await base44.asServiceRole.entities.Ledger.create({
-          player_id: player_id,
-          change: tierUpBonus,
-          reason: 'vip_tier_up',
-          balance_after: player.points_balance + tierUpBonus,
-          note: `VIP Tier Up: ${VIP_TIERS[oldTier].name} → ${newTierInfo.name}`
-        });
+    // Calculate new tier
+    let newTier = 0;
+    for (let i = VIP_TIERS.length - 1; i >= 0; i--) {
+      if (newVipPoints >= VIP_TIERS[i].threshold) {
+        newTier = VIP_TIERS[i].tier;
+        break;
       }
-    } else if (vipPoints !== player.vip_points) {
-      // Just update VIP points if no tier change
-      await base44.asServiceRole.entities.Player.update(player_id, {
-        vip_points: vipPoints
+    }
+    
+    let tierUpBonus = 0;
+    const tiersGained = newTier - oldTier;
+    
+    // Award bonus for each tier gained
+    if (tiersGained > 0) {
+      for (let i = oldTier + 1; i <= newTier; i++) {
+        tierUpBonus += VIP_TIERS[i].bonus;
+      }
+    }
+
+    // Update player
+    const updates = {
+      vip_points: newVipPoints,
+      vip_tier: newTier,
+    };
+
+    if (tierUpBonus > 0) {
+      updates.points_balance = player.points_balance + tierUpBonus;
+    }
+
+    await base44.asServiceRole.entities.Player.update(player_id, updates);
+
+    // Create ledger entry for tier-up bonus
+    if (tierUpBonus > 0) {
+      await base44.asServiceRole.entities.Ledger.create({
+        player_id: player_id,
+        change: tierUpBonus,
+        reason: 'vip_tier_up',
+        balance_after: updates.points_balance,
+        note: `VIP Tier Up! ${VIP_TIERS[oldTier].name} → ${VIP_TIERS[newTier].name}`
       });
     }
 
     return Response.json({
       success: true,
+      tier_up: tiersGained > 0,
       old_tier: oldTier,
       new_tier: newTier,
-      tier_name: newTierInfo.name,
-      vip_points: vipPoints,
-      tiers_gained: newTier - oldTier,
+      old_vip_points: oldVipPoints,
+      new_vip_points: newVipPoints,
+      xp_added: xp_to_add || 0,
+      tiers_gained: tiersGained,
       bonus_awarded: tierUpBonus,
-      progress_to_next: progressToNext,
-      next_tier: nextTierInfo ? nextTierInfo.name : 'Max Tier',
-      next_tier_requirement: nextTierInfo ? nextTierInfo.min_vip_points : null
+      tier_name: VIP_TIERS[newTier].name,
+      next_tier: newTier < 5 ? VIP_TIERS[newTier + 1] : null
     });
 
   } catch (error) {

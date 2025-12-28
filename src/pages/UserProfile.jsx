@@ -147,8 +147,21 @@ export default function UserProfile() {
     return achievement?.grants_verified;
   });
 
-  // Calculate level from games played (1 level per 10 games)
-  const calculatedLevel = Math.floor((player.games_played || 0) / 10) + 1;
+  // VIP tier thresholds
+  const VIP_TIERS = [
+    { tier: 0, name: 'Player', threshold: 0 },
+    { tier: 1, name: 'Regular', threshold: 5000 },
+    { tier: 2, name: 'Insider', threshold: 15000 },
+    { tier: 3, name: 'High Roller', threshold: 40000 },
+    { tier: 4, name: 'Elite', threshold: 100000 },
+    { tier: 5, name: 'Legend', threshold: 250000 }
+  ];
+
+  const currentTier = VIP_TIERS[player.vip_tier || 0];
+  const nextTier = player.vip_tier < 5 ? VIP_TIERS[player.vip_tier + 1] : null;
+  const vipProgress = nextTier 
+    ? ((player.vip_points - currentTier.threshold) / (nextTier.threshold - currentTier.threshold)) * 100
+    : 100;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -252,20 +265,28 @@ export default function UserProfile() {
 
                   <p className="text-slate-400 text-sm mb-2">{currentUser.email}</p>
 
-                  {/* VIP Badge & Stats */}
+                  {/* VIP Badge & Progression */}
                   <div className="space-y-3">
-                    <VIPBadge tier={player.vip_tier} size="md" showName />
+                    <VIPBadge tier={player.vip_tier} size="lg" showName />
                     
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="text-slate-400">Level</span>
-                        <span className="text-white font-bold text-lg">{calculatedLevel}</span>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-400">XP Progress</span>
+                        <span className="text-purple-400 font-bold">
+                          {(player.vip_points || 0).toLocaleString()} XP
+                        </span>
                       </div>
-                      <div className="h-4 w-px bg-slate-700" />
-                      <div className="flex items-center gap-2">
-                        <span className="text-slate-400">VIP Points</span>
-                        <span className="text-purple-400 font-bold">{(player.vip_points || 0).toLocaleString()}</span>
-                      </div>
+                      {nextTier && (
+                        <>
+                          <Progress value={vipProgress} className="h-2" />
+                          <p className="text-xs text-slate-500 text-right">
+                            {nextTier.threshold.toLocaleString()} XP for {nextTier.name}
+                          </p>
+                        </>
+                      )}
+                      {!nextTier && (
+                        <p className="text-xs text-amber-400 font-bold">🏆 Max VIP Tier Reached!</p>
+                      )}
                     </div>
                   </div>
                 </div>
