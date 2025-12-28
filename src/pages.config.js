@@ -21,6 +21,9 @@ import GameStandards from './pages/GameStandards';
 import DevOpsTest from './pages/DevOpsTest';
 import UserProfile from './pages/UserProfile';
 import VIPStatus from './pages/VIPStatus';
+import Home from './pages/Home';
+import GamePage from './pages/GamePage';
+import Leaderboards from './pages/Leaderboards';
 import __Layout from './Layout.jsx';
 
 
@@ -48,6 +51,9 @@ export const PAGES = {
     "DevOpsTest": DevOpsTest,
     "UserProfile": UserProfile,
     "VIPStatus": VIPStatus,
+    "Home": Home,
+    "GamePage": GamePage,
+    "Leaderboards": Leaderboards,
 }
 
 export const pagesConfig = {

@@ -32,7 +32,7 @@ export default function Layout({ children, currentPageName }) {
       {currentUser && currentPageName !== 'Admin' && (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/50">
           <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2">
-            <Link to={createPageUrl('GameGallery')} className="flex items-center gap-1 sm:gap-2">
+            <Link to={createPageUrl('Home')} className="flex items-center gap-1 sm:gap-2">
               <span className="text-xl sm:text-2xl">🚪</span>
               <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400 text-sm sm:text-base">
                 THE BACKROOMS
@@ -41,10 +41,24 @@ export default function Layout({ children, currentPageName }) {
 
             <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
               <Link 
+                to={createPageUrl('Home')}
+                className="hidden sm:flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-slate-500/10 text-slate-300 hover:bg-slate-500/20 transition-colors text-xs sm:text-sm font-medium"
+              >
+                🏠 <span className="hidden lg:inline">Home</span>
+              </Link>
+
+              <Link 
                 to={createPageUrl('GameGallery')}
                 className="hidden sm:flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-slate-500/10 text-slate-300 hover:bg-slate-500/20 transition-colors text-xs sm:text-sm font-medium"
               >
                 🎮 <span className="hidden lg:inline">Games</span>
+              </Link>
+
+              <Link 
+                to={createPageUrl('Leaderboards')}
+                className="hidden sm:flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-slate-500/10 text-slate-300 hover:bg-slate-500/20 transition-colors text-xs sm:text-sm font-medium"
+              >
+                🏆 <span className="hidden lg:inline">Leaderboards</span>
               </Link>
 
               <Link 
