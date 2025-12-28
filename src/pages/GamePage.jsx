@@ -22,7 +22,7 @@ const GAME_COMPONENTS = {
 export default function GamePage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const gameSlug = window.location.pathname.split('/games/')[1];
+  const gameSlug = searchParams.get('slug');
   const queryClient = useQueryClient();
   
   const [showLevelUp, setShowLevelUp] = useState(false);
