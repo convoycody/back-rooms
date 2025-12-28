@@ -283,16 +283,24 @@ export default function Admin() {
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Settings className="w-5 h-5 text-purple-400" />
-              Game Settings & Limits
+              Configuration Dashboards
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
+            <Button onClick={() => navigate(createPageUrl('GameSettings'))} className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold">
+              <Settings className="w-4 h-4 mr-2" />
+              Game Settings - Per-Game Limits & Controls
+            </Button>
+            <p className="text-slate-400 text-xs">
+              Configure min/max bets, enable/disable games, and manage game-specific settings
+            </p>
+            
             <Button onClick={() => navigate(createPageUrl('HouseControls'))} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold">
               <Settings className="w-4 h-4 mr-2" />
-              Open Full House Controls Dashboard
+              Platform Settings - Economy & Bonuses
             </Button>
-            <p className="text-slate-400 text-sm mt-3">
-              Manage game limits, RTP settings, volatility, bonus amounts, referral rewards, and more
+            <p className="text-slate-400 text-xs">
+              Manage daily bonuses, referral rewards, top-ups, Noon Drop, and economy stats
             </p>
           </CardContent>
         </Card>

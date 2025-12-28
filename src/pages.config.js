@@ -31,6 +31,7 @@ import LargeWinnings from './pages/LargeWinnings';
 import Wallet from './pages/Wallet';
 import ScratchersMetrics from './pages/ScratchersMetrics';
 import AnnouncementDetail from './pages/AnnouncementDetail';
+import GameSettings from './pages/GameSettings';
 import __Layout from './Layout.jsx';
 
 
@@ -68,6 +69,7 @@ export const PAGES = {
     "Wallet": Wallet,
     "ScratchersMetrics": ScratchersMetrics,
     "AnnouncementDetail": AnnouncementDetail,
+    "GameSettings": GameSettings,
 }
 
 export const pagesConfig = {
