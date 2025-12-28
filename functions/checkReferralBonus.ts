@@ -89,10 +89,47 @@ Deno.serve(async (req) => {
       referral_bonus_claimed: true
     });
 
+    // Check for milestone bonuses
+    const completedReferrals = await base44.asServiceRole.entities.Referral.filter({
+      referrer_id: referrerPlayer.id,
+      status: 'completed'
+    });
+
+    const completedCount = completedReferrals.length;
+    let milestoneBonus = 0;
+    let milestoneName = '';
+
+    if (completedCount === 5 && config.referral_milestone_5) {
+      milestoneBonus = config.referral_milestone_5;
+      milestoneName = '5th referral';
+    } else if (completedCount === 10 && config.referral_milestone_10) {
+      milestoneBonus = config.referral_milestone_10;
+      milestoneName = '10th referral';
+    } else if (completedCount === 20 && config.referral_milestone_20) {
+      milestoneBonus = config.referral_milestone_20;
+      milestoneName = '20th referral';
+    }
+
+    if (milestoneBonus > 0) {
+      const milestoneBalance = newBalance + milestoneBonus;
+      await base44.asServiceRole.entities.Player.update(referrerPlayer.id, {
+        points_balance: milestoneBalance
+      });
+
+      await base44.asServiceRole.entities.Ledger.create({
+        player_id: referrerPlayer.id,
+        change: milestoneBonus,
+        reason: 'referral_bonus',
+        balance_after: milestoneBalance,
+        note: `🎉 Milestone bonus: ${milestoneName}!`
+      });
+    }
+
     return Response.json({ 
       awarded: true, 
       amount: bonusAmount,
-      referrer: referrerPlayer.display_name
+      referrer: referrerPlayer.display_name,
+      milestone: milestoneBonus > 0 ? { amount: milestoneBonus, name: milestoneName } : null
     });
 
   } catch (error) {

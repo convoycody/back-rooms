@@ -82,6 +82,27 @@ export default function GameGallery() {
       if (referrerId) {
         const configs = await base44.entities.HouseConfig.list();
         const config = configs[0];
+        
+        // Give immediate bonus to inviter
+        const immediateBonus = config?.referral_immediate_inviter_bonus || 10000;
+        const referrers = await base44.entities.Player.filter({ id: referrerId });
+        if (referrers.length > 0) {
+          const referrerPlayer = referrers[0];
+          const newReferrerBalance = referrerPlayer.points_balance + immediateBonus;
+          
+          await base44.entities.Player.update(referrerId, {
+            points_balance: newReferrerBalance
+          });
+          
+          await base44.entities.Ledger.create({
+            player_id: referrerId,
+            change: immediateBonus,
+            reason: 'referral_bonus',
+            balance_after: newReferrerBalance,
+            note: `Immediate referral bonus from ${newPlayer.display_name}`
+          });
+        }
+        
         await base44.entities.Referral.create({
           referrer_id: referrerId,
           referee_id: newPlayer.id,
