@@ -103,21 +103,14 @@ export default function GamePage() {
       }
     }
 
-    // Calculate XP
-    const baseXP = Math.floor(bet / 10);
-    const winBonus = payout > bet ? Math.floor((payout - bet) / 20) : 0;
-    const totalXP = baseXP + winBonus;
-
     // Update player stats
     const newBalance = player.points_balance + net;
-    const newXP = (player.xp || 0) + totalXP;
     const newWagered = (player.total_wagered || 0) + bet;
     const newWon = (player.total_won || 0) + payout;
     const newGamesPlayed = (player.games_played || 0) + 1;
 
     const updates = {
       points_balance: newBalance,
-      xp: newXP,
       total_wagered: newWagered,
       total_won: newWon,
       games_played: newGamesPlayed,
@@ -148,11 +141,10 @@ export default function GamePage() {
 
     await updatePlayerMutation.mutateAsync({ playerId: player.id, updates });
 
-    // Check for level up
+    // Check for level up (every 10 games)
     try {
       const levelUpResponse = await base44.functions.invoke('calculateLevelUp', {
-        player_id: player.id,
-        xp_to_add: totalXP
+        player_id: player.id
       });
 
       if (levelUpResponse.data.level_up) {

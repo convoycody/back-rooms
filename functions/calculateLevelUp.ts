@@ -1,9 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-// XP calculation: Each level requires 500 XP
-// Level 1: 0-499 XP
-// Level 2: 500-999 XP
-// Level 3: 1000-1499 XP, etc.
+// Level calculation: 1 level per 10 games played
+// No XP system - just simple level based on activity
 
 Deno.serve(async (req) => {
   try {
@@ -14,9 +12,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { player_id, xp_to_add } = await req.json();
+    const { player_id } = await req.json();
 
-    if (!player_id || typeof xp_to_add !== 'number') {
+    if (!player_id) {
       return Response.json({ error: 'Invalid input' }, { status: 400 });
     }
 
@@ -27,12 +25,10 @@ Deno.serve(async (req) => {
     }
 
     const player = players[0];
-    const oldXp = player.xp || 0;
     const oldLevel = player.level || 1;
-    const newXp = oldXp + xp_to_add;
     
-    // Calculate new level (1 XP = 1 point towards next level, 500 XP per level)
-    const newLevel = Math.floor(newXp / 500) + 1;
+    // Calculate new level based on games played (1 level per 10 games)
+    const newLevel = Math.floor((player.games_played || 0) / 10) + 1;
     
     let levelUpBonus = 0;
     const levelsGained = newLevel - oldLevel;
@@ -44,7 +40,6 @@ Deno.serve(async (req) => {
 
     // Update player
     const updates = {
-      xp: newXp,
       level: newLevel,
     };
 
@@ -67,11 +62,9 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
+      level_up: levelsGained > 0,
       old_level: oldLevel,
       new_level: newLevel,
-      old_xp: oldXp,
-      new_xp: newXp,
-      xp_added: xp_to_add,
       levels_gained: levelsGained,
       bonus_awarded: levelUpBonus
     });
