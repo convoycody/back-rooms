@@ -142,6 +142,8 @@ export default function GamePage() {
       }
     } else if (gameSlug === 'plinko') {
       updates.plinko_drops = (player.plinko_drops || 0) + 1;
+    } else if (gameSlug === 'scratchers') {
+      // Scratchers stats are handled in playScratchCard backend
     }
 
     await updatePlayerMutation.mutateAsync({ playerId: player.id, updates });

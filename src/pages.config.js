@@ -31,6 +31,7 @@ import Moderation from './pages/Moderation';
 import LargeWinnings from './pages/LargeWinnings';
 import Wallet from './pages/Wallet';
 import ScratchersMetrics from './pages/ScratchersMetrics';
+import AnnouncementDetail from './pages/AnnouncementDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -68,6 +69,7 @@ export const PAGES = {
     "LargeWinnings": LargeWinnings,
     "Wallet": Wallet,
     "ScratchersMetrics": ScratchersMetrics,
+    "AnnouncementDetail": AnnouncementDetail,
 }
 
 export const pagesConfig = {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -1042,6 +1043,55 @@ export default function HouseControls() {
                     </TableBody>
                   </Table>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="scratchers">
+            <Card className="bg-slate-900/50 border-slate-700/50">
+              <CardHeader>
+                <CardTitle className="text-white">Scratchers Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-medium">Scratchers Enabled</p>
+                    <p className="text-slate-400 text-sm">Master toggle for scratch cards</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={config?.scratchers_enabled}
+                    onChange={(e) => updateConfig.mutate({ scratchers_enabled: e.target.checked })}
+                    className="w-12 h-6"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-white font-medium block mb-2">Card Cost</label>
+                  <input
+                    type="number"
+                    value={config?.scratchers_cost || 1000}
+                    onChange={(e) => updateConfig.mutate({ scratchers_cost: parseInt(e.target.value) || 1000 })}
+                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-white font-medium block mb-2">Announcement Threshold</label>
+                  <p className="text-slate-400 text-sm mb-2">Minimum win to create announcement</p>
+                  <input
+                    type="number"
+                    value={config?.announcement_threshold || 250000}
+                    onChange={(e) => updateConfig.mutate({ announcement_threshold: parseInt(e.target.value) || 250000 })}
+                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                  />
+                </div>
+
+                <div className="pt-4">
+                  <Button onClick={() => navigate(createPageUrl('ScratchersMetrics'))} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                    View Scratchers Metrics
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
