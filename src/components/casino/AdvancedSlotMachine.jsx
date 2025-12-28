@@ -172,7 +172,10 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
 
       const result = response.data;
 
-      const animationDuration = fastMode ? 500 : 2000;
+      // Calculate animation duration: spin time + max reel delay (400ms for 5th reel)
+      const spinDuration = fastMode ? 300 : 1500;
+      const maxReelDelay = 400; // 5th reel delay: 4 * 100ms
+      const animationDuration = spinDuration + maxReelDelay + 100; // +100ms buffer
       
       setTimeout(() => {
         setGrid(result.grid);
