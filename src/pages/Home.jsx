@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
@@ -12,9 +12,12 @@ import NoonDropCard from '@/components/NoonDropCard';
 import EnhancedLeaderboard from '@/components/casino/EnhancedLeaderboard';
 import AnnouncementsStrip from '@/components/home/AnnouncementsStrip';
 import LargeWinningsPreview from '@/components/home/LargeWinningsPreview';
+import ChatPreview from '@/components/home/ChatPreview';
+import ChatSidebar from '@/components/chat/ChatSidebar';
 
 export default function Home() {
   const navigate = useNavigate();
+  const [chatOpen, setChatOpen] = useState(false);
 
   const { data: currentUser, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
@@ -255,6 +258,16 @@ export default function Home() {
           </div>
         </motion.div>
 
+        {/* Chat Preview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="mb-8"
+        >
+          <ChatPreview onOpenChat={() => setChatOpen(true)} />
+        </motion.div>
+
         {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -291,6 +304,9 @@ export default function Home() {
           </div>
         </motion.div>
       </div>
+
+      {/* Chat Sidebar */}
+      <ChatSidebar isOpen={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
   );
 }

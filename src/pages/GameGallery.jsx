@@ -123,7 +123,7 @@ export default function GameGallery() {
   });
 
   const handlePlayGame = (game) => {
-    navigate(createPageUrl('PlayGame') + `?game=${game.game_id}`);
+    navigate(`/games/${game.game_id}`);
   };
 
   const featuredGames = games.filter(g => g.featured && g.enabled);

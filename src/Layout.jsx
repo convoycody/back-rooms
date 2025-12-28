@@ -210,11 +210,17 @@ export default function Layout({ children, currentPageName }) {
                       BTC Store
                     </Link>
                     <Link to={createPageUrl('Announcements')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                      Announcements
-                    </Link>
-                    <Link to={createPageUrl('LargeWinnings')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                      Large Winnings
-                    </Link>
+                        Announcements
+                      </Link>
+                      <Link to={createPageUrl('LargeWinnings')} className="block text-slate-400 hover:text-white text-sm transition-colors">
+                        Large Winnings
+                      </Link>
+                      <Link to={createPageUrl('Leaderboards')} className="block text-slate-400 hover:text-white text-sm transition-colors">
+                        Leaderboards
+                      </Link>
+                      <Link to={createPageUrl('Settings')} className="block text-slate-400 hover:text-white text-sm transition-colors">
+                        Settings
+                      </Link>
                 </div>
               </div>
             </div>

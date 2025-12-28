@@ -13,6 +13,7 @@ import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 
 export default function Admin() {
+  const navigate = useNavigate();
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [adjustAmount, setAdjustAmount] = useState('');
   const [adjustNote, setAdjustNote] = useState('');
@@ -164,12 +165,10 @@ export default function Admin() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link to={createPageUrl('Casino')}>
-              <Button variant="ghost" className="text-slate-400 hover:text-white">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Casino
-              </Button>
-            </Link>
+            <Button onClick={() => navigate(createPageUrl('Home'))} variant="ghost" className="text-slate-400 hover:text-white">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
             <div>
               <h1 className="text-3xl font-black text-white flex items-center gap-3">
                 <Shield className="w-8 h-8 text-amber-500" />
@@ -274,12 +273,17 @@ export default function Admin() {
 
         {/* Quick Actions */}
         <div className="flex flex-wrap gap-4 mb-8">
-          <Link to={createPageUrl('HouseControls')}>
-            <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold">
-              <Settings className="w-4 h-4 mr-2" />
-              House Controls
-            </Button>
-          </Link>
+          <Button onClick={() => navigate(createPageUrl('HouseControls'))} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold">
+            <Settings className="w-4 h-4 mr-2" />
+            House Controls
+          </Button>
+          <Button onClick={() => navigate(createPageUrl('Moderation'))} className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold">
+            <Shield className="w-4 h-4 mr-2" />
+            Chat Moderation
+          </Button>
+          <Button onClick={() => navigate(createPageUrl('ScratchersMetrics'))} className="bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold">
+            🎫 Scratchers Metrics
+          </Button>
           <Link to={createPageUrl('DevOpsTest')}>
             <Button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold">
               <Zap className="w-4 h-4 mr-2" />
