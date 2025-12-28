@@ -32,6 +32,7 @@ import Wallet from './pages/Wallet';
 import ScratchersMetrics from './pages/ScratchersMetrics';
 import AnnouncementDetail from './pages/AnnouncementDetail';
 import GameSettings from './pages/GameSettings';
+import Vault from './pages/Vault';
 import __Layout from './Layout.jsx';
 
 
@@ -70,6 +71,7 @@ export const PAGES = {
     "ScratchersMetrics": ScratchersMetrics,
     "AnnouncementDetail": AnnouncementDetail,
     "GameSettings": GameSettings,
+    "Vault": Vault,
 }
 
 export const pagesConfig = {
