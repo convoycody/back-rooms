@@ -174,10 +174,8 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
 
       const animationDuration = fastMode ? 500 : 2000;
       
-      // Set final grid immediately but keep spinning true until animation completes
-      setGrid(result.grid);
-      
       setTimeout(() => {
+        setGrid(result.grid);
         setSpinning(false);
         setLastResult(result);
 
