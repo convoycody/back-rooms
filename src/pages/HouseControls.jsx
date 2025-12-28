@@ -381,6 +381,90 @@ export default function HouseControls() {
             </div>
           </TabsContent>
 
+          {/* Noon Drop Tab */}
+          <TabsContent value="noondrop" className="space-y-6">
+            <Card className="bg-gradient-to-br from-amber-900/30 to-yellow-900/30 border-amber-700/50">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-amber-400" />
+                  The Noon Drop
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 mb-4">
+                  <p className="text-amber-200 text-sm">
+                    <strong>How it works:</strong> Every day at 12:00 PM Eastern Time, one random eligible player wins 1,000,000 points. Fully automated, provably fair, and transparent.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-white">Noon Drop Enabled</Label>
+                    <p className="text-slate-400 text-sm">Daily random jackpot draw</p>
+                  </div>
+                  <Switch
+                    checked={houseConfig.noon_drop_enabled}
+                    onCheckedChange={(checked) => updateConfigMutation.mutate({ noon_drop_enabled: checked })}
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-white">Prize Amount: {houseConfig.noon_drop_prize?.toLocaleString() || 1000000}</Label>
+                  <p className="text-slate-400 text-xs mb-2">Fixed at 1,000,000 for fairness</p>
+                  <div className="text-amber-400 text-sm font-bold mt-2">
+                    {houseConfig.noon_drop_prize?.toLocaleString() || 1000000} points
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-white">Eligibility Window: {houseConfig.noon_drop_eligibility_days || 7} days</Label>
+                  <p className="text-slate-400 text-xs mb-2">Players must have been active within this period</p>
+                  <Slider
+                    value={[houseConfig.noon_drop_eligibility_days || 7]}
+                    onValueChange={([val]) => updateConfigMutation.mutate({ noon_drop_eligibility_days: val })}
+                    min={1}
+                    max={30}
+                    step={1}
+                    disabled={!houseConfig.noon_drop_enabled}
+                    className="mt-2"
+                  />
+                </div>
+
+                <div className="pt-4 border-t border-amber-700/30">
+                  <p className="text-slate-400 text-sm mb-2">Test Noon Drop</p>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const result = await base44.functions.invoke('executeNoonDrop', { 
+                          manual_override: true,
+                          test_mode: true 
+                        });
+                        toast.success(`Winner: ${result.data.winner.display_name} won ${result.data.draw.prize_amount.toLocaleString()} points!`);
+                        queryClient.invalidateQueries({ queryKey: ['allPlayers'] });
+                      } catch (err) {
+                        toast.error(err.response?.data?.error || 'Test failed');
+                      }
+                    }}
+                    className="w-full bg-amber-500 hover:bg-amber-600 text-black"
+                  >
+                    <Trophy className="w-4 h-4 mr-2" />
+                    Run Test Draw Now
+                  </Button>
+                </div>
+
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                  <p className="text-slate-300 font-semibold mb-2">⚠️ Important Notes</p>
+                  <ul className="text-slate-400 text-sm space-y-1 list-disc list-inside">
+                    <li>Prize is fixed at 1M for trust & fairness</li>
+                    <li>Draw uses provably fair RNG</li>
+                    <li>No admin influence on winner selection</li>
+                    <li>All draws are logged and auditable</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Daily Bonuses Tab */}
           <TabsContent value="bonuses" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">

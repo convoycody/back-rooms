@@ -339,6 +339,8 @@ export default function Casino() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            <NoonDropCard />
+            
             <DailyBonusCard 
               playerId={player?.id}
               balance={player?.points_balance || 0}
