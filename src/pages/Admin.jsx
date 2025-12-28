@@ -278,12 +278,27 @@ export default function Admin() {
           </Card>
         </div>
 
+        {/* Game Settings Card */}
+        <Card className="bg-slate-900/50 border-slate-700/50 mb-8">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Settings className="w-5 h-5 text-purple-400" />
+              Game Settings & Limits
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => navigate(createPageUrl('HouseControls'))} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold">
+              <Settings className="w-4 h-4 mr-2" />
+              Open Full House Controls Dashboard
+            </Button>
+            <p className="text-slate-400 text-sm mt-3">
+              Manage game limits, RTP settings, volatility, bonus amounts, referral rewards, and more
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Quick Actions */}
         <div className="flex flex-wrap gap-4 mb-8">
-          <Button onClick={() => navigate(createPageUrl('HouseControls'))} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold">
-            <Settings className="w-4 h-4 mr-2" />
-            House Controls
-          </Button>
           <Button onClick={() => navigate(createPageUrl('Moderation'))} className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold">
             <Shield className="w-4 h-4 mr-2" />
             Chat Moderation
