@@ -19,12 +19,25 @@ export default function Referrals() {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: player } = useQuery({
+  const { data: player, refetch: refetchPlayer } = useQuery({
     queryKey: ['player', currentUser?.email],
     queryFn: async () => {
       if (!currentUser) return null;
       const players = await base44.entities.Player.filter({ created_by: currentUser.email });
-      return players[0] || null;
+      const p = players[0] || null;
+      
+      // Auto-fix missing referral code
+      if (p && !p.referral_code) {
+        try {
+          await base44.functions.invoke('fixReferralCode');
+          const updatedPlayers = await base44.entities.Player.filter({ created_by: currentUser.email });
+          return updatedPlayers[0] || null;
+        } catch (err) {
+          console.error('Failed to fix referral code:', err);
+        }
+      }
+      
+      return p;
     },
     enabled: !!currentUser,
   });
