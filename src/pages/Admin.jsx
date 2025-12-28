@@ -17,6 +17,8 @@ export default function Admin() {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [adjustAmount, setAdjustAmount] = useState('');
   const [adjustNote, setAdjustNote] = useState('');
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState('');
   const queryClient = useQueryClient();
 
   const { data: currentUser, isLoading: userLoading } = useQuery({
@@ -76,7 +78,10 @@ export default function Admin() {
   };
 
   const handleResetAllBalances = async () => {
-    if (!confirm('Are you sure you want to reset ALL player balances to 1000?')) return;
+    if (resetConfirmText !== 'RESET') {
+      toast.error('Please type RESET to confirm');
+      return;
+    }
 
     for (const player of players) {
       await updatePlayerMutation.mutateAsync({
@@ -100,6 +105,8 @@ export default function Admin() {
       });
     }
 
+    setShowResetDialog(false);
+    setResetConfirmText('');
     toast.success('All balances reset to 1000');
   };
 
@@ -297,14 +304,70 @@ export default function Admin() {
             <Gift className="w-4 h-4 mr-2" />
             Give All Players 100pts
           </Button>
-          <Button 
-            onClick={handleResetAllBalances}
-            variant="outline"
-            className="border-red-500/50 text-red-400 hover:bg-red-500/10"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Reset All Balances (Season Reset)
-          </Button>
+          <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reset All Balances (Season Reset)
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-slate-900 border-red-500/30">
+              <DialogHeader>
+                <DialogTitle className="text-white flex items-center gap-2">
+                  <RefreshCw className="w-5 h-5 text-red-400" />
+                  Reset All Player Balances
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                  <p className="text-red-400 font-bold mb-2">⚠️ CRITICAL WARNING</p>
+                  <p className="text-slate-300 text-sm">
+                    This will reset ALL player balances to 1000 and clear all stats (wagered, won, games played, XP, level).
+                    This action cannot be undone.
+                  </p>
+                </div>
+                
+                <div>
+                  <Label className="text-slate-400 mb-2 block">
+                    Type <span className="text-red-400 font-bold">RESET</span> to confirm
+                  </Label>
+                  <Input
+                    value={resetConfirmText}
+                    onChange={(e) => setResetConfirmText(e.target.value)}
+                    placeholder="Type RESET here"
+                    className="bg-slate-800 border-slate-700 text-white font-mono"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    onClick={() => {
+                      setShowResetDialog(false);
+                      setResetConfirmText('');
+                    }}
+                    variant="outline"
+                    className="flex-1 border-slate-600"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleResetAllBalances}
+                    disabled={resetConfirmText !== 'RESET' || updatePlayerMutation.isPending}
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold"
+                  >
+                    {updatePlayerMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      'Reset All Balances'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Players Table */}
