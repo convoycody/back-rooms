@@ -24,6 +24,8 @@ import VIPStatus from './pages/VIPStatus';
 import Home from './pages/Home';
 import GamePage from './pages/GamePage';
 import Leaderboards from './pages/Leaderboards';
+import Announcements from './pages/Announcements';
+import Receipt from './pages/Receipt';
 import __Layout from './Layout.jsx';
 
 
@@ -54,6 +56,8 @@ export const PAGES = {
     "Home": Home,
     "GamePage": GamePage,
     "Leaderboards": Leaderboards,
+    "Announcements": Announcements,
+    "Receipt": Receipt,
 }
 
 export const pagesConfig = {

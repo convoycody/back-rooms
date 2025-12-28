@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Shield, LogOut } from 'lucide-react';
+import { Shield, LogOut, MessageSquare } from 'lucide-react';
 import WalletDropdown from '@/components/WalletDropdown';
+import ChatSidebar from '@/components/chat/ChatSidebar';
 
 export default function Layout({ children, currentPageName }) {
   const [lastChange, setLastChange] = useState(0);
+  const [chatOpen, setChatOpen] = useState(false);
   
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -86,6 +88,13 @@ export default function Layout({ children, currentPageName }) {
                 </Link>
               )}
 
+              <button
+                onClick={() => setChatOpen(true)}
+                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors relative"
+              >
+                <MessageSquare className="w-5 h-5" />
+              </button>
+
               <WalletDropdown 
                 balance={player?.points_balance || 0}
                 level={player?.level || 1}
@@ -126,6 +135,9 @@ export default function Layout({ children, currentPageName }) {
       <main className={currentUser && currentPageName !== 'Admin' ? 'pt-16' : ''}>
         {children}
       </main>
+
+      {/* Chat Sidebar */}
+      {currentUser && <ChatSidebar isOpen={chatOpen} onClose={() => setChatOpen(false)} />}
 
       {/* Footer */}
       {currentUser && currentPageName !== 'Admin' && (

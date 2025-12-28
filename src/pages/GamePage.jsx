@@ -81,6 +81,22 @@ export default function GamePage() {
     const payout = result.payout || result.total_win || 0;
     const net = payout - bet;
 
+    // Check for announcement-worthy wins (>= 250k)
+    if (payout >= 250000) {
+      try {
+        await base44.functions.invoke('createAnnouncement', {
+          player_id: player.id,
+          type: payout >= 1000000 ? 'jackpot' : 'big_win',
+          game_id: gameSlug,
+          game_name: game?.name || gameSlug,
+          amount: payout,
+          multiplier: bet > 0 ? payout / bet : 0
+        });
+      } catch (err) {
+        console.error('Announcement creation failed:', err);
+      }
+    }
+
     // Calculate XP
     const baseXP = Math.floor(bet / 10);
     const winBonus = payout > bet ? Math.floor((payout - bet) / 20) : 0;
