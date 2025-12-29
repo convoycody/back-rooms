@@ -15,6 +15,7 @@ const VIP_TIERS = [
   {
     tier: 0,
     name: 'Player',
+    threshold: 0,
     color: 'slate',
     icon: null,
     dailyBonus: '10,000',
@@ -28,10 +29,10 @@ const VIP_TIERS = [
   {
     tier: 1,
     name: 'Regular',
+    threshold: 5000,
     color: 'blue',
     icon: Star,
     dailyBonus: '11,000',
-    requirement: '100 VIP points',
     perks: [
       '+10% daily bonus (11,000 pts)',
       '+1 extra auto top-up per day',
@@ -42,10 +43,10 @@ const VIP_TIERS = [
   {
     tier: 2,
     name: 'Insider',
+    threshold: 15000,
     color: 'purple',
     icon: Sparkles,
     dailyBonus: '12,000',
-    requirement: '500 VIP points',
     perks: [
       '+20% daily bonus (12,000 pts)',
       'Reduced top-up cooldown',
@@ -56,10 +57,10 @@ const VIP_TIERS = [
   {
     tier: 3,
     name: 'High Roller',
+    threshold: 40000,
     color: 'amber',
     icon: Trophy,
     dailyBonus: '13,500',
-    requirement: '2,000 VIP points',
     perks: [
       '+35% daily bonus (13,500 pts)',
       'Higher daily top-up cap',
@@ -72,10 +73,10 @@ const VIP_TIERS = [
   {
     tier: 4,
     name: 'Elite',
+    threshold: 100000,
     color: 'emerald',
     icon: Crown,
     dailyBonus: '15,000',
-    requirement: '10,000 VIP points',
     perks: [
       '+50% daily bonus (15,000 pts)',
       'Exclusive Elite UI theme',
@@ -88,10 +89,10 @@ const VIP_TIERS = [
   {
     tier: 5,
     name: 'Legend',
+    threshold: 250000,
     color: 'pink',
     icon: Gem,
     dailyBonus: '17,500',
-    requirement: '50,000 VIP points',
     perks: [
       '+75% daily bonus (17,500 pts)',
       'One Legend Chest per month',
@@ -142,8 +143,8 @@ export default function VIPStatus() {
   const nextTierInfo = VIP_TIERS[currentTier + 1];
 
   // Calculate progress to next tier
-  const nextTierRequirement = nextTierInfo ? parseInt(nextTierInfo.requirement?.split(' ')[0].replace(',', '')) : null;
-  const currentTierRequirement = currentTier > 0 ? parseInt(VIP_TIERS[currentTier].requirement?.split(' ')[0].replace(',', '')) : 0;
+  const nextTierRequirement = nextTierInfo?.threshold || null;
+  const currentTierRequirement = VIP_TIERS[currentTier]?.threshold || 0;
   const progressPercent = nextTierRequirement 
     ? ((currentVIPPoints - currentTierRequirement) / (nextTierRequirement - currentTierRequirement)) * 100
     : 100;
@@ -241,28 +242,24 @@ export default function VIPStatus() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-slate-800/50 rounded-lg p-4">
-                  <p className="text-slate-400 text-sm mb-1">Play Games</p>
-                  <p className="text-white font-bold">1 pt per 5 games</p>
-                  <p className="text-slate-500 text-xs mt-1">Keep playing to progress</p>
+                  <p className="text-slate-400 text-sm mb-1">Wager Points</p>
+                  <p className="text-white font-bold">10% of bet = XP</p>
+                  <p className="text-slate-500 text-xs mt-1">Bet 1000 pts = 100 XP</p>
                 </div>
                 <div className="bg-slate-800/50 rounded-lg p-4">
-                  <p className="text-slate-400 text-sm mb-1">Earn XP</p>
-                  <p className="text-white font-bold">1 pt per 50 XP</p>
-                  <p className="text-slate-500 text-xs mt-1">Win and wager for XP</p>
+                  <p className="text-slate-400 text-sm mb-1">Win Bonus XP</p>
+                  <p className="text-white font-bold">5% of net win</p>
+                  <p className="text-slate-500 text-xs mt-1">Win 2000 net = 100 XP</p>
                 </div>
                 <div className="bg-slate-800/50 rounded-lg p-4">
-                  <p className="text-slate-400 text-sm mb-1">Active Days</p>
-                  <p className="text-white font-bold">10 pts per day</p>
-                  <p className="text-slate-500 text-xs mt-1">Log in daily for bonus</p>
-                </div>
-                <div className="bg-slate-800/50 rounded-lg p-4">
-                  <p className="text-slate-400 text-sm mb-1">Streaks</p>
-                  <p className="text-white font-bold">5 pts per streak day</p>
-                  <p className="text-slate-500 text-xs mt-1">Consecutive active days</p>
+                  <p className="text-slate-400 text-sm mb-1">Your Stats</p>
+                  <p className="text-white font-bold">{player.xp?.toLocaleString() || 0} XP</p>
+                  <p className="text-purple-400 text-xs mt-1">{player.vip_points?.toLocaleString() || 0} VIP Points</p>
                 </div>
               </div>
+              <p className="text-amber-400 text-xs mt-4">💡 Note: XP and VIP Points are separate. VIP Points determine your tier and are earned through activity tracking.</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -309,9 +306,9 @@ export default function VIPStatus() {
                             <CheckCircle2 className="w-5 h-5 text-green-400" />
                           )}
                         </div>
-                        {tierInfo.requirement && (
+                        {tierInfo.threshold > 0 && (
                           <p className={`text-sm mb-3 ${isUnlocked ? 'text-green-400' : 'text-slate-400'}`}>
-                            {isUnlocked ? '✓ ' : '🔒 '}Requires: {tierInfo.requirement}
+                            {isUnlocked ? '✓ ' : '🔒 '}Requires: {tierInfo.threshold.toLocaleString()} VIP points
                           </p>
                         )}
                         <div className="grid md:grid-cols-2 gap-2">
