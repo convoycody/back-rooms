@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ChevronDown, Coins, Zap, Gift, Fuel } from 'lucide-react';
+import { ChevronDown, Zap, Gift, Fuel } from 'lucide-react';
 import VIPBadge from '@/components/VIPBadge';
 import {
   DropdownMenu,

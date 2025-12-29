@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { 
   Loader2, 
-  User, 
   TrendingUp, 
   Trophy, 
   Coins, 
@@ -112,7 +111,7 @@ export default function UserProfile() {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await updatePlayerMutation.mutateAsync({ avatar_url: file_url });
       toast.success('Avatar updated!');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to upload avatar');
     } finally {
       setUploadingAvatar(false);

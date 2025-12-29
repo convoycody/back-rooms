@@ -271,7 +271,7 @@ export default function VIPStatus() {
         >
           <h2 className="text-2xl font-bold text-white mb-4">All VIP Tiers</h2>
           <div className="space-y-4">
-            {VIP_TIERS.map((tierInfo, index) => {
+            {VIP_TIERS.map((tierInfo) => {
               const Icon = tierInfo.icon;
               const isUnlocked = currentTier >= tierInfo.tier;
               const isCurrent = currentTier === tierInfo.tier;

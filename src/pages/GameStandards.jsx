@@ -633,7 +633,7 @@ export default function GameStandards() {
                       </div>
 
                       <div className="border border-green-500/30 rounded p-3">
-                        <h4 className="text-green-300 font-semibold text-sm mb-2">2. Win/Loss Entry (if payout > 0)</h4>
+                        <h4 className="text-green-300 font-semibold text-sm mb-2">2. Win/Loss Entry (if payout &gt; 0)</h4>
                         <div className="space-y-1 text-xs">
                           <div className="flex gap-2"><span className="text-slate-500">change:</span><span className="text-green-400">+payout</span></div>
                           <div className="flex gap-2"><span className="text-slate-500">reason:</span><span className="text-slate-300">"game_win"</span></div>

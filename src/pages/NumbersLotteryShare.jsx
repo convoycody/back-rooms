@@ -16,7 +16,7 @@ export default function NumbersLotteryShare() {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: player } = useQuery({
+  const { data: _player } = useQuery({
     queryKey: ['player', currentUser?.email],
     queryFn: async () => {
       if (!currentUser) return null;

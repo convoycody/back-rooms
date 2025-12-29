@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
@@ -155,8 +155,8 @@ export default function PlayGame() {
           bonus: levelUpResult.data.bonus_awarded
         });
       }
-    } catch (err) {
-      console.error('Level up error:', err);
+    } catch (_err) {
+      console.error('Level up error:', _err);
     }
     
     await refetchPlayer();
@@ -167,7 +167,7 @@ export default function PlayGame() {
     if (player.referred_by && !player.referral_bonus_claimed) {
       try {
         await base44.functions.invoke('checkReferralBonus', { player_id: player.id });
-      } catch (err) {
+      } catch (_err) {
         // Silent
       }
     }
@@ -272,7 +272,7 @@ export default function PlayGame() {
     if (player.referred_by && !player.referral_bonus_claimed) {
       try {
         await base44.functions.invoke('checkReferralBonus', { player_id: player.id });
-      } catch (err) {
+      } catch (_err) {
         // Silent
       }
     }

@@ -19,7 +19,7 @@ export default function Referrals() {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: player, refetch: refetchPlayer } = useQuery({
+  const { data: player, refetch: _refetchPlayer } = useQuery({
     queryKey: ['player', currentUser?.email],
     queryFn: async () => {
       if (!currentUser) return null;

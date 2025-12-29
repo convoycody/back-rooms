@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Loader2, ArrowLeft, TrendingUp, TrendingDown, Coins, Trophy, Zap, Plus, Minus, History } from 'lucide-react';
+import { Loader2, ArrowLeft, TrendingUp, Coins, Trophy, Zap, Plus, Minus, History } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';

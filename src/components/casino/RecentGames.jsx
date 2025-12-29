@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Dices, CircleDot } from 'lucide-react';
+import { Clock, Dices } from 'lucide-react';
 import moment from 'moment';
 
 const getGameIcon = (type) => {

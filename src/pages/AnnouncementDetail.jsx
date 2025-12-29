@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Copy, Share2 } from 'lucide-react';
+import { Loader2, Calendar, Copy } from 'lucide-react';
 import moment from 'moment';
 import { toast } from 'sonner';
 

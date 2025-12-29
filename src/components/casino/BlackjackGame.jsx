@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Loader2 } from 'lucide-react';
@@ -105,7 +105,6 @@ const HandDisplay = ({ cards, label, value, hidden = false, isDealer = false, fa
   </div>
 );
 
-import { base44 } from "@/api/base44Client";
 
 export default function BlackjackGame({ balance, onGameEnd, disabled }) {
   const [deck, setDeck] = useState([]);

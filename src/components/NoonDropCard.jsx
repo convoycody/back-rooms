@@ -15,7 +15,7 @@ export default function NoonDropCard() {
     },
   });
 
-  const { data: todaysDraw, refetch } = useQuery({
+  const { data: todaysDraw } = useQuery({
     queryKey: ['noonDropToday'],
     queryFn: async () => {
       const now = new Date();

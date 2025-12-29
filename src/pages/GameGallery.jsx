@@ -6,7 +6,6 @@ import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
 import { Loader2, Sparkles } from 'lucide-react';
 import GameCard from '@/components/games/GameCard';
-import BalanceDisplay from '@/components/casino/BalanceDisplay';
 
 export default function GameGallery() {
   const navigate = useNavigate();

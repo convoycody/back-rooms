@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
-import { Loader2, Sparkles, Trophy, MessageSquare, Gift, ChevronRight } from 'lucide-react';
+import { Loader2, Sparkles, Trophy, Gift, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import GameCard from '@/components/games/GameCard';
 import DailyBonusCard from '@/components/casino/DailyBonusCard';
@@ -18,35 +18,46 @@ import ChatSidebar from '@/components/chat/ChatSidebar';
 export default function Home() {
   const navigate = useNavigate();
   const [chatOpen, setChatOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-  const { data: currentUser, isLoading: userLoading } = useQuery({
+  const { data: currentUser, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: player } = useQuery({
+  const {
+    data: player,
+    isLoading: playerLoading,
+    error: playerError,
+  } = useQuery({
     queryKey: ['player', currentUser?.email],
     queryFn: async () => {
       if (!currentUser) return null;
       const players = await base44.entities.Player.filter({ created_by: currentUser.email });
-      
-      if (players.length > 0) {
-        // Track activity on home page load
-        try {
-          await base44.functions.invoke('trackActivity', { player_id: players[0].id });
-        } catch (err) {
-          console.error('Activity tracking failed:', err);
-        }
-        return players[0];
-      }
-      
-      // New player signup logic
+      return players[0] || null;
+    },
+    enabled: !!currentUser,
+  });
+
+  const trackActivity = useMutation({
+    mutationFn: (playerId) => base44.functions.invoke('trackActivity', { player_id: playerId }),
+  });
+
+  useEffect(() => {
+    if (player?.id) {
+      trackActivity.mutate(player.id);
+    }
+  }, [player?.id]);
+
+  const createPlayer = useMutation({
+    mutationFn: async () => {
+      if (!currentUser) throw new Error('No user');
       const urlParams = new URLSearchParams(window.location.search);
       const refCode = urlParams.get('ref');
-      
+
       let referrerId = null;
       let signupBonus = 1000;
-      
+
       if (refCode) {
         const referrers = await base44.entities.Player.filter({ referral_code: refCode });
         if (referrers.length > 0) {
@@ -58,9 +69,9 @@ export default function Home() {
           }
         }
       }
-      
+
       const referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      
+
       const newPlayer = await base44.entities.Player.create({
         display_name: currentUser.full_name || currentUser.email.split('@')[0],
         referral_code: referralCode,
@@ -74,47 +85,49 @@ export default function Home() {
         change: signupBonus,
         reason: 'signup_bonus',
         balance_after: signupBonus,
-        note: referrerId ? 'Welcome + referral bonus!' : 'Welcome bonus!'
+        note: referrerId ? 'Welcome + referral bonus!' : 'Welcome bonus!',
       });
-      
+
       if (referrerId) {
         const configs = await base44.entities.HouseConfig.list();
         const config = configs[0];
-        
+
         const immediateBonus = config?.referral_immediate_inviter_bonus || 10000;
         const referrers = await base44.entities.Player.filter({ id: referrerId });
         if (referrers.length > 0) {
           const referrerPlayer = referrers[0];
           const newReferrerBalance = referrerPlayer.points_balance + immediateBonus;
-          
+
           await base44.entities.Player.update(referrerId, {
-            points_balance: newReferrerBalance
+            points_balance: newReferrerBalance,
           });
-          
+
           await base44.entities.Ledger.create({
             player_id: referrerId,
             change: immediateBonus,
             reason: 'referral_bonus',
             balance_after: newReferrerBalance,
-            note: `Immediate referral bonus from ${newPlayer.display_name}`
+            note: `Immediate referral bonus from ${newPlayer.display_name}`,
           });
         }
-        
+
         await base44.entities.Referral.create({
           referrer_id: referrerId,
           referee_id: newPlayer.id,
           referral_code_used: refCode,
           referee_signup_bonus: config?.referral_new_user_bonus || 0,
-          status: 'pending'
+          status: 'pending',
         });
       }
-      
+
       return newPlayer;
     },
-    enabled: !!currentUser,
+    onSuccess: (newPlayer) => {
+      queryClient.setQueryData(['player', currentUser?.email], newPlayer);
+    },
   });
 
-  const { data: games = [], isLoading: gamesLoading } = useQuery({
+  const { data: games = [], isLoading: gamesLoading, error: gamesError } = useQuery({
     queryKey: ['games'],
     queryFn: () => base44.entities.Game.list('sort_order'),
   });
@@ -129,10 +142,13 @@ export default function Home() {
 
   const featuredGames = games.filter(g => g.featured && g.enabled);
 
-  if (userLoading || gamesLoading) {
+  const loadingState = userLoading || gamesLoading || playerLoading;
+
+  if (loadingState) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+        <p className="text-slate-400 text-sm">Loading your experience…</p>
       </div>
     );
   }
@@ -149,6 +165,82 @@ export default function Home() {
           >
             Log In
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  const renderError = (label, error) => (
+    <div className="w-full max-w-2xl mx-auto mb-6 bg-red-500/10 border border-red-500/30 text-red-100 rounded-xl p-4">
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <p className="font-semibold">{label}</p>
+          <p className="text-sm text-red-200">{error?.message || 'Something went wrong.'}</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-red-400 text-red-100"
+          onClick={() => {
+            if (label.includes('player')) {
+              queryClient.invalidateQueries(['player', currentUser?.email]);
+            } else if (label.includes('games')) {
+              queryClient.invalidateQueries(['games']);
+            } else {
+              queryClient.invalidateQueries(['currentUser']);
+            }
+          }}
+        >
+          Retry
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (playerError || userError || gamesError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
+        {userError && renderError('User error', userError)}
+        {playerError && renderError('Player error', playerError)}
+        {gamesError && renderError('Games error', gamesError)}
+      </div>
+    );
+  }
+
+  const handleCreatePlayer = () => {
+    createPlayer.mutate();
+  };
+
+  if (!player) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+        <div className="bg-slate-900/70 border border-slate-700/60 rounded-2xl p-6 max-w-xl w-full">
+          <h1 className="text-3xl font-black text-white mb-2">Finish setting up</h1>
+          <p className="text-slate-300 mb-4">
+            Create your player profile to get your signup bonus and start playing.
+          </p>
+          {createPlayer.error && (
+            <div className="mb-3 text-sm text-red-200 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+              {createPlayer.error.message}
+            </div>
+          )}
+          <Button
+            onClick={handleCreatePlayer}
+            disabled={createPlayer.isPending}
+            className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold"
+          >
+            {createPlayer.isPending ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Creating your player…
+              </div>
+            ) : (
+              'Create my player'
+            )}
+          </Button>
+          <p className="text-slate-500 text-xs mt-3">
+            We’ll reserve your referral bonus automatically if you used a referral link.
+          </p>
         </div>
       </div>
     );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
-export default function DailyBonusCard({ playerId, balance, onClaimed }) {
+export default function DailyBonusCard({ playerId, onClaimed }) {
   const [claiming, setClaiming] = useState(false);
   const [showReferralPrompt, setShowReferralPrompt] = useState(false);
   const queryClient = useQueryClient();

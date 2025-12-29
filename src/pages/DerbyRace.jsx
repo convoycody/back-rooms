@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, ArrowLeft, Trophy, Users, Clock, TrendingUp, Share2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import moment from 'moment';
 import BettingSlip from '@/components/derby/BettingSlip';
 import OddsDisplay from '@/components/derby/OddsDisplay';
 import MomentumTracker from '@/components/derby/MomentumTracker';
+import { useRaceConfig } from '@/hooks/useRaceConfig';
 
 export default function DerbyRace() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
   const raceId = urlParams.get('id');
 
@@ -69,13 +69,7 @@ export default function DerbyRace() {
     enabled: !!raceId && !!player,
   });
 
-  const { data: config } = useQuery({
-    queryKey: ['raceConfig'],
-    queryFn: async () => {
-      const configs = await base44.entities.RaceConfig.list();
-      return configs[0];
-    },
-  });
+  const { data: config, isLoading: configLoading } = useRaceConfig();
 
   // Check if player is entered as owner
   const isOwnerInRace = entries.some(e => e.owner_id === player?.id);
@@ -123,7 +117,7 @@ export default function DerbyRace() {
     };
   };
 
-  if (isLoading || !race) {
+  if (isLoading || !race || configLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-amber-500" />

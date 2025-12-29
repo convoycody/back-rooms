@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft, TrendingUp, TrendingDown, Trophy, Lock, Unlock } from 'lucide-react';
+import { Loader2, ArrowLeft, Trophy, Lock, Unlock } from 'lucide-react';
 import moment from 'moment';
 
 export default function ScratchersMetrics() {
