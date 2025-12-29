@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Shield, LogOut, MessageSquare, Menu, X, Home, Gamepad2, Wallet, Gift, Crown, DollarSign } from 'lucide-react';
 import WalletDropdown from '@/components/WalletDropdown';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
+import { soundManager } from '@/components/casino/SoundManager';
+import { broadcastPlayerUpdate, listenPlayerUpdates } from '@/lib/playerSync';
 
 export default function Layout({ children, currentPageName }) {
   const [lastChange] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const logoClicks = useRef(0);
+  const queryClient = useQueryClient();
+  const lastBroadcastBalance = useRef(null);
   
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -26,9 +32,49 @@ export default function Layout({ children, currentPageName }) {
       return players[0] || null;
     },
     enabled: !!currentUser,
+    refetchInterval: 4000,
+    refetchOnWindowFocus: true,
   });
 
   const isAdmin = player?.is_admin || currentUser?.role === 'admin';
+
+  const redeemEasterEgg = async (code, label) => {
+    try {
+      soundManager.ensureTone('egg-chime', 1440, 200, 0.4);
+      soundManager.safePlay('egg-chime', 0.9);
+      if (!currentUser) {
+        toast.info('Sign in to claim hidden vault rewards');
+        return;
+      }
+      await base44.functions.invoke('awardEasterEgg', { code });
+      toast.success(`${label} unlocked! Check your wallet for the bonus.`);
+    } catch (err) {
+      toast.error('Easter egg already claimed or unavailable.');
+      console.error('Easter egg redeem failed', err);
+    }
+  };
+
+  const handleLogoClick = () => {
+    logoClicks.current += 1;
+    if (logoClicks.current >= 3) {
+      logoClicks.current = 0;
+      redeemEasterEgg('backrooms_logo_click', 'Backrooms Portal Bonus');
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = listenPlayerUpdates(() => {
+      queryClient.invalidateQueries({ queryKey: ['player'] });
+    });
+    return unsubscribe;
+  }, [queryClient]);
+
+  useEffect(() => {
+    if (player?.points_balance !== lastBroadcastBalance.current) {
+      lastBroadcastBalance.current = player?.points_balance;
+      broadcastPlayerUpdate({ reason: 'balance-change', balance: player?.points_balance });
+    }
+  }, [player?.points_balance]);
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -45,10 +91,13 @@ export default function Layout({ children, currentPageName }) {
             </button>
 
             {/* Logo - Always clickable to home */}
-            <Link to={createPageUrl('Home')} className="flex items-center gap-1 sm:gap-2">
+            <Link to={createPageUrl('Home')} className="flex items-center gap-1 sm:gap-2" onClick={handleLogoClick}>
               <span className="text-xl sm:text-2xl">🚪</span>
-              <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400 text-sm sm:text-base">
-                THE BACKROOMS
+              <span
+                className="text-sm sm:text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 italic"
+                style={{ fontFamily: '"Brush Script MT", "Pacifico", cursive' }}
+              >
+                The Backrooms
               </span>
             </Link>
 
@@ -307,87 +356,54 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Footer */}
       {currentUser && currentPageName !== 'Admin' && (
-        <footer className="bg-slate-900/50 border-t border-slate-800/50 py-8 mt-12">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <footer className="bg-slate-900/50 border-t border-slate-800/50 py-10 mt-12">
+          <div className="max-w-7xl mx-auto px-4 space-y-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="space-y-3">
+                <h3 className="text-white font-bold text-sm">The Backrooms</h3>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  A social casino vaulting tickets, VIP rewards, and high-limit thrills.
+                </p>
+                <button
+                  onClick={() => redeemEasterEgg('void_secret', 'Void Runner Bonus')}
+                  className="text-amber-300 text-xs underline hover:text-amber-200"
+                >
+                  Unlock the Void Runner bonus →
+                </button>
+              </div>
+
               <div>
-                <h3 className="text-white font-bold mb-3 text-sm">Legal</h3>
+                <h3 className="text-white font-bold mb-3 text-sm">Games & Vault</h3>
                 <div className="space-y-2">
-                  <Link to={createPageUrl('TermsOfUse')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    Terms of Use
-                  </Link>
-                  <Link to={createPageUrl('PrivacyPolicy')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    Privacy Policy
-                  </Link>
-                  <Link to={createPageUrl('GamblingDisclaimer')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    Gambling Disclaimer
-                  </Link>
-                  <Link to={createPageUrl('Jurisdiction')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    Jurisdiction
-                  </Link>
+                  <Link to={createPageUrl('GameGallery')} className="block text-slate-400 hover:text-white text-sm transition-colors">Game Gallery</Link>
+                  <Link to={createPageUrl('Wallet')} className="block text-slate-400 hover:text-white text-sm transition-colors">Wallet</Link>
+                  <Link to={createPageUrl('Vault')} className="block text-slate-400 hover:text-white text-sm transition-colors">Vault</Link>
+                  <Link to={createPageUrl('VaultTickets')} className="block text-slate-400 hover:text-white text-sm transition-colors">Vault Tickets</Link>
+                  <Link to={createPageUrl('Leaderboards')} className="block text-slate-400 hover:text-white text-sm transition-colors">Leaderboards</Link>
+                  <Link to={createPageUrl('GamePage') + '?slug=highroller_wheel'} className="block text-slate-400 hover:text-white text-sm transition-colors">High Limit Wheel</Link>
+                  <Link to={createPageUrl('GamePage') + '?slug=double_or_nothing_coin'} className="block text-slate-400 hover:text-white text-sm transition-colors">Coin Flip</Link>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-white font-bold mb-3 text-sm">Transparency</h3>
+                <h3 className="text-white font-bold mb-3 text-sm">Help & Learn</h3>
                 <div className="space-y-2">
-                  <Link to={createPageUrl('Fairness')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    Fairness & Integrity
-                  </Link>
-                  <Link to={createPageUrl('ResponsiblePlay')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    Responsible Play
-                  </Link>
-                  <Link to={createPageUrl('CryptoDisclosure')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    Crypto Disclosure
-                  </Link>
+                  <Link to={createPageUrl('HowToPlay')} className="block text-slate-400 hover:text-white text-sm transition-colors">How to Play</Link>
+                  <Link to={createPageUrl('HowBettingWorks')} className="block text-slate-400 hover:text-white text-sm transition-colors">How Betting Works</Link>
+                  <Link to={createPageUrl('Fairness')} className="block text-slate-400 hover:text-white text-sm transition-colors">Fairness & Integrity</Link>
+                  <Link to={createPageUrl('ResponsiblePlay')} className="block text-slate-400 hover:text-white text-sm transition-colors">Responsible Play</Link>
+                  <Link to={createPageUrl('Support')} className="block text-slate-400 hover:text-white text-sm transition-colors">Support</Link>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-white font-bold mb-3 text-sm">Help</h3>
+                <h3 className="text-white font-bold mb-3 text-sm">Compliance</h3>
                 <div className="space-y-2">
-                  <Link to={createPageUrl('HowToPlay')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    How to Play
-                  </Link>
-                  <Link to={createPageUrl('HowBettingWorks')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    How Betting Works
-                  </Link>
-                  <Link to={createPageUrl('Support')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                    Support
-                  </Link>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-white font-bold mb-3 text-sm">Platform</h3>
-                <div className="space-y-2">
-                  <Link to={createPageUrl('Home')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                      Home
-                    </Link>
-                    <Link to={createPageUrl('GameGallery')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                      Games
-                    </Link>
-                    <Link to={createPageUrl('Wallet')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                      Wallet
-                    </Link>
-                    <Link to={createPageUrl('Store')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                      Points Store
-                    </Link>
-                    <Link to={createPageUrl('BTCStore')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                      BTC Store
-                    </Link>
-                    <Link to={createPageUrl('Announcements')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                        Announcements
-                      </Link>
-                      <Link to={createPageUrl('LargeWinnings')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                        Large Winnings
-                      </Link>
-                      <Link to={createPageUrl('Leaderboards')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                        Leaderboards
-                      </Link>
-                      <Link to={createPageUrl('Settings')} className="block text-slate-400 hover:text-white text-sm transition-colors">
-                        Settings
-                      </Link>
+                  <Link to={createPageUrl('TermsOfUse')} className="block text-slate-400 hover:text-white text-sm transition-colors">Terms of Use</Link>
+                  <Link to={createPageUrl('PrivacyPolicy')} className="block text-slate-400 hover:text-white text-sm transition-colors">Privacy Policy</Link>
+                  <Link to={createPageUrl('GamblingDisclaimer')} className="block text-slate-400 hover:text-white text-sm transition-colors">Gambling Disclaimer</Link>
+                  <Link to={createPageUrl('Jurisdiction')} className="block text-slate-400 hover:text-white text-sm transition-colors">Jurisdiction</Link>
+                  <Link to={createPageUrl('CryptoDisclosure')} className="block text-slate-400 hover:text-white text-sm transition-colors">Crypto Disclosure</Link>
                 </div>
               </div>
             </div>

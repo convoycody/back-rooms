@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Loader2 } from 'lucide-react';
+import { soundManager } from './SoundManager';
 
 const SUITS = ['♠', '♥', '♦', '♣'];
 const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -116,13 +117,22 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
   const [isDealing, setIsDealing] = useState(false);
   const [fastMode, setFastMode] = useState(false);
 
-  const betOptions = [1, 5, 10, 25, 50, 100];
+  const betOptions = [10, 25, 50, 100, 250, 500];
+
+  useEffect(() => {
+    soundManager.ensureTone('bj-deal', 920, 160, 0.35);
+    soundManager.ensureTone('bj-hit', 1180, 120, 0.25);
+    soundManager.ensureTone('bj-stand', 640, 140, 0.2);
+    soundManager.ensureTone('bj-win', 1320, 220, 0.4);
+    soundManager.ensureTone('bj-loss', 320, 280, 0.35);
+  }, []);
 
   const playerValue = calculateHand(playerHand);
   const dealerValue = calculateHand(dealerHand);
   const dealerVisibleValue = dealerHand.length > 0 ? getCardValue(dealerHand[0].rank) : 0;
 
   const startGame = () => {
+    soundManager.play('bj-deal', 0.8);
     const newDeck = createDeck();
     const pHand = [newDeck.pop(), newDeck.pop()];
     const dHand = [newDeck.pop(), newDeck.pop()];
@@ -152,6 +162,7 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
   };
 
   const hit = () => {
+    soundManager.play('bj-hit', 0.7);
     const newCard = deck.pop();
     const newHand = [...playerHand, newCard];
     setPlayerHand(newHand);
@@ -166,6 +177,7 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
   };
 
   const stand = (currentHand = playerHand) => {
+    soundManager.play('bj-stand', 0.5);
     setGameState('dealerTurn');
     dealerPlay(currentHand);
   };
@@ -231,6 +243,14 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
         resultText = 'Dealer Wins';
         break;
     }
+
+    if (payout > betAmount) {
+      soundManager.play('bj-win', 1);
+    } else if (payout === betAmount) {
+      soundManager.play('bj-stand', 0.6);
+    } else {
+      soundManager.play('bj-loss', 0.9);
+    }
     
     setResult({ outcome, text: resultText, payout });
 
@@ -258,7 +278,8 @@ export default function BlackjackGame({ balance, onGameEnd, disabled }) {
   };
 
   return (
-    <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 lg:p-8 border border-emerald-500/20 shadow-2xl shadow-emerald-500/5 relative">
+    <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 lg:p-8 border border-emerald-500/20 shadow-2xl shadow-emerald-500/10 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.08),transparent_30%),radial-gradient(circle_at_80%_30%,rgba(59,130,246,0.06),transparent_25%)]" />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-2">
         <div className="flex-1">

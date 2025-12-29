@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
@@ -121,6 +121,41 @@ export default function GameGallery() {
     queryFn: () => base44.entities.Game.list('sort_order'),
   });
 
+  const curatedGames = useMemo(() => {
+    const wheelGameId = 'highroller_wheel';
+    const coinFlipId = 'double_or_nothing_coin';
+    const hasWheel = games.some(g => g.game_id === wheelGameId);
+    const hasCoinFlip = games.some(g => g.game_id === coinFlipId);
+
+    return [
+      ...games,
+      ...(!hasWheel ? [{
+        id: wheelGameId,
+        game_id: wheelGameId,
+        name: 'High Limit Spin Wheel',
+        icon: '🎡',
+        tagline: '6 wedges • risk tuned • min 10,000 pts',
+        featured: true,
+        enabled: true,
+        coming_soon: false,
+        component: 'SpinWheelGame',
+        sort_order: 2,
+      }] : []),
+      ...(!hasCoinFlip ? [{
+        id: coinFlipId,
+        game_id: coinFlipId,
+        name: 'Double or Nothing Coin Flip',
+        icon: '🪙',
+        tagline: 'Heads or tails with a free double-down after losses',
+        featured: true,
+        enabled: true,
+        coming_soon: false,
+        component: 'CoinFlipGame',
+        sort_order: 3,
+      }] : [])
+    ];
+  }, [games]);
+
   const handlePlayGame = (game) => {
     if (game.game_id === 'derby') {
       navigate(createPageUrl('DerbyLobby'));
@@ -129,9 +164,9 @@ export default function GameGallery() {
     }
   };
 
-  const featuredGames = games.filter(g => g.featured && g.enabled);
-  const availableGames = games.filter(g => !g.coming_soon && g.enabled);
-  const comingSoon = games.filter(g => g.coming_soon);
+  const featuredGames = curatedGames.filter(g => g.featured && g.enabled);
+  const availableGames = curatedGames.filter(g => !g.coming_soon && g.enabled);
+  const comingSoon = curatedGames.filter(g => g.coming_soon);
 
   if (userLoading || gamesLoading) {
     return (
@@ -193,7 +228,7 @@ export default function GameGallery() {
             </p>
             <p className="text-slate-400 text-xs mt-1">points</p>
             <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between">
-              <p className="text-slate-400 text-xs">XP: {player?.xp?.toLocaleString() || 0}</p>
+              <p className="text-slate-400 text-xs">VIP Points: {player?.vip_points?.toLocaleString() || 0}</p>
               {player?.vip_tier > 0 && (
                 <p className="text-purple-400 text-xs">VIP Tier {player.vip_tier}</p>
               )}
@@ -246,7 +281,10 @@ export default function GameGallery() {
           transition={{ delay: 0.4 }}
           className="mb-12"
         >
-          <h2 className="text-2xl font-black text-white mb-4">🎰 Vault Games</h2>
+          <h2 className="text-2xl font-black text-white mb-2">🎰 Vault Games</h2>
+          <p className="text-slate-400 text-sm mb-4">
+            Ticketed experiences that live in your vault. Pay with your spendable balance, store the tickets in your vault/wallet, and redeem winnings automatically.
+          </p>
           <div className="grid sm:grid-cols-2 gap-4">
             <button
               onClick={() => navigate(createPageUrl('FiftyFiftyPool'))}
@@ -254,7 +292,7 @@ export default function GameGallery() {
             >
               <span className="text-4xl mb-3 block">🎯</span>
               <h3 className="text-white font-bold mb-1">50/50 Pool</h3>
-              <p className="text-slate-400 text-sm">Win 50% of the total pot</p>
+              <p className="text-slate-400 text-sm">Win 50% of the total pot with vault-stored tickets</p>
             </button>
 
             <button
@@ -263,7 +301,7 @@ export default function GameGallery() {
             >
               <span className="text-4xl mb-3 block">🎱</span>
               <h3 className="text-white font-bold mb-1">Numbers Lottery</h3>
-              <p className="text-slate-400 text-sm">Pick numbers, win big prizes</p>
+              <p className="text-slate-400 text-sm">Pick numbers, store tickets safely, claim from your vault</p>
             </button>
           </div>
         </motion.div>

@@ -65,6 +65,32 @@ class SoundManager {
   setVolume(volume) {
     this.volume = Math.max(0, Math.min(1, volume));
   }
+
+  ensureTone(key, frequency = 880, durationMs = 180, volume = 0.3) {
+    if (this.sounds[key]) return;
+    if (!this.initialized) this.init();
+    if (!this.context) return;
+
+    const sampleRate = this.context.sampleRate || 44100;
+    const frameCount = Math.floor((durationMs / 1000) * sampleRate);
+    const buffer = this.context.createBuffer(1, frameCount, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < frameCount; i += 1) {
+      const envelope = 1 - i / frameCount;
+      data[i] = Math.sin((2 * Math.PI * frequency * i) / sampleRate) * envelope * volume;
+    }
+
+    this.sounds[key] = buffer;
+  }
+
+  safePlay(key, volume = 1) {
+    try {
+      this.play(key, volume);
+    } catch (err) {
+      console.warn('Sound play skipped', err);
+    }
+  }
 }
 
 // Singleton instance

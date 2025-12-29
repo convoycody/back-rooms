@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import Admin from './pages/Admin';
 import AnnouncementDetail from './pages/AnnouncementDetail';
 import Announcements from './pages/Announcements';
@@ -14,11 +15,8 @@ import DerbyStable from './pages/DerbyStable';
 import DevOpsTest from './pages/DevOpsTest';
 import Fairness from './pages/Fairness';
 import FiftyFiftyAdmin from './pages/FiftyFiftyAdmin';
-import FiftyFiftyPool from './pages/FiftyFiftyPool';
 import FiftyFiftyShare from './pages/FiftyFiftyShare';
 import GamblingDisclaimer from './pages/GamblingDisclaimer';
-import GameGallery from './pages/GameGallery';
-import GamePage from './pages/GamePage';
 import GameSettings from './pages/GameSettings';
 import GameStandards from './pages/GameStandards';
 import Home from './pages/Home';
@@ -29,10 +27,8 @@ import Jurisdiction from './pages/Jurisdiction';
 import LargeWinnings from './pages/LargeWinnings';
 import Leaderboards from './pages/Leaderboards';
 import Moderation from './pages/Moderation';
-import NumbersLottery from './pages/NumbersLottery';
 import NumbersLotteryAdmin from './pages/NumbersLotteryAdmin';
 import NumbersLotteryShare from './pages/NumbersLotteryShare';
-import PlayGame from './pages/PlayGame';
 import PlayerProfile from './pages/PlayerProfile';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Receipt from './pages/Receipt';
@@ -44,13 +40,19 @@ import Support from './pages/Support';
 import TermsOfUse from './pages/TermsOfUse';
 import UserProfile from './pages/UserProfile';
 import VIPStatus from './pages/VIPStatus';
-import Vault from './pages/Vault';
 import VaultGamesAdmin from './pages/VaultGamesAdmin';
 import VaultTickets from './pages/VaultTickets';
-import Wallet from './pages/Wallet';
 import ErrorLogs from './pages/ErrorLogs';
 import SlotsBreakdown from './pages/SlotsBreakdown';
 import __Layout from './Layout.jsx';
+
+const GameGallery = lazy(() => import('./pages/GameGallery'));
+const GamePage = lazy(() => import('./pages/GamePage'));
+const PlayGame = lazy(() => import('./pages/PlayGame'));
+const Wallet = lazy(() => import('./pages/Wallet'));
+const Vault = lazy(() => import('./pages/Vault'));
+const NumbersLottery = lazy(() => import('./pages/NumbersLottery'));
+const FiftyFiftyPool = lazy(() => import('./pages/FiftyFiftyPool'));
 
 
 export const PAGES = {

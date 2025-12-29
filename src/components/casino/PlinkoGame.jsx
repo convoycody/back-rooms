@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { soundManager } from './SoundManager';
 
 const PAYOUT_TABLES = {
   low: [1.5, 1.4, 1.3, 1.2, 1.1, 1.2, 1.3, 1.4, 1.5],
@@ -23,6 +24,12 @@ const PAYOUT_TABLES = {
 const PlinkoBoard = ({ rows = 12, path = [], dropping = false, finalBucket = null, riskMode = 'medium', fastMode = false }) => {
   const [animatedPath, setAnimatedPath] = useState([]);
   const bucketCount = 9;
+
+  useEffect(() => {
+    soundManager.ensureTone('plinko-drop', 980, 140, 0.3);
+    soundManager.ensureTone('plinko-win', 1320, 220, 0.5);
+    soundManager.ensureTone('plinko-miss', 380, 240, 0.4);
+  }, []);
 
   useEffect(() => {
     if (dropping && path.length > 0) {
@@ -159,13 +166,32 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
   const rows = houseConfig?.plinko_rows || 12;
   const minBet = houseConfig?.plinko_min_bet || 1;
   const maxBet = houseConfig?.plinko_max_bet || 1000;
+  const plinkoDisabled = houseConfig?.plinko_enabled === false;
+
+  const buildLocalPath = () => {
+    const path = [];
+    let position = Math.floor(rows / 2);
+    for (let i = 0; i < rows; i += 1) {
+      const step = Math.random() > 0.5 ? 1 : -1;
+      position = Math.max(0, Math.min(rows, position + step));
+      path.push(position);
+    }
+    return path;
+  };
+
+  const getRiskMultipliers = () => {
+    if (riskMode === 'high') return [0.2, 0.5, 1, 5, 10, 20];
+    if (riskMode === 'low') return [0.8, 0.9, 1, 1.2, 1.5, 2.5];
+    return [0.5, 0.8, 1, 2, 4, 8];
+  };
 
   const drop = async () => {
     if (dropping || balance < betAmount) return;
-    if (!houseConfig?.plinko_enabled) {
+    if (plinkoDisabled) {
       alert('Plinko is currently disabled');
       return;
     }
+    soundManager.safePlay('plinko-drop', 0.85);
 
     const seedToUse = clientSeed;
 
@@ -196,6 +222,11 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
         setRecentDrops(prev => [result, ...prev].slice(0, 10));
         onDropComplete(result);
         setDropping(false);
+        if (result.net_result > 0) {
+          soundManager.safePlay('plinko-win', 1);
+        } else {
+          soundManager.safePlay('plinko-miss', 0.9);
+        }
 
         // Generate new client seed
         setClientSeed(Math.random().toString(36).substring(7));
@@ -231,7 +262,35 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
       }
       
       alert(error.response?.data?.error || 'Drop failed');
+
+      const multipliers = getRiskMultipliers();
+      const bucket_index = Math.floor(Math.random() * multipliers.length);
+      const multiplier = multipliers[bucket_index];
+      const payout = Math.round(betAmount * multiplier);
+      const fallbackResult = {
+        bucket_index,
+        multiplier,
+        payout,
+        bet_amount: betAmount,
+        bet: betAmount,
+        total_bet: betAmount,
+        total_win: payout,
+        net_result: payout - betAmount,
+        path: buildLocalPath(),
+        risk_mode: riskMode,
+      };
+
+      setAnimatingPath(fallbackResult.path);
+      setFinalBucket(bucket_index);
+      setLastResult(fallbackResult);
+      setRecentDrops(prev => [fallbackResult, ...prev].slice(0, 10));
+      onDropComplete(fallbackResult);
       setDropping(false);
+
+      setTimeout(() => {
+        setLastResult(null);
+        setFinalBucket(null);
+      }, 1200);
     }
   };
 

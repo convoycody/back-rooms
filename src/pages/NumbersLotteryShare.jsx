@@ -137,7 +137,7 @@ export default function NumbersLotteryShare() {
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">2</div>
                   <div>
                     <p className="text-white font-semibold">Buy Your Ticket</p>
-                    <p className="text-slate-400 text-sm">Each ticket costs {config.ticket_price?.toLocaleString()} points from your vault</p>
+                    <p className="text-slate-400 text-sm">Each ticket costs {config.ticket_price?.toLocaleString()} points and lives in your vault wallet</p>
                   </div>
                 </div>
                 <div className="flex gap-4">

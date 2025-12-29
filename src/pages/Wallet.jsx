@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, ArrowLeft, Wallet as WalletIcon, Clock } from 'lucide-react';
+import { Loader2, ArrowLeft, Wallet as WalletIcon, Clock, Landmark, ShieldCheck, LineChart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import moment from 'moment';
 import DailyBonusCard from '@/components/casino/DailyBonusCard';
@@ -33,6 +33,7 @@ export default function Wallet() {
     queryKey: ['ledger', player?.id],
     queryFn: () => base44.entities.Ledger.filter({ player_id: player.id }, '-created_date', 50),
     enabled: !!player,
+    staleTime: 30 * 1000,
   });
 
   const { data: vaultConfig } = useQuery({
@@ -41,6 +42,7 @@ export default function Wallet() {
       const configs = await base44.entities.VaultConfig.list();
       return configs[0] || null;
     },
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: vaultTransactions = [] } = useQuery({
@@ -52,7 +54,39 @@ export default function Wallet() {
   const { data: noonDropHistory = [] } = useQuery({
     queryKey: ['noonDropHistory'],
     queryFn: () => base44.entities.NoonDropDraw.filter({ status: 'executed' }, '-draw_time', 10),
+    staleTime: 60 * 1000,
   });
+
+  const { data: myTickets = [] } = useQuery({
+    queryKey: ['walletTickets', player?.id],
+    queryFn: () => base44.entities.Ticket.filter({ player_id: player.id }),
+    enabled: !!player,
+  });
+
+  const {
+    vaultBalance,
+    spendableBalance,
+    interestRate,
+    estimatedDailyInterest,
+    estimatedMonthlyInterest,
+    activeTickets,
+    winningTickets
+  } = useMemo(() => {
+    const vault = player?.vault_points || 0;
+    const spendable = player?.points_balance || 0;
+    const rate = vaultConfig?.interest_rate_percentage || 0;
+    const active = myTickets.filter(t => t.status === 'active');
+    const winners = myTickets.filter(t => t.is_winner);
+    return {
+      vaultBalance: vault,
+      spendableBalance: spendable,
+      interestRate: rate,
+      estimatedDailyInterest: Math.round((vault * rate) / 100 / 365),
+      estimatedMonthlyInterest: Math.round((vault * rate) / 100 / 12),
+      activeTickets: active,
+      winningTickets: winners
+    };
+  }, [player?.vault_points, player?.points_balance, vaultConfig?.interest_rate_percentage, myTickets]);
 
   if (isLoading || !player) {
     return (
@@ -85,9 +119,9 @@ export default function Wallet() {
       reason: vt.transaction_type === 'deposit' ? 'vault_deposit' : 
               vt.transaction_type === 'withdraw' ? 'vault_withdraw' : 
               vt.transaction_type,
-      change: vt.transaction_type === 'deposit' ? 0 : 0, // Show as neutral for vault moves
-      balance_after: vt.spendable_balance_after,
-      note: vt.note,
+      change: vt.transaction_type === 'withdraw' ? vt.amount : -vt.amount,
+      balance_after: vt.spendable_balance_after ?? (vt.transaction_type === 'withdraw' ? spendableBalance + vt.amount : Math.max(spendableBalance - vt.amount, 0)),
+      note: vt.note || 'Vault transfer recorded',
       source: 'vault',
       vault_amount: vt.amount
     }))
@@ -112,7 +146,7 @@ export default function Wallet() {
           <h1 className="text-4xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
             💰 Wallet
           </h1>
-          <p className="text-slate-400 mt-2">Manage your balance and view transaction history</p>
+          <p className="text-slate-400 mt-2">Manage spendable funds, vault interest, ticket storage, and banking activity.</p>
         </div>
 
         {/* Balance Overview */}
@@ -156,6 +190,69 @@ export default function Wallet() {
           />
         </div>
 
+        {/* Banking & Interest */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="grid md:grid-cols-2 gap-4 mb-8"
+        >
+          <Card className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border-purple-700/40">
+            <CardContent className="p-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-slate-400 text-xs uppercase tracking-wide">Vault Interest</p>
+                  <p className="text-3xl font-black text-purple-200">{interestRate ? `${interestRate}% APY` : 'Interest ready'}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                  <LineChart className="w-6 h-6 text-purple-300" />
+                </div>
+              </div>
+              <p className="text-slate-300 text-sm">
+                Earning interest on {vaultBalance.toLocaleString()} vault pts. Estimated daily: {estimatedDailyInterest.toLocaleString()} pts • Monthly: {estimatedMonthlyInterest.toLocaleString()} pts.
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
+                <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800/60">
+                  <p className="text-white font-semibold text-sm">{vaultBalance.toLocaleString()} pts</p>
+                  <p className="text-slate-500 mt-1">Vault principal</p>
+                </div>
+                <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800/60">
+                  <p className="text-white font-semibold text-sm">{spendableBalance.toLocaleString()} pts</p>
+                  <p className="text-slate-500 mt-1">Spendable</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-slate-900/60 to-slate-950/70 border-slate-800/70">
+            <CardContent className="p-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-slate-400 text-xs uppercase tracking-wide">Advanced Banking</p>
+                  <p className="text-xl font-black text-white">Ticket-safe controls</p>
+                </div>
+                <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                  <Landmark className="w-6 h-6 text-amber-300" />
+                </div>
+              </div>
+              <div className="space-y-2 text-sm text-slate-300">
+                <div className="flex items-start gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-300 mt-0.5" />
+                  <p>Auto-sweep points from spendable into the vault when buying tickets.</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-300 mt-0.5" />
+                  <p>Tickets live in your vault wallet; view winners and redemptions in one place.</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-300 mt-0.5" />
+                  <p>Banking timeline synced to ledger + vault movements for audit-ready reporting.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Bonus Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -197,10 +294,11 @@ export default function Wallet() {
                 </Link>
               </div>
               <div className="text-center py-4">
-                <p className="text-slate-500 text-sm mb-3">No active tickets</p>
+                <p className="text-slate-300 text-sm mb-1">{activeTickets.length} active • {winningTickets.length} wins • {myTickets.length} stored</p>
+                <p className="text-slate-500 text-xs mb-2">Tickets sit in your vault + wallet for quick claiming.</p>
                 <a href={createPageUrl('GameGallery') + '#vault-games'}>
                   <Button variant="outline" size="sm" className="border-purple-600 text-purple-300 hover:bg-purple-500/10">
-                    🎰 Browse Vault Games
+                    🎰 Browse Ticketed Vault Games
                   </Button>
                 </a>
               </div>
@@ -307,12 +405,13 @@ export default function Wallet() {
                     <div className="text-right flex-shrink-0 ml-2">
                       {entry.source === 'vault' ? (
                         <>
-                          <p className={`font-bold text-sm sm:text-lg ${entry.vault_amount >= 0 ? 'text-purple-400' : 'text-purple-400'}`}>
-                            {entry.vault_amount >= 0 ? '→' : '←'} Vault
+                          <p className={`font-bold text-sm sm:text-lg ${entry.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {entry.change >= 0 ? '+' : ''}{entry.change.toLocaleString()} pts
                           </p>
-                          <p className="text-slate-500 text-xs">
-                            {Math.abs(entry.vault_amount).toLocaleString()} pts
+                          <p className="text-purple-300 text-xs">
+                            Vault: {entry.vault_amount >= 0 ? '→' : '←'} {Math.abs(entry.vault_amount).toLocaleString()} pts
                           </p>
+                          <p className="text-slate-500 text-xs">Spendable after: {entry.balance_after?.toLocaleString() || 0}</p>
                         </>
                       ) : (
                         <>

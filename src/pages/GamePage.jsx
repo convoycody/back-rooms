@@ -8,7 +8,10 @@ import GameShell from '@/components/game-shell/GameShell';
 import AdvancedSlotMachine from '@/components/casino/AdvancedSlotMachine';
 import BlackjackGame from '@/components/casino/BlackjackGame';
 import PlinkoGame from '@/components/casino/PlinkoGame';
+import CoinFlipGame from '@/components/casino/CoinFlipGame';
+import SpinWheelGame from '@/components/casino/SpinWheelGame';
 import LevelUpNotification from '@/components/LevelUpNotification';
+import { broadcastPlayerUpdate } from '@/lib/playerSync';
 
 import ScratchersGame from '@/components/games/ScratchersGame';
 
@@ -19,6 +22,12 @@ const GAME_COMPONENTS = {
   'BlackjackGame': BlackjackGame,
   'plinko': PlinkoGame,
   'PlinkoGame': PlinkoGame,
+  'coin-flip': CoinFlipGame,
+  'CoinFlipGame': CoinFlipGame,
+  'double_or_nothing_coin': CoinFlipGame,
+  'spin-wheel': SpinWheelGame,
+  'SpinWheelGame': SpinWheelGame,
+  'highroller_wheel': SpinWheelGame,
   'scratchers': ScratchersGame,
   'ScratchersGame': ScratchersGame,
   'derby': () => null // Derby handled by dedicated pages
@@ -134,9 +143,14 @@ export default function GamePage() {
       }
     } else if (gameSlug === 'plinko') {
       updates.plinko_drops = (player.plinko_drops || 0) + 1;
+    } else if (gameSlug === 'spin-wheel' || gameSlug === 'highroller_wheel' || gameSlug === 'SpinWheelGame') {
+      updates.wheel_spins = (player.wheel_spins || 0) + 1;
+    } else if (gameSlug === 'coin-flip' || gameSlug === 'CoinFlipGame' || gameSlug === 'double_or_nothing_coin') {
+      updates.coin_flips = (player.coin_flips || 0) + 1;
     }
 
     await updatePlayerMutation.mutateAsync({ playerId: player.id, updates });
+    broadcastPlayerUpdate({ reason: 'game-result', balance: newBalance });
 
     // Process progression through unified engine
     try {
@@ -242,7 +256,18 @@ export default function GamePage() {
         <GameComponent
           balance={player.points_balance}
           onSpinComplete={gameSlug?.startsWith('slots') ? handleGameResult : undefined}
-          onGameEnd={gameSlug?.startsWith('blackjack') || gameSlug?.startsWith('scratchers') ? handleGameResult : undefined}
+          onGameEnd={
+            gameSlug?.startsWith('blackjack') ||
+            gameSlug?.startsWith('scratchers') ||
+            gameSlug === 'spin-wheel' ||
+            gameSlug === 'highroller_wheel' ||
+            gameSlug === 'SpinWheelGame' ||
+            gameSlug === 'coin-flip' ||
+            gameSlug === 'CoinFlipGame' ||
+            gameSlug === 'double_or_nothing_coin'
+              ? handleGameResult
+              : undefined
+          }
           onDropComplete={gameSlug?.startsWith('plinko') ? handleGameResult : undefined}
           houseConfig={houseConfig}
         />

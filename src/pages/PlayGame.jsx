@@ -11,6 +11,8 @@ import LevelUpNotification from '@/components/LevelUpNotification';
 import AdvancedSlotMachine from '@/components/casino/AdvancedSlotMachine';
 import BlackjackGame from '@/components/casino/BlackjackGame';
 import PlinkoGame from '@/components/casino/PlinkoGame';
+import CoinFlipGame from '@/components/casino/CoinFlipGame';
+import SpinWheelGame from '@/components/casino/SpinWheelGame';
 
 export default function PlayGame() {
   const [lastChange, setLastChange] = useState(0);
@@ -311,6 +313,21 @@ export default function PlayGame() {
           <PlinkoGame
             balance={player?.points_balance || 0}
             onDropComplete={handlePlinkoComplete}
+            houseConfig={houseConfig}
+          />
+        );
+      case 'CoinFlipGame':
+        return (
+          <CoinFlipGame
+            balance={player?.points_balance || 0}
+            onGameEnd={handleBlackjackEnd}
+          />
+        );
+      case 'SpinWheelGame':
+        return (
+          <SpinWheelGame
+            balance={player?.points_balance || 0}
+            onGameEnd={handleBlackjackEnd}
             houseConfig={houseConfig}
           />
         );

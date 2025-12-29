@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
@@ -56,6 +56,15 @@ export default function Vault() {
     enabled: !!player,
   });
 
+  const { data: vaultConfig } = useQuery({
+    queryKey: ['vaultConfig'],
+    queryFn: async () => {
+      const configs = await base44.entities.VaultConfig.list();
+      return configs[0] || null;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const { data: myTickets = [] } = useQuery({
     queryKey: ['myTickets', player?.id],
     queryFn: () => base44.entities.Ticket.filter({ player_id: player.id }),
@@ -82,6 +91,27 @@ export default function Vault() {
       toast.error(error.response?.data?.error || 'Transaction failed');
     },
   });
+  const {
+    activeTickets,
+    wonTickets,
+    totalWinnings,
+    vaultBalance,
+    interestRate,
+    estimatedDailyInterest
+  } = useMemo(() => {
+    const active = myTickets.filter(t => t.status === 'active');
+    const winners = myTickets.filter(t => t.is_winner);
+    const balance = vaultAccount?.vault_balance || 0;
+    const rate = vaultConfig?.interest_rate_percentage || 0;
+    return {
+      activeTickets: active,
+      wonTickets: winners,
+      totalWinnings: winners.reduce((sum, t) => sum + (t.payout_amount || 0), 0),
+      vaultBalance: balance,
+      interestRate: rate,
+      estimatedDailyInterest: Math.round((balance * rate) / 100 / 365)
+    };
+  }, [myTickets, vaultAccount?.vault_balance, vaultConfig?.interest_rate_percentage]);
 
   if (userLoading) {
     return (
@@ -90,10 +120,6 @@ export default function Vault() {
       </div>
     );
   }
-
-  const activeTickets = myTickets.filter(t => t.status === 'active');
-  const wonTickets = myTickets.filter(t => t.is_winner);
-  const totalWinnings = wonTickets.reduce((sum, t) => sum + (t.payout_amount || 0), 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -113,7 +139,15 @@ export default function Vault() {
             <VaultIcon className="w-10 h-10 text-amber-500" />
             Vault
           </h1>
-          <p className="text-slate-400 mt-2">Secure your points and participate in draws</p>
+          <p className="text-slate-400 mt-2">Ticket vault, wallet, and banking controls in one place.</p>
+          <div className="flex flex-wrap gap-2 mt-3">
+            <Badge className="bg-purple-600 text-white">Tickets stored safely</Badge>
+            {interestRate ? (
+              <Badge className="bg-green-600 text-white">{interestRate}% APY live</Badge>
+            ) : (
+              <Badge variant="outline" className="border-slate-600 text-slate-200">Interest ready</Badge>
+            )}
+          </div>
         </motion.div>
 
         {/* Balance Cards */}
@@ -142,9 +176,12 @@ export default function Vault() {
               </CardHeader>
               <CardContent>
                 <p className="text-4xl font-black text-amber-400">
-                  {(vaultAccount?.vault_balance || 0).toLocaleString()}
+                  {vaultBalance.toLocaleString()}
                 </p>
                 <p className="text-slate-400 text-xs mt-1">locked for tickets</p>
+                {interestRate > 0 && (
+                  <p className="text-green-300 text-xs mt-2">~{estimatedDailyInterest.toLocaleString()} pts daily interest</p>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -188,7 +225,7 @@ export default function Vault() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-slate-400 text-sm">
-                    Move points from your spendable balance to your vault for buying tickets
+                    Move points from spendable into your vault safe to mint tickets and start earning interest.
                   </p>
                   <div className="space-y-2">
                     <Input
@@ -232,7 +269,7 @@ export default function Vault() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-slate-400 text-sm">
-                    Move points back to your spendable balance (unused ticket funds)
+                    Unlock points back to your spendable balance when you want to play instantly.
                   </p>
                   <div className="space-y-2">
                     <Input
@@ -245,10 +282,10 @@ export default function Vault() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setWithdrawAmount((vaultAccount?.vault_balance || 0).toString())}
+                      onClick={() => setWithdrawAmount(vaultBalance.toString())}
                       className="w-full border-slate-600"
                     >
-                      Max: {(vaultAccount?.vault_balance || 0).toLocaleString()}
+                      Max: {vaultBalance.toLocaleString()}
                     </Button>
                   </div>
                   <Button

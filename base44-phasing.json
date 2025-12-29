@@ -1,0 +1,5 @@
+{
+  "max_files_per_phase": 10,
+  "notes": "To keep Base44 chat responses stable, process changes in phases of <=10 files at a time.",
+  "recommendation": "Prefer incremental commits per phase with lint/test per batch to avoid oversized payloads."
+}
