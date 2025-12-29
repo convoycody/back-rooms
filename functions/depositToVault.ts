@@ -96,6 +96,17 @@ Deno.serve(async (req) => {
       note: `Vault deposit: ${amount} points`
     });
 
+    // Process progression for vault deposit
+    try {
+      await base44.asServiceRole.functions.invoke('processPlayerProgression', {
+        player_id: player.id,
+        event_type: 'vault_deposit',
+        event_data: { amount }
+      });
+    } catch (err) {
+      console.error('Progression processing failed:', err);
+    }
+
     return Response.json({
       success: true,
       spendable_balance: newSpendable,

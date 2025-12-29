@@ -73,6 +73,17 @@ Deno.serve(async (req) => {
         : `Daily bonus claimed for ${dayKey}`
     });
 
+    // Process progression for daily bonus
+    try {
+      await base44.asServiceRole.functions.invoke('processPlayerProgression', {
+        player_id: player.id,
+        event_type: 'daily_bonus_claimed',
+        event_data: { amount: bonusAmount }
+      });
+    } catch (err) {
+      console.error('Progression processing failed:', err);
+    }
+
     return Response.json({
       success: true,
       amount: bonusAmount,
