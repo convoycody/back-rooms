@@ -6,6 +6,8 @@ import BTCStore from './pages/BTCStore';
 import CryptoDisclosure from './pages/CryptoDisclosure';
 import DevOpsTest from './pages/DevOpsTest';
 import Fairness from './pages/Fairness';
+import FiftyFiftyPool from './pages/FiftyFiftyPool';
+import FiftyFiftyShare from './pages/FiftyFiftyShare';
 import GamblingDisclaimer from './pages/GamblingDisclaimer';
 import GameGallery from './pages/GameGallery';
 import GamePage from './pages/GamePage';
@@ -19,6 +21,8 @@ import Jurisdiction from './pages/Jurisdiction';
 import LargeWinnings from './pages/LargeWinnings';
 import Leaderboards from './pages/Leaderboards';
 import Moderation from './pages/Moderation';
+import NumbersLottery from './pages/NumbersLottery';
+import NumbersLotteryShare from './pages/NumbersLotteryShare';
 import PlayGame from './pages/PlayGame';
 import PlayerProfile from './pages/PlayerProfile';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -32,13 +36,11 @@ import TermsOfUse from './pages/TermsOfUse';
 import UserProfile from './pages/UserProfile';
 import VIPStatus from './pages/VIPStatus';
 import Vault from './pages/Vault';
-import Wallet from './pages/Wallet';
-import VaultTickets from './pages/VaultTickets';
-import FiftyFiftyPool from './pages/FiftyFiftyPool';
-import NumbersLottery from './pages/NumbersLottery';
 import VaultGamesAdmin from './pages/VaultGamesAdmin';
-import FiftyFiftyShare from './pages/FiftyFiftyShare';
-import NumbersLotteryShare from './pages/NumbersLotteryShare';
+import VaultTickets from './pages/VaultTickets';
+import Wallet from './pages/Wallet';
+import DerbyAdmin from './pages/DerbyAdmin';
+import DerbyLobby from './pages/DerbyLobby';
 import __Layout from './Layout.jsx';
 
 
@@ -51,6 +53,8 @@ export const PAGES = {
     "CryptoDisclosure": CryptoDisclosure,
     "DevOpsTest": DevOpsTest,
     "Fairness": Fairness,
+    "FiftyFiftyPool": FiftyFiftyPool,
+    "FiftyFiftyShare": FiftyFiftyShare,
     "GamblingDisclaimer": GamblingDisclaimer,
     "GameGallery": GameGallery,
     "GamePage": GamePage,
@@ -64,6 +68,8 @@ export const PAGES = {
     "LargeWinnings": LargeWinnings,
     "Leaderboards": Leaderboards,
     "Moderation": Moderation,
+    "NumbersLottery": NumbersLottery,
+    "NumbersLotteryShare": NumbersLotteryShare,
     "PlayGame": PlayGame,
     "PlayerProfile": PlayerProfile,
     "PrivacyPolicy": PrivacyPolicy,
@@ -77,13 +83,11 @@ export const PAGES = {
     "UserProfile": UserProfile,
     "VIPStatus": VIPStatus,
     "Vault": Vault,
-    "Wallet": Wallet,
-    "VaultTickets": VaultTickets,
-    "FiftyFiftyPool": FiftyFiftyPool,
-    "NumbersLottery": NumbersLottery,
     "VaultGamesAdmin": VaultGamesAdmin,
-    "FiftyFiftyShare": FiftyFiftyShare,
-    "NumbersLotteryShare": NumbersLotteryShare,
+    "VaultTickets": VaultTickets,
+    "Wallet": Wallet,
+    "DerbyAdmin": DerbyAdmin,
+    "DerbyLobby": DerbyLobby,
 }
 
 export const pagesConfig = {
