@@ -180,7 +180,7 @@ export default function Home() {
               <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between">
                 <div>
                   <p className="text-slate-400 text-xs">Level {player?.level || 1}</p>
-                  <p className="text-slate-500 text-xs">XP: {player?.xp?.toLocaleString() || 0}</p>
+                  <p className="text-purple-400 text-xs">{player?.vip_points?.toLocaleString() || 0} VIP pts</p>
                 </div>
                 {player?.vip_tier > 0 && (
                   <p className="text-purple-400 text-xs font-bold">VIP {player.vip_tier}</p>

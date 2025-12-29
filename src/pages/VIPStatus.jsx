@@ -245,21 +245,20 @@ export default function VIPStatus() {
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-slate-800/50 rounded-lg p-4">
                   <p className="text-slate-400 text-sm mb-1">Wager Points</p>
-                  <p className="text-white font-bold">10% of bet = XP</p>
-                  <p className="text-slate-500 text-xs mt-1">Bet 1000 pts = 100 XP</p>
+                  <p className="text-white font-bold">10% of bet</p>
+                  <p className="text-slate-500 text-xs mt-1">Bet 1000 pts = 100 VIP pts</p>
                 </div>
                 <div className="bg-slate-800/50 rounded-lg p-4">
-                  <p className="text-slate-400 text-sm mb-1">Win Bonus XP</p>
+                  <p className="text-slate-400 text-sm mb-1">Win Bonus</p>
                   <p className="text-white font-bold">5% of net win</p>
-                  <p className="text-slate-500 text-xs mt-1">Win 2000 net = 100 XP</p>
+                  <p className="text-slate-500 text-xs mt-1">Win 2000 net = 100 VIP pts</p>
                 </div>
                 <div className="bg-slate-800/50 rounded-lg p-4">
-                  <p className="text-slate-400 text-sm mb-1">Your Stats</p>
-                  <p className="text-white font-bold">{player.xp?.toLocaleString() || 0} XP</p>
-                  <p className="text-purple-400 text-xs mt-1">{player.vip_points?.toLocaleString() || 0} VIP Points</p>
+                  <p className="text-slate-400 text-sm mb-1">Your Progress</p>
+                  <p className="text-purple-400 font-bold text-xl">{player.vip_points?.toLocaleString() || 0}</p>
+                  <p className="text-slate-400 text-xs mt-1">VIP Points</p>
                 </div>
               </div>
-              <p className="text-amber-400 text-xs mt-4">💡 Note: XP and VIP Points are separate. VIP Points determine your tier and are earned through activity tracking.</p>
             </CardContent>
           </Card>
         </motion.div>
