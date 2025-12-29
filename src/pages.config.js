@@ -42,6 +42,8 @@ import Wallet from './pages/Wallet';
 import DerbyAdmin from './pages/DerbyAdmin';
 import DerbyLobby from './pages/DerbyLobby';
 import DerbyRace from './pages/DerbyRace';
+import DerbyStable from './pages/DerbyStable';
+import DerbyEnter from './pages/DerbyEnter';
 import __Layout from './Layout.jsx';
 
 
@@ -90,6 +92,8 @@ export const PAGES = {
     "DerbyAdmin": DerbyAdmin,
     "DerbyLobby": DerbyLobby,
     "DerbyRace": DerbyRace,
+    "DerbyStable": DerbyStable,
+    "DerbyEnter": DerbyEnter,
 }
 
 export const pagesConfig = {
