@@ -95,6 +95,11 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
               {vaultBalance.toLocaleString()}
             </p>
             <p className="text-slate-400 text-sm mt-1">points locked in vault</p>
+            {config?.interest_rate_percentage > 0 && (
+              <p className="text-green-400 text-xs mt-2 flex items-center gap-1">
+                📈 Earning {config.interest_rate_percentage}% APY
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">

@@ -76,7 +76,8 @@ export default function NumbersLotteryAdmin() {
               </div>
 
               <div>
-                <Label>Ticket Price (vault points)</Label>
+                <Label className="text-slate-300">Ticket Price (vault points)</Label>
+                <p className="text-slate-500 text-xs mb-2">Cost per ticket. Higher price = bigger prizes. Recommended: 2000</p>
                 <Input
                   type="number"
                   value={config?.ticket_price ?? 2000}
@@ -178,7 +179,8 @@ export default function NumbersLotteryAdmin() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>5 Main + Power (%)</Label>
+                <Label className="text-slate-300">5 Main + Power (%)</Label>
+                <p className="text-slate-500 text-xs mb-2">Jackpot tier - matching all numbers. Should be highest. Default: 50%</p>
                 <Input
                   type="number"
                   value={config?.payout_tier_5_match_percentage ?? 50}
@@ -187,7 +189,8 @@ export default function NumbersLotteryAdmin() {
                 />
               </div>
               <div>
-                <Label>5 Main (%)</Label>
+                <Label className="text-slate-300">5 Main (%)</Label>
+                <p className="text-slate-500 text-xs mb-2">Second tier - all main numbers only. Default: 10%</p>
                 <Input
                   type="number"
                   value={config?.payout_tier_5_percentage ?? 10}
@@ -196,7 +199,8 @@ export default function NumbersLotteryAdmin() {
                 />
               </div>
               <div>
-                <Label>4 Main + Power (%)</Label>
+                <Label className="text-slate-300">4 Main + Power (%)</Label>
+                <p className="text-slate-500 text-xs mb-2">Third tier - 4 main plus power. Default: 5%</p>
                 <Input
                   type="number"
                   value={config?.payout_tier_4_power_percentage ?? 5}
@@ -205,7 +209,8 @@ export default function NumbersLotteryAdmin() {
                 />
               </div>
               <div>
-                <Label>4 Main (%)</Label>
+                <Label className="text-slate-300">4 Main (%)</Label>
+                <p className="text-slate-500 text-xs mb-2">Fourth tier - 4 main numbers only. Default: 3%</p>
                 <Input
                   type="number"
                   value={config?.payout_tier_4_percentage ?? 3}
@@ -214,7 +219,8 @@ export default function NumbersLotteryAdmin() {
                 />
               </div>
               <div>
-                <Label>3 Main + Power (%)</Label>
+                <Label className="text-slate-300">3 Main + Power (%)</Label>
+                <p className="text-slate-500 text-xs mb-2">Fifth tier - 3 main plus power. Most common win. Default: 2%</p>
                 <Input
                   type="number"
                   value={config?.payout_tier_3_power_percentage ?? 2}
@@ -222,6 +228,7 @@ export default function NumbersLotteryAdmin() {
                   className="bg-slate-800 border-slate-700 text-white"
                 />
               </div>
+              <p className="text-amber-400 text-xs pt-2 border-t border-slate-700">💡 Tip: Total percentages should add up to less than 100%. Remaining goes to house/rollover.</p>
             </CardContent>
           </Card>
 
@@ -232,7 +239,10 @@ export default function NumbersLotteryAdmin() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label>Enable Rollover</Label>
+                <div>
+                  <Label className="text-slate-300">Enable Rollover</Label>
+                  <p className="text-slate-500 text-xs">If no jackpot winner, prize rolls to next draw. Creates excitement!</p>
+                </div>
                 <Switch
                   checked={config?.rollover_enabled ?? true}
                   onCheckedChange={(val) => updateConfigMutation.mutate({ ...config, rollover_enabled: val })}
@@ -240,7 +250,8 @@ export default function NumbersLotteryAdmin() {
               </div>
 
               <div>
-                <Label>Max Payout Cap (0 = no cap)</Label>
+                <Label className="text-slate-300">Max Payout Cap (0 = no cap)</Label>
+                <p className="text-slate-500 text-xs mb-2">Maximum total payout per draw. Set 0 for unlimited. Use to manage risk.</p>
                 <Input
                   type="number"
                   value={config?.max_payout_cap ?? 0}

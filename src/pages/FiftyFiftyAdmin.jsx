@@ -76,7 +76,8 @@ export default function FiftyFiftyAdmin() {
               </div>
 
               <div>
-                <Label>Ticket Price (vault points)</Label>
+                <Label className="text-slate-300">Ticket Price (vault points)</Label>
+                <p className="text-slate-500 text-xs mb-2">Cost per entry. Players pay from vault balance.</p>
                 <Input
                   type="number"
                   value={config?.ticket_price ?? 1000}
@@ -111,7 +112,8 @@ export default function FiftyFiftyAdmin() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Sales Cutoff Hour (0-23)</Label>
+                <Label className="text-slate-300">Sales Cutoff Hour (0-23)</Label>
+                <p className="text-slate-500 text-xs mb-2">When ticket sales close (Eastern Time). Example: 20 = 8:00 PM ET</p>
                 <Input
                   type="number"
                   value={config?.cutoff_hour_et ?? 20}
@@ -121,7 +123,8 @@ export default function FiftyFiftyAdmin() {
               </div>
 
               <div>
-                <Label>Draw Execution Hour (0-23)</Label>
+                <Label className="text-slate-300">Draw Execution Hour (0-23)</Label>
+                <p className="text-slate-500 text-xs mb-2">When winner is drawn (Eastern Time). Should be after cutoff. Example: 21 = 9:00 PM ET</p>
                 <Input
                   type="number"
                   value={config?.draw_hour_et ?? 21}
@@ -139,7 +142,8 @@ export default function FiftyFiftyAdmin() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Min Pool Size (tickets to execute)</Label>
+                <Label className="text-slate-300">Min Pool Size (tickets to execute)</Label>
+                <p className="text-slate-500 text-xs mb-2">Minimum tickets needed to run draw. If not met, all tickets refunded automatically.</p>
                 <Input
                   type="number"
                   value={config?.min_pool_size ?? 5}
@@ -149,7 +153,8 @@ export default function FiftyFiftyAdmin() {
               </div>
 
               <div>
-                <Label>Max Tickets Per Player Per Draw</Label>
+                <Label className="text-slate-300">Max Tickets Per Player Per Draw</Label>
+                <p className="text-slate-500 text-xs mb-2">Prevents single player from dominating the pool. Recommended: 100</p>
                 <Input
                   type="number"
                   value={config?.max_tickets_per_player_per_draw ?? 100}
@@ -159,7 +164,8 @@ export default function FiftyFiftyAdmin() {
               </div>
 
               <div>
-                <Label>Min Account Age (days)</Label>
+                <Label className="text-slate-300">Min Account Age (days)</Label>
+                <p className="text-slate-500 text-xs mb-2">Account must be this old to participate. Prevents multi-accounting. Set 0 to disable.</p>
                 <Input
                   type="number"
                   value={config?.min_account_age_days ?? 1}
@@ -169,7 +175,8 @@ export default function FiftyFiftyAdmin() {
               </div>
 
               <div>
-                <Label>Max Pool Payout Cap (0 = no cap)</Label>
+                <Label className="text-slate-300">Max Pool Payout Cap (0 = no cap)</Label>
+                <p className="text-slate-500 text-xs mb-2">Maximum winner payout per draw. Set 0 for unlimited. Use to control risk.</p>
                 <Input
                   type="number"
                   value={config?.max_pool_payout_cap ?? 0}
@@ -179,7 +186,8 @@ export default function FiftyFiftyAdmin() {
               </div>
 
               <div>
-                <Label>Announcement Threshold (min win to announce)</Label>
+                <Label className="text-slate-300">Announcement Threshold (min win to announce)</Label>
+                <p className="text-slate-500 text-xs mb-2">Minimum win amount to create public announcement. Promotes big wins.</p>
                 <Input
                   type="number"
                   value={config?.announcement_threshold ?? 10000}
@@ -197,7 +205,8 @@ export default function FiftyFiftyAdmin() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>House 50% Goes To</Label>
+                <Label className="text-slate-300">House 50% Goes To</Label>
+                <p className="text-slate-500 text-xs mb-2">What happens to the platform's 50% cut. Reserve = keeps, Burn = removes from economy, Jackpot = adds to future pools.</p>
                 <Select
                   value={config?.house_allocation ?? 'reserve'}
                   onValueChange={(val) => updateConfigMutation.mutate({ ...config, house_allocation: val })}

@@ -215,14 +215,14 @@ export default function DerbyAdmin() {
                 </div>
 
                 <div>
-                  <Label className="text-slate-400">Minimum Pool Size</Label>
+                  <Label className="text-slate-400">Minimum Pool Size (Total Betting Pool)</Label>
+                  <p className="text-slate-500 text-xs mb-2">Minimum combined betting pool (Win + Place + Show) needed to complete race. Prevents manipulation in low-bet scenarios. Set 0 to disable. Recommended: 1000+</p>
                   <Input
                     type="number"
                     value={config?.min_pool_size || 0}
                     onChange={(e) => updateConfigMutation.mutate({ ...config, min_pool_size: parseInt(e.target.value) })}
                     className="bg-slate-800 border-slate-700 text-white"
                   />
-                  <p className="text-slate-500 text-xs mt-1">Minimum total betting pool to run race (0 = no minimum, prevents low-pool manipulation)</p>
                 </div>
               </CardContent>
             </Card>

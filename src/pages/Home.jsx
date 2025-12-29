@@ -177,10 +177,13 @@ export default function Home() {
                 {player?.points_balance?.toLocaleString() || 0}
               </p>
               <p className="text-slate-400 text-xs mt-1">points</p>
-              <div className="mt-3 pt-3 border-t border-slate-800">
-                <p className="text-slate-400 text-xs">XP: {player?.xp?.toLocaleString() || 0}</p>
+              <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between">
+                <div>
+                  <p className="text-slate-400 text-xs">Level {player?.level || 1}</p>
+                  <p className="text-slate-500 text-xs">XP: {player?.xp?.toLocaleString() || 0}</p>
+                </div>
                 {player?.vip_tier > 0 && (
-                  <p className="text-purple-400 text-xs mt-1">VIP Tier {player.vip_tier}</p>
+                  <p className="text-purple-400 text-xs font-bold">VIP {player.vip_tier}</p>
                 )}
               </div>
             </div>
