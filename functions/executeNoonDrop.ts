@@ -1,9 +1,9 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createPlatformClient } from './_shared/platformClient.ts';
 import * as crypto from 'node:crypto';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
+    const base44 = createPlatformClient(req);
     const user = await base44.auth.me();
     
     if (!user) {
@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
         day: '2-digit'
       }).format(now).split('/').reverse().join('-').replace(/(\d{4})-(\d{2})-(\d{2})/, '$1-$3-$2');
       
-      const base44 = createClientFromRequest(req);
+      const base44 = createPlatformClient(req);
       await base44.asServiceRole.entities.NoonDropDraw.create({
         draw_date: etDateStr,
         draw_time: now.toISOString(),

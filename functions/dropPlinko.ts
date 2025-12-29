@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createPlatformClient } from './_shared/platformClient.ts';
 import * as crypto from 'node:crypto';
 
 // Payout multipliers for each risk mode (9 buckets)
@@ -35,7 +35,7 @@ function calculateBucket(path) {
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
+    const base44 = createPlatformClient(req);
     const user = await base44.auth.me();
     
     if (!user) {

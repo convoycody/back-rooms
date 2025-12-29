@@ -1,17 +1,21 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { requireServiceAuth } from './_shared/auth.ts';
+import { resolveAppIdentity, sendDevOpsEvent } from './_shared/devopsClient.ts';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
+    const auth = requireServiceAuth(req);
+    if (!auth.ok) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const { 
-      app_name, 
-      app_id, 
-      error_message, 
-      error_stack, 
-      severity, 
-      user_affected, 
-      metadata 
+      app_name,
+      app_id,
+      error_message,
+      error_stack,
+      severity,
+      user_affected,
+      metadata,
     } = await req.json();
 
     // Log the error
@@ -25,6 +29,21 @@ Deno.serve(async (req) => {
       metadata,
       timestamp: new Date().toISOString()
     });
+
+    // Forward to DevOps hub
+    const { appId, appName } = resolveAppIdentity(app_id, app_name);
+    const devOpsPayload = {
+      app_id: appId,
+      app_name: appName,
+      error_message,
+      error_stack,
+      severity: severity || 'unknown',
+      user_affected,
+      metadata: metadata || {},
+      timestamp: new Date().toISOString(),
+    };
+
+    await sendDevOpsEvent('/api/functions/webhooks/appError', devOpsPayload);
 
     return Response.json({ 
       success: true,

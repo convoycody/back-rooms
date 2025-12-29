@@ -1,9 +1,12 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { requireServiceAuth } from './_shared/auth.ts';
+import { resolveAppIdentity, sendDevOpsEvent } from './_shared/devopsClient.ts';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me().catch(() => null);
+    const auth = requireServiceAuth(req, { allowAnonymous: true });
+    if (!auth.ok) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const { 
       error_type, 
@@ -17,37 +20,23 @@ Deno.serve(async (req) => {
     // Generate unique error ID
     const errorId = `ERR-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-    // Get player info if user exists
-    let playerId = null;
-    if (user) {
-      const players = await base44.asServiceRole.entities.Player.filter({ created_by: user.email });
-      if (players.length > 0) {
-        playerId = players[0].id;
-      }
-    }
-
-    // Log error to database
-    await base44.asServiceRole.entities.ErrorLog.create({
-      error_id: errorId,
-      error_type: error_type || 'other',
-      user_email: user?.email || 'anonymous',
-      player_id: playerId,
+    // Forward to DevOps hub
+    const { appId, appName } = resolveAppIdentity();
+    const devOpsPayload = {
+      app_id: appId,
+      app_name: appName,
+      error_type,
+      error_message,
+      error_stack,
       page_url: page_url || 'unknown',
       game_slug: game_slug || null,
-      error_message: error_message || 'Unknown error',
-      error_stack: error_stack || '',
-      user_agent: req.headers.get('user-agent') || 'unknown',
       additional_data: additional_data || {},
-      status: 'new'
-    });
+      player_id: null,
+      user_email: 'anonymous',
+      timestamp: new Date().toISOString(),
+    };
 
-    console.error(`[ERROR ${errorId}]`, {
-      type: error_type,
-      message: error_message,
-      user: user?.email,
-      game: game_slug,
-      stack: error_stack
-    });
+    await sendDevOpsEvent('/api/functions/webhooks/appError', devOpsPayload);
 
     return Response.json({
       success: true,

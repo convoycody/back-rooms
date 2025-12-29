@@ -11,6 +11,7 @@ import { Loader2, Users, Coins, RefreshCw, Plus, Minus, Gift, Shield, ArrowLeft,
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function Admin() {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState('');
   const queryClient = useQueryClient();
+  const [verifyingBadge, setVerifyingBadge] = useState(false);
 
   const { isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
@@ -108,6 +110,36 @@ export default function Admin() {
     setShowResetDialog(false);
     setResetConfirmText('');
     toast.success('All balances reset to 1000');
+  };
+
+  const integrationChecks = [
+    { name: 'Auth API', key: 'auth', status: 'needs-live-service', description: 'Ensure /auth/me, /auth/login, /auth/logout are reachable.' },
+    { name: 'Ledger & Wallet', key: 'ledger', status: 'needs-live-service', description: 'Ledger is source of truth; wallet deposit/withdraw endpoints must exist.' },
+    { name: 'RNG/Provable Fairness', key: 'rng', status: 'pending', description: 'Provide /rng/seed and /rng/verify for provable results.' },
+    { name: 'Audit & Telemetry', key: 'audit', status: 'wired', description: 'Functions forward to DevOps; ensure SERVICE_API_KEY + webhooks are configured.' },
+    { name: 'DevOps Badge', key: 'badge', status: 'manual', description: 'Badge verification endpoint required; see Docs/Integrations.' },
+  ];
+
+  const envVars = [
+    'VITE_API_BASE_URL',
+    'VITE_AUTH_LOGIN_URL',
+    'VITE_AUTH_LOGOUT_URL',
+    'VITE_SERVICE_API_KEY',
+    'DEVOPS_BASE_URL',
+    'DEVOPS_API_KEY',
+    'DEVOPS_APP_ID',
+    'DEVOPS_APP_NAME',
+    'SERVICE_API_KEY',
+  ];
+
+  const handleVerifyBadge = async () => {
+    try {
+      setVerifyingBadge(true);
+      // Placeholder until a real badge verification endpoint exists
+      toast.info('Badge verification requires a live /badge/verify endpoint on the platform API.');
+    } finally {
+      setVerifyingBadge(false);
+    }
   };
 
   const handleGiveBonus = async () => {
@@ -543,6 +575,85 @@ export default function Admin() {
                 ))}
               </TableBody>
             </Table>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Integration Readiness
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {integrationChecks.map((item) => (
+              <div key={item.key} className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-medium text-slate-100">{item.name}</div>
+                  <Badge variant="outline" className="text-xs">
+                    {item.status}
+                  </Badge>
+                </div>
+                <p className="text-xs text-slate-300 mt-1">{item.description}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="w-4 h-4" />
+              Env Vars for Deployments
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-xs text-slate-300">
+              Set these in both staging and production. Staging should point to separate API/DBs.
+            </p>
+            <div className="grid grid-cols-1 gap-2">
+              {envVars.map((key) => (
+                <div key={key} className="text-xs px-2 py-1 rounded bg-slate-900/60 border border-slate-800 text-slate-100">
+                  {key}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-amber-200 mt-2">
+              Tip: use two branches/environments (staging vs prod) with isolated databases and secrets.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              DevOps Badge & Logs
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-slate-200">
+              Verify badge connection and view incoming telemetry in DevOps.
+            </p>
+            <Button
+              disabled={verifyingBadge}
+              onClick={handleVerifyBadge}
+              className="w-full"
+            >
+              {verifyingBadge ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Run badge token check
+            </Button>
+            <p className="text-xs text-slate-300">
+              Ensure DevOps webhooks are reachable and SERVICE_API_KEY is set so functions can forward events.
+            </p>
+            <Link
+              to={createPageUrl('DevOpsTest')}
+              className="text-xs text-amber-300 hover:underline inline-flex items-center gap-1"
+            >
+              <ArrowLeft className="w-3 h-3 rotate-180" />
+              Go to DevOps test page
+            </Link>
           </CardContent>
         </Card>
       </div>

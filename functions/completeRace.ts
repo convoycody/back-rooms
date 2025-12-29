@@ -1,8 +1,8 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createPlatformClient } from './_shared/platformClient.ts';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
+    const base44 = createPlatformClient(req);
     const { race_id } = await req.json();
 
     if (!race_id) {
