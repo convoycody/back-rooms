@@ -355,11 +355,19 @@ Deno.serve(async (req) => {
     // Execute all updates in parallel
     const [session] = await Promise.all(updates);
     
+    // Generate unique spin ID
+    const spin_id = crypto.randomUUID();
+    
+    // Calculate total bet for win tier
+    const total_bet = totalBet;
+    
     return Response.json({
       success: true,
+      spin_id,
       grid,
       line_wins: lineWins,
       scatter_win: scatterWin ? { count: scatterWin.count, payout: scatterPayout } : null,
+      total_bet,
       total_win: totalWin,
       net_result: netResult,
       jackpot_contribution: jackpotContribution,
