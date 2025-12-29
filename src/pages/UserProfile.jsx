@@ -204,9 +204,11 @@ export default function UserProfile() {
                       <span>{player.display_name?.[0]?.toUpperCase() || '?'}</span>
                     )}
                   </div>
-                  <div className="absolute -bottom-2 -right-2 bg-amber-500 text-black rounded-full w-10 h-10 flex items-center justify-center font-black text-sm">
-                    {player.level}
-                  </div>
+                  {player.vip_tier > 0 && (
+                    <div className="absolute -bottom-2 -right-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-black text-sm border-2 border-slate-900">
+                      👑
+                    </div>
+                  )}
                 </div>
 
                 {/* Info */}
