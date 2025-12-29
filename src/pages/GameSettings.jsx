@@ -81,7 +81,12 @@ export default function GameSettings() {
                 <CardContent className="p-6 text-center">
                   <span className="text-5xl block mb-3">🎰</span>
                   <h3 className="text-xl font-bold text-white mb-1">Slots</h3>
-                  <p className="text-slate-400 text-sm">RTP, volatility, jackpot, bet limits</p>
+                  <p className="text-slate-400 text-sm mb-2">RTP, volatility, jackpot, bet limits</p>
+                  <Link to={createPageUrl('SlotsBreakdown')} onClick={(e) => e.stopPropagation()}>
+                    <Button variant="outline" size="sm" className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10 text-xs">
+                      📖 System Breakdown
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             </Link>

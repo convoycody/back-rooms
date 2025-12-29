@@ -49,6 +49,7 @@ import VaultGamesAdmin from './pages/VaultGamesAdmin';
 import VaultTickets from './pages/VaultTickets';
 import Wallet from './pages/Wallet';
 import ErrorLogs from './pages/ErrorLogs';
+import SlotsBreakdown from './pages/SlotsBreakdown';
 import __Layout from './Layout.jsx';
 
 
@@ -104,6 +105,7 @@ export const PAGES = {
     "VaultTickets": VaultTickets,
     "Wallet": Wallet,
     "ErrorLogs": ErrorLogs,
+    "SlotsBreakdown": SlotsBreakdown,
 }
 
 export const pagesConfig = {
