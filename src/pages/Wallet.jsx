@@ -176,12 +176,12 @@ export default function Wallet() {
           <NoonDropCard />
         </motion.div>
 
-        {/* Vault Tickets Preview */}
+        {/* Quick Links */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="mb-8"
+          className="mb-8 grid sm:grid-cols-2 gap-4"
         >
           <Card className="bg-slate-900/50 border-slate-700/50">
             <CardContent className="p-6">
@@ -196,14 +196,37 @@ export default function Wallet() {
                   </Button>
                 </Link>
               </div>
-              <div className="text-center py-8">
+              <div className="text-center py-4">
                 <p className="text-slate-500 text-sm mb-3">No active tickets</p>
-                <p className="text-slate-600 text-xs mb-4">Purchase tickets for vault games to see them here</p>
                 <a href={createPageUrl('GameGallery') + '#vault-games'}>
                   <Button variant="outline" size="sm" className="border-purple-600 text-purple-300 hover:bg-purple-500/10">
                     🎰 Browse Vault Games
                   </Button>
                 </a>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900/50 border-slate-700/50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <span className="text-2xl">🐴</span>
+                  My Stable
+                </h3>
+                <Link to={createPageUrl('DerbyStable')}>
+                  <Button variant="outline" size="sm" className="border-slate-600 text-slate-300">
+                    View Stable
+                  </Button>
+                </Link>
+              </div>
+              <div className="text-center py-4">
+                <p className="text-slate-500 text-sm mb-3">Manage your racing horses</p>
+                <Link to={createPageUrl('DerbyLobby')}>
+                  <Button variant="outline" size="sm" className="border-amber-600 text-amber-300 hover:bg-amber-500/10">
+                    🏇 View Races
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
