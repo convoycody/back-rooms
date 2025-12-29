@@ -123,7 +123,11 @@ export default function GameGallery() {
   });
 
   const handlePlayGame = (game) => {
-    navigate(createPageUrl('GamePage') + `?slug=${game.game_id}`);
+    if (game.game_id === 'derby') {
+      navigate(createPageUrl('DerbyLobby'));
+    } else {
+      navigate(createPageUrl('GamePage') + `?slug=${game.game_id}`);
+    }
   };
 
   const featuredGames = games.filter(g => g.featured && g.enabled);

@@ -16,7 +16,8 @@ const GAME_COMPONENTS = {
   'slots': AdvancedSlotMachine,
   'blackjack': BlackjackGame,
   'plinko': PlinkoGame,
-  'scratchers': ScratchersGame
+  'scratchers': ScratchersGame,
+  'derby': () => null // Derby handled by dedicated pages
 };
 
 export default function GamePage() {
