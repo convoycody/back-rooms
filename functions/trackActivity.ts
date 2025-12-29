@@ -67,11 +67,18 @@ Deno.serve(async (req) => {
       
       await base44.asServiceRole.entities.Player.update(player_id, updates);
       
-      // Recalculate VIP tier
+      // Process progression for daily activity
       try {
-        await base44.functions.invoke('calculateVIPTier', { player_id });
+        await base44.functions.invoke('processPlayerProgression', {
+          player_id,
+          event_type: 'activity_tracked',
+          event_data: { 
+            active_days: updates.active_days, 
+            current_streak: updates.current_streak 
+          }
+        });
       } catch (err) {
-        console.error('VIP tier calculation failed:', err);
+        console.error('Progression processing failed:', err);
       }
       
       return Response.json({

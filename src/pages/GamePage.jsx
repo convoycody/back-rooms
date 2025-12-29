@@ -108,13 +108,11 @@ export default function GamePage() {
     const newBalance = player.points_balance + net;
     const newWagered = (player.total_wagered || 0) + bet;
     const newWon = (player.total_won || 0) + payout;
-    const newGamesPlayed = (player.games_played || 0) + 1;
 
     const updates = {
       points_balance: newBalance,
       total_wagered: newWagered,
       total_won: newWon,
-      games_played: newGamesPlayed,
       biggest_win: Math.max(player.biggest_win || 0, payout)
     };
 
@@ -136,34 +134,33 @@ export default function GamePage() {
       }
     } else if (gameSlug === 'plinko') {
       updates.plinko_drops = (player.plinko_drops || 0) + 1;
-    } else if (gameSlug === 'scratchers') {
-      // Scratchers stats are handled in playScratchCard backend
     }
 
     await updatePlayerMutation.mutateAsync({ playerId: player.id, updates });
 
-    // Calculate XP and VIP tier (XP = 10% of bet + 5% of net win)
-    const baseXP = Math.floor(bet / 10);
-    const winBonus = net > 0 ? Math.floor(net / 20) : 0;
-    const totalXP = baseXP + winBonus;
-
+    // Process progression through unified engine
     try {
-      const vipResponse = await base44.functions.invoke('calculateVIPTier', {
+      const progressionResponse = await base44.functions.invoke('processPlayerProgression', {
         player_id: player.id,
-        xp_to_add: totalXP
+        event_type: 'game_completed',
+        event_data: { bet, payout }
       });
 
-      if (vipResponse.data.tier_up) {
+      const { rewards } = progressionResponse.data;
+
+      if (rewards.tier_up) {
         setLevelUpData({
-          new_tier: vipResponse.data.new_tier,
-          bonus_awarded: vipResponse.data.bonus_awarded,
-          tier_name: vipResponse.data.tier_name
+          new_tier: rewards.new_tier,
+          bonus_awarded: rewards.points_awarded,
+          tier_name: rewards.tier_name
         });
         setShowLevelUp(true);
-        toast.success(`VIP Tier Up! You're now ${vipResponse.data.tier_name}!`);
+        toast.success(`VIP Tier Up! You're now ${rewards.tier_name}!`);
+      } else if (rewards.level_up) {
+        toast.success(`Level Up! You're now level ${rewards.new_level}!`);
       }
     } catch (err) {
-      console.error('VIP tier calculation failed:', err);
+      console.error('Progression processing failed:', err);
     }
 
     // Check referral progression
