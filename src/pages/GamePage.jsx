@@ -245,10 +245,9 @@ export default function GamePage() {
       <GameShell game={game} balance={player.points_balance}>
         <GameComponent
           balance={player.points_balance}
-          onSpinComplete={gameSlug === 'slots' ? handleGameResult : undefined}
-          onGameEnd={gameSlug === 'blackjack' || gameSlug === 'scratchers' ? handleGameResult : undefined}
-          onDropComplete={gameSlug === 'plinko' ? handleGameResult : undefined}
-          onGameEnd={gameSlug === 'scratchers' ? handleGameResult : undefined}
+          onSpinComplete={gameSlug?.startsWith('slots') ? handleGameResult : undefined}
+          onGameEnd={gameSlug?.startsWith('blackjack') || gameSlug?.startsWith('scratchers') ? handleGameResult : undefined}
+          onDropComplete={gameSlug?.startsWith('plinko') ? handleGameResult : undefined}
           houseConfig={houseConfig}
         />
       </GameShell>
