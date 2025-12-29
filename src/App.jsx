@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import GlobalErrorReporter from '@/components/GlobalErrorReporter';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -73,6 +74,7 @@ function App() {
           <NavigationTracker />
           <AuthenticatedApp />
         </Router>
+        <GlobalErrorReporter />
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>

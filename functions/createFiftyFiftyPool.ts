@@ -1,9 +1,9 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createPlatformClient } from './_shared/platformClient.ts';
 import { createHash } from 'node:crypto';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
+    const base44 = createPlatformClient(req);
     
     // This should be called by admin or scheduled job
     const { pool_date } = await req.json();

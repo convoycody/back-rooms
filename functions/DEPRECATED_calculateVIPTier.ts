@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createPlatformClient } from './_shared/platformClient.ts';
 
 /**
  * DEPRECATED: Use processPlayerProgression instead
@@ -9,7 +9,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
+    const base44 = createPlatformClient(req);
     const { player_id, xp_to_add } = await req.json();
 
     // Redirect to new unified engine

@@ -1,23 +1,22 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { requireServiceAuth } from './_shared/auth.ts';
+import { resolveAppIdentity, sendDevOpsEvent } from './_shared/devopsClient.ts';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    
-    if (!user) {
+    const auth = requireServiceAuth(req);
+    if (!auth.ok) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { 
-      app_name, 
-      app_id, 
-      amount, 
-      currency, 
-      category, 
-      customer_email, 
-      stream_name, 
-      metadata 
+    const {
+      app_name,
+      app_id,
+      amount,
+      currency,
+      category,
+      customer_email,
+      stream_name,
+      metadata,
     } = await req.json();
 
     // Log the revenue event
@@ -32,6 +31,22 @@ Deno.serve(async (req) => {
       metadata,
       timestamp: new Date().toISOString()
     });
+
+    // Forward to DevOps hub
+    const { appId, appName } = resolveAppIdentity(app_id, app_name);
+    const devOpsPayload = {
+      app_id: appId,
+      app_name: appName,
+      amount,
+      currency,
+      category,
+      customer_email,
+      stream_name,
+      metadata: metadata || {},
+      timestamp: new Date().toISOString(),
+    };
+
+    await sendDevOpsEvent('/api/functions/webhooks/revenueEvent', devOpsPayload);
 
     return Response.json({ 
       success: true,

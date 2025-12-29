@@ -1,20 +1,19 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { requireServiceAuth } from './_shared/auth.ts';
+import { resolveAppIdentity, sendDevOpsEvent } from './_shared/devopsClient.ts';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    
-    if (!user) {
+    const auth = requireServiceAuth(req);
+    if (!auth.ok) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { 
-      app_name, 
-      app_id, 
-      event_type, 
-      user_email, 
-      metadata 
+    const {
+      app_name,
+      app_id,
+      event_type,
+      user_email,
+      metadata,
     } = await req.json();
 
     // Log the event (in production, this would send to Dev Center Ops)
@@ -27,14 +26,18 @@ Deno.serve(async (req) => {
       timestamp: new Date().toISOString()
     });
 
-    // Store event in database for tracking
-    await base44.asServiceRole.entities.Ledger.create({
-      player_id: metadata?.player_id || user_email,
-      change: 0,
-      reason: 'admin_adjustment',
-      balance_after: 0,
-      note: `Event: ${event_type} - ${JSON.stringify(metadata)}`
-    });
+    // Forward to DevOps hub
+    const { appId, appName } = resolveAppIdentity(app_id, app_name);
+    const devOpsPayload = {
+      app_id: appId,
+      app_name: appName,
+      event_type,
+      user_email,
+      metadata: metadata || {},
+      timestamp: new Date().toISOString(),
+    };
+
+    await sendDevOpsEvent('/api/functions/webhooks/userEvent', devOpsPayload);
 
     return Response.json({ 
       success: true,
