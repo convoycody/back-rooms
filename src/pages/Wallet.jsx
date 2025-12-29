@@ -294,6 +294,14 @@ export default function Wallet() {
                         </p>
                         <p className="text-slate-400 text-xs">{moment(entry.created_date).fromNow()}</p>
                         {entry.note && <p className="text-slate-500 text-xs truncate">{entry.note}</p>}
+                        {entry.source === 'vault' && (
+                          <Link 
+                            to={createPageUrl('Vault')} 
+                            className="text-purple-300 text-xs hover:text-purple-200 font-semibold"
+                          >
+                            View Vault details →
+                          </Link>
+                        )}
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0 ml-2">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,7 +15,77 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [depositOpen, setDepositOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [recentBalances, setRecentBalances] = useState(null);
   const queryClient = useQueryClient();
+
+  const vaultBalance = recentBalances?.vault ?? player?.vault_points ?? 0;
+  const spendableBalance = recentBalances?.spendable ?? player?.points_balance ?? 0;
+
+  const depositMin = config?.min_deposit ?? 100;
+  const depositMax = Math.max(0, Math.min(spendableBalance, config?.max_deposit ?? spendableBalance));
+  const withdrawMin = config?.min_withdraw ?? 100;
+  const withdrawMax = Math.max(0, Math.min(vaultBalance, config?.max_withdraw ?? vaultBalance));
+
+  const depositQuickAmounts = useMemo(() => {
+    const starter = depositMin > 0 ? depositMin : 100;
+    const mid = Math.min(depositMax, starter * 5);
+    const upper = Math.min(depositMax, Math.max(starter, Math.round(depositMax / 2)) || depositMax);
+    return [starter, mid, upper].filter((amt, idx, arr) => amt > 0 && amt <= depositMax && arr.indexOf(amt) === idx);
+  }, [depositMax, depositMin]);
+
+  const withdrawQuickAmounts = useMemo(() => {
+    const starter = withdrawMin > 0 ? withdrawMin : 100;
+    const mid = Math.min(withdrawMax, starter * 5);
+    const upper = Math.min(withdrawMax, Math.max(starter, Math.round(withdrawMax / 2)) || withdrawMax);
+    return [starter, mid, upper].filter((amt, idx, arr) => amt > 0 && amt <= withdrawMax && arr.indexOf(amt) === idx);
+  }, [withdrawMax, withdrawMin]);
+
+  useEffect(() => {
+    setRecentBalances(null);
+  }, [player?.vault_points, player?.points_balance]);
+
+  useEffect(() => {
+    if (depositOpen && !depositAmount && depositMax > 0) {
+      setDepositAmount((depositQuickAmounts[0] ?? depositMax).toString());
+    }
+    if (!depositOpen) setDepositAmount('');
+  }, [depositOpen, depositMax, depositQuickAmounts, depositAmount]);
+
+  useEffect(() => {
+    if (withdrawOpen && !withdrawAmount && withdrawMax > 0) {
+      setWithdrawAmount((withdrawQuickAmounts[0] ?? withdrawMax).toString());
+    }
+    if (!withdrawOpen) setWithdrawAmount('');
+  }, [withdrawOpen, withdrawMax, withdrawQuickAmounts, withdrawAmount]);
+
+  const getDepositValidation = () => {
+    const amount = parseInt(depositAmount, 10);
+    if (!depositAmount) return `Min: ${depositMin.toLocaleString()} • Max: ${depositMax.toLocaleString()}`;
+    if (isNaN(amount) || amount <= 0) return 'Enter a valid amount';
+    if (amount < depositMin) return `Minimum deposit is ${depositMin.toLocaleString()} pts`;
+    if (amount > depositMax) return `Maximum deposit is ${depositMax.toLocaleString()} pts`;
+    if (amount > spendableBalance) return 'Exceeds spendable balance';
+    return `Will leave ${(spendableBalance - amount).toLocaleString()} pts spendable`;
+  };
+
+  const getWithdrawValidation = () => {
+    const amount = parseInt(withdrawAmount, 10);
+    if (!withdrawAmount) return `Min: ${withdrawMin.toLocaleString()} • Cooldown: ${config?.withdraw_cooldown_minutes || 60}m`;
+    if (isNaN(amount) || amount <= 0) return 'Enter a valid amount';
+    if (amount < withdrawMin) return `Minimum withdrawal is ${withdrawMin.toLocaleString()} pts`;
+    if (amount > withdrawMax) return `Maximum available is ${withdrawMax.toLocaleString()} pts`;
+    return `Next withdrawal unlocks after ${config?.withdraw_cooldown_minutes || 60} minutes`;
+  };
+
+  const depositValid = useMemo(() => {
+    const amount = parseInt(depositAmount, 10);
+    return !!amount && amount >= depositMin && amount <= depositMax && amount <= spendableBalance;
+  }, [depositAmount, depositMax, depositMin, spendableBalance]);
+
+  const withdrawValid = useMemo(() => {
+    const amount = parseInt(withdrawAmount, 10);
+    return !!amount && amount >= withdrawMin && amount <= withdrawMax;
+  }, [withdrawAmount, withdrawMax, withdrawMin]);
 
   const depositMutation = useMutation({
     mutationFn: async (amount) => {
@@ -23,8 +93,11 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
       return response.data;
     },
     onSuccess: (data) => {
-      toast.success(`Deposited ${data.amount.toLocaleString()} points to vault`);
+      toast.success(`Deposited ${data.amount.toLocaleString()} pts • Vault: ${data.vault_balance.toLocaleString()} • Spendable: ${data.spendable_balance.toLocaleString()}`);
       queryClient.invalidateQueries({ queryKey: ['player'] });
+      queryClient.invalidateQueries({ queryKey: ['ledger', player?.id] });
+      queryClient.invalidateQueries({ queryKey: ['vaultTransactions', player?.id] });
+      setRecentBalances({ vault: data.vault_balance, spendable: data.spendable_balance });
       setDepositAmount('');
       setDepositOpen(false);
       if (onUpdate) onUpdate();
@@ -40,8 +113,12 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
       return response.data;
     },
     onSuccess: (data) => {
-      toast.success(`Withdrew ${data.amount.toLocaleString()} points from vault`);
+      const cooldownLabel = `${config?.withdraw_cooldown_minutes || 60}m cooldown`;
+      toast.success(`Withdrew ${data.amount.toLocaleString()} pts • Vault: ${data.vault_balance.toLocaleString()} • Spendable: ${data.spendable_balance.toLocaleString()} • ${data.withdrawals_remaining_today ?? '∞'} withdrawals left today • ${cooldownLabel}`);
       queryClient.invalidateQueries({ queryKey: ['player'] });
+      queryClient.invalidateQueries({ queryKey: ['ledger', player?.id] });
+      queryClient.invalidateQueries({ queryKey: ['vaultTransactions', player?.id] });
+      setRecentBalances({ vault: data.vault_balance, spendable: data.spendable_balance });
       setWithdrawAmount('');
       setWithdrawOpen(false);
       if (onUpdate) onUpdate();
@@ -59,8 +136,8 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
 
   const handleDeposit = () => {
     const amount = parseInt(depositAmount);
-    if (isNaN(amount) || amount <= 0) {
-      toast.error('Please enter a valid amount');
+    if (!depositValid) {
+      toast.error(getDepositValidation());
       return;
     }
     depositMutation.mutate(amount);
@@ -68,15 +145,12 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
 
   const handleWithdraw = () => {
     const amount = parseInt(withdrawAmount);
-    if (isNaN(amount) || amount <= 0) {
-      toast.error('Please enter a valid amount');
+    if (!withdrawValid) {
+      toast.error(getWithdrawValidation());
       return;
     }
     withdrawMutation.mutate(amount);
   };
-
-  const vaultBalance = player?.vault_points || 0;
-  const spendableBalance = player?.points_balance || 0;
 
   return (
     <motion.div
@@ -91,10 +165,24 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
           </div>
 
           <div className="mb-6">
-            <p className="text-4xl font-black text-purple-300">
+            <motion.p 
+              key={vaultBalance}
+              initial={{ scale: 0.95, opacity: 0.5 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+              className="text-4xl font-black text-purple-300"
+            >
               {vaultBalance.toLocaleString()}
-            </p>
-            <p className="text-slate-400 text-sm mt-1">points locked in vault</p>
+            </motion.p>
+            <motion.p 
+              key={spendableBalance}
+              initial={{ opacity: 0.6 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="text-slate-400 text-sm mt-1"
+            >
+              points locked in vault • Spendable: {spendableBalance.toLocaleString()}
+            </motion.p>
             {config?.interest_rate_percentage > 0 && (
               <p className="text-green-400 text-xs mt-2 flex items-center gap-1">
                 📈 Earning {config.interest_rate_percentage}% APY
@@ -143,37 +231,32 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
                       onChange={(e) => setDepositAmount(e.target.value)}
                       placeholder="Enter amount"
                       className="bg-slate-800 border-slate-700 text-white"
-                      min={config?.min_deposit || 100}
-                      max={config?.max_deposit || 100000}
+                      min={depositMin}
+                      max={depositMax}
                     />
-                    <p className="text-slate-500 text-xs mt-1">
-                      Min: {config?.min_deposit?.toLocaleString() || 100} • 
-                      Max: {config?.max_deposit?.toLocaleString() || 100000}
+                    <p className={`text-xs mt-1 ${depositValid ? 'text-slate-400' : 'text-red-400'}`}>
+                      {getDepositValidation()}
                     </p>
                   </div>
 
                   <div className="flex gap-2">
+                    {depositQuickAmounts.map((amt) => (
+                      <Button
+                        key={amt}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDepositAmount(amt.toString())}
+                        className="flex-1"
+                      >
+                        {amt.toLocaleString()}
+                      </Button>
+                    ))}
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setDepositAmount('1000')}
+                      onClick={() => setDepositAmount(depositMax.toString())}
                       className="flex-1"
-                    >
-                      1,000
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setDepositAmount('5000')}
-                      className="flex-1"
-                    >
-                      5,000
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setDepositAmount(spendableBalance.toString())}
-                      className="flex-1"
+                      disabled={depositMax <= 0}
                     >
                       Max
                     </Button>
@@ -181,7 +264,7 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
 
                   <Button
                     onClick={handleDeposit}
-                    disabled={depositMutation.isPending || !depositAmount}
+                    disabled={depositMutation.isPending || !depositValid}
                     className="w-full bg-green-600 hover:bg-green-700 text-white font-bold"
                   >
                     {depositMutation.isPending ? (
@@ -236,36 +319,32 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
                       onChange={(e) => setWithdrawAmount(e.target.value)}
                       placeholder="Enter amount"
                       className="bg-slate-800 border-slate-700 text-white"
-                      min={config?.min_withdraw || 100}
-                      max={vaultBalance}
+                      min={withdrawMin}
+                      max={withdrawMax}
                     />
-                    <p className="text-slate-500 text-xs mt-1">
-                      Min: {config?.min_withdraw?.toLocaleString() || 100}
+                    <p className={`text-xs mt-1 ${withdrawValid ? 'text-slate-400' : 'text-red-400'}`}>
+                      {getWithdrawValidation()}
                     </p>
                   </div>
 
                   <div className="flex gap-2">
+                    {withdrawQuickAmounts.map((amt) => (
+                      <Button
+                        key={amt}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setWithdrawAmount(amt.toString())}
+                        className="flex-1"
+                      >
+                        {amt.toLocaleString()}
+                      </Button>
+                    ))}
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setWithdrawAmount('1000')}
+                      onClick={() => setWithdrawAmount(withdrawMax.toString())}
                       className="flex-1"
-                    >
-                      1,000
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setWithdrawAmount('5000')}
-                      className="flex-1"
-                    >
-                      5,000
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setWithdrawAmount(vaultBalance.toString())}
-                      className="flex-1"
+                      disabled={withdrawMax <= 0}
                     >
                       Max
                     </Button>
@@ -273,7 +352,7 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
 
                   <Button
                     onClick={handleWithdraw}
-                    disabled={withdrawMutation.isPending || !withdrawAmount}
+                    disabled={withdrawMutation.isPending || !withdrawValid}
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold"
                   >
                     {withdrawMutation.isPending ? (
