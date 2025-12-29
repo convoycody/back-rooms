@@ -325,12 +325,12 @@ export default function Vault() {
 
           {/* Store */}
           <TabsContent value="store">
-            <Link to={createPageUrl('VaultStore')}>
+            <Link to={createPageUrl('GameGallery') + '#vault-games'}>
               <Card className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 border-purple-500/30 cursor-pointer hover:scale-105 transition-transform">
                 <CardContent className="p-12 text-center">
                   <Ticket className="w-16 h-16 text-purple-400 mx-auto mb-4" />
                   <h3 className="text-2xl font-black text-white mb-2">Browse Ticket Store</h3>
-                  <p className="text-slate-300">50/50 Pools • Raffles • Number Picks</p>
+                  <p className="text-slate-300">Vault-ready games filtered for you</p>
                 </CardContent>
               </Card>
             </Link>
