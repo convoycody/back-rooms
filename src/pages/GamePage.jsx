@@ -14,9 +14,13 @@ import ScratchersGame from '@/components/games/ScratchersGame';
 
 const GAME_COMPONENTS = {
   'slots': AdvancedSlotMachine,
+  'AdvancedSlotMachine': AdvancedSlotMachine,
   'blackjack': BlackjackGame,
+  'BlackjackGame': BlackjackGame,
   'plinko': PlinkoGame,
+  'PlinkoGame': PlinkoGame,
   'scratchers': ScratchersGame,
+  'ScratchersGame': ScratchersGame,
   'derby': () => null // Derby handled by dedicated pages
 };
 
