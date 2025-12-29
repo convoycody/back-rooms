@@ -11,12 +11,13 @@ export default function DerbySystemBreakdown() {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-slate-800">
+        <TabsList className="grid w-full grid-cols-6 bg-slate-800">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="economics">Economics</TabsTrigger>
           <TabsTrigger value="odds">Odds Model</TabsTrigger>
           <TabsTrigger value="momentum">Momentum</TabsTrigger>
           <TabsTrigger value="technical">Technical</TabsTrigger>
+          <TabsTrigger value="admin">Admin</TabsTrigger>
         </TabsList>
 
         {/* OVERVIEW */}
@@ -553,6 +554,138 @@ useQuery({'{'}
                   <li><strong>DerbyRace:</strong> View odds, place bets (spectators), submit proofs (owners)</li>
                   <li><strong>DerbyRaceShare:</strong> Shareable result page with podium, stats</li>
                 </ol>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ADMIN */}
+        <TabsContent value="admin">
+          <Card className="bg-slate-900 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white">Admin Dashboard & Configuration</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-slate-300">
+              <div>
+                <h3 className="text-amber-400 font-bold mb-2">🎛️ Admin Access</h3>
+                <p className="mb-2">Derby system includes a comprehensive admin dashboard for real-time configuration:</p>
+                <div className="bg-slate-800 rounded p-3 text-sm">
+                  <p className="font-bold text-white mb-2">Navigation:</p>
+                  <p className="font-mono text-xs">Admin → Game Settings → Flagship Platform Games → Derby Racetrack</p>
+                  <p className="text-slate-400 mt-2 text-xs">Access restricted to users with <span className="text-amber-400">is_admin=true</span> or role='admin'</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-amber-400 font-bold mb-2">⚙️ Configuration Tabs</h3>
+                <div className="space-y-3">
+                  <div className="bg-slate-800 rounded p-3">
+                    <p className="font-bold text-white mb-1">General Settings</p>
+                    <ul className="list-disc ml-6 text-sm space-y-1">
+                      <li>Enable/Disable Derby System (master toggle)</li>
+                      <li>Owner License Cost (default: 50,000 pts)</li>
+                      <li>Max Horses Per Owner (default: 3)</li>
+                      <li>Race Duration (default: 60 seconds)</li>
+                      <li>Momentum Impact Cap (default: 8%)</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-slate-800 rounded p-3">
+                    <p className="font-bold text-white mb-1">Fees & Entry</p>
+                    <ul className="list-disc ml-6 text-sm space-y-1">
+                      <li>Duel Entry Fee (2-horse races, default: 5,000)</li>
+                      <li>Sprint Entry Fee (4-horse races, default: 10,000)</li>
+                      <li>Main Event Entry Fee (6-horse races, default: 20,000)</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-slate-800 rounded p-3">
+                    <p className="font-bold text-white mb-1">Betting</p>
+                    <ul className="list-disc ml-6 text-sm space-y-1">
+                      <li>Minimum Bet Amount (default: 100 pts)</li>
+                      <li>Maximum Bet Amount (default: 50,000 pts)</li>
+                      <li>House Take Percentage (default: 10%)</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-slate-800 rounded p-3">
+                    <p className="font-bold text-white mb-1">Payouts</p>
+                    <ul className="list-disc ml-6 text-sm space-y-1">
+                      <li>Win (1st Place) % (default: 60%)</li>
+                      <li>Place (2nd Place) % (default: 30%)</li>
+                      <li>Show (3rd Place) % (default: 10%)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-amber-400 font-bold mb-2">📊 Live Statistics</h3>
+                <div className="bg-slate-800 rounded p-3 text-sm">
+                  <p className="mb-2">Dashboard displays real-time metrics:</p>
+                  <ul className="list-disc ml-6 space-y-1">
+                    <li>Active Races count</li>
+                    <li>Owner License Cost display</li>
+                    <li>System Status (Active/Disabled)</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-amber-400 font-bold mb-2">🎨 UI Components</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="bg-green-900/20 border border-green-700/50 rounded p-2">
+                    <p className="font-bold text-white">DerbyLobby</p>
+                    <p className="text-xs text-slate-400">Main entry - browse races, view roles, see race types</p>
+                  </div>
+                  <div className="bg-green-900/20 border border-green-700/50 rounded p-2">
+                    <p className="font-bold text-white">DerbyStable</p>
+                    <p className="text-xs text-slate-400">Manage horses, purchase license, view stats</p>
+                  </div>
+                  <div className="bg-green-900/20 border border-green-700/50 rounded p-2">
+                    <p className="font-bold text-white">DerbyEnter</p>
+                    <p className="text-xs text-slate-400">Select horse, choose race type, pay entry fee</p>
+                  </div>
+                  <div className="bg-green-900/20 border border-green-700/50 rounded p-2">
+                    <p className="font-bold text-white">DerbyRace</p>
+                    <p className="text-xs text-slate-400">Live race view with odds, betting slip, momentum tracker</p>
+                  </div>
+                  <div className="bg-green-900/20 border border-green-700/50 rounded p-2">
+                    <p className="font-bold text-white">DerbyRaceShare</p>
+                    <p className="text-xs text-slate-400">Shareable results page with podium and stats</p>
+                  </div>
+                  <div className="bg-green-900/20 border border-green-700/50 rounded p-2">
+                    <p className="font-bold text-white">DerbyAdmin</p>
+                    <p className="text-xs text-slate-400">Full admin dashboard with tabbed configuration</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-amber-400 font-bold mb-2">🔄 Hot-Reload Configuration</h3>
+                <div className="bg-slate-800 rounded p-3 text-sm">
+                  <p className="mb-2">All changes take effect immediately:</p>
+                  <ul className="list-disc ml-6 space-y-1">
+                    <li>No server restart required</li>
+                    <li>Existing races unaffected</li>
+                    <li>New races use updated config</li>
+                    <li>React Query auto-invalidates cached data</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-amber-400 font-bold mb-2">🛡️ Admin Best Practices</h3>
+                <div className="bg-orange-900/20 border border-orange-700/50 rounded p-3 text-sm">
+                  <ul className="list-disc ml-6 space-y-1">
+                    <li><strong>Test Changes:</strong> Adjust values incrementally, monitor impact</li>
+                    <li><strong>Entry Fees:</strong> Balance purse sizes with player affordability</li>
+                    <li><strong>House Take:</strong> 10% is standard; lower = more to bettors, higher = more revenue</li>
+                    <li><strong>Momentum Cap:</strong> Keep at 5-10% to prevent proof spam dominance</li>
+                    <li><strong>Bet Limits:</strong> Set max to prevent single-bet pool manipulation</li>
+                    <li><strong>License Cost:</strong> Should be achievable but meaningful investment</li>
+                  </ul>
+                </div>
               </div>
             </CardContent>
           </Card>
