@@ -296,6 +296,32 @@ Deno.serve(async (req) => {
       third_horse_id: third?.horse_id || null,
     });
 
+    // Create announcement for Main Event wins (6-horse races)
+    if (race.max_horses === 6 && winPayout >= 50000) {
+      const winnerHorses = await base44.asServiceRole.entities.RaceHorse.filter({ id: winner.horse_id });
+      const winningHorse = winnerHorses[0];
+      const owners = await base44.asServiceRole.entities.Player.filter({ id: winner.owner_id });
+      const owner = owners[0];
+
+      if (owner && winningHorse) {
+        await base44.asServiceRole.entities.Announcement.create({
+          player_id: winner.owner_id,
+          type: 'big_win',
+          game_id: 'derby',
+          game_name: 'Derby Main Event',
+          amount: winPayout,
+          multiplier: race.entry_fee > 0 ? winPayout / race.entry_fee : 0,
+          player_name: owner.display_name || owner.created_by,
+          metadata: {
+            race_id: race.id,
+            race_number: race.race_number,
+            horse_name: winningHorse.horse_name,
+            horse_emoji: winningHorse.avatar_emoji,
+          },
+        });
+      }
+    }
+
     return Response.json({
       success: true,
       winner: winner.horse_id,

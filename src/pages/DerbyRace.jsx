@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, ArrowLeft, Trophy, Users, Clock, TrendingUp } from 'lucide-react';
+import { Loader2, ArrowLeft, Trophy, Users, Clock, TrendingUp, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import moment from 'moment';
@@ -134,6 +134,12 @@ export default function DerbyRace() {
   const isBettingOpen = race.status === 'open' && new Date(race.cutoff_at) > new Date();
   const timeUntilStart = moment(race.starts_at).diff(moment(), 'minutes');
 
+  const handleShare = () => {
+    const shareUrl = `${window.location.origin}${createPageUrl('DerbyRaceShare')}?slug=${race.id}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast.success('Share link copied!');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -166,7 +172,18 @@ export default function DerbyRace() {
                   </h1>
                   <p className="text-slate-400">{getRaceTypeLabel(race.race_type)}</p>
                 </div>
-                <div className="text-right">
+                <div className="flex items-center gap-2">
+                  {race.status === 'completed' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleShare}
+                      className="border-slate-600 text-slate-300"
+                    >
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Share
+                    </Button>
+                  )}
                   <div className={`px-4 py-2 rounded-lg ${
                     race.status === 'open' ? 'bg-green-500/20 text-green-400' :
                     race.status === 'running' ? 'bg-blue-500/20 text-blue-400' :

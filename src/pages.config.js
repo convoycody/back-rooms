@@ -44,6 +44,7 @@ import DerbyLobby from './pages/DerbyLobby';
 import DerbyRace from './pages/DerbyRace';
 import DerbyStable from './pages/DerbyStable';
 import DerbyEnter from './pages/DerbyEnter';
+import DerbyRaceShare from './pages/DerbyRaceShare';
 import __Layout from './Layout.jsx';
 
 
@@ -94,6 +95,7 @@ export const PAGES = {
     "DerbyRace": DerbyRace,
     "DerbyStable": DerbyStable,
     "DerbyEnter": DerbyEnter,
+    "DerbyRaceShare": DerbyRaceShare,
 }
 
 export const pagesConfig = {
