@@ -41,6 +41,7 @@ import VaultTickets from './pages/VaultTickets';
 import Wallet from './pages/Wallet';
 import DerbyAdmin from './pages/DerbyAdmin';
 import DerbyLobby from './pages/DerbyLobby';
+import DerbyRace from './pages/DerbyRace';
 import __Layout from './Layout.jsx';
 
 
@@ -88,6 +89,7 @@ export const PAGES = {
     "Wallet": Wallet,
     "DerbyAdmin": DerbyAdmin,
     "DerbyLobby": DerbyLobby,
+    "DerbyRace": DerbyRace,
 }
 
 export const pagesConfig = {
