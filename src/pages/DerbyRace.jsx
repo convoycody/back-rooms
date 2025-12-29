@@ -69,6 +69,14 @@ export default function DerbyRace() {
     enabled: !!raceId && !!player,
   });
 
+  const { data: config } = useQuery({
+    queryKey: ['raceConfig'],
+    queryFn: async () => {
+      const configs = await base44.entities.RaceConfig.list();
+      return configs[0];
+    },
+  });
+
   // Check if player is entered as owner
   const isOwnerInRace = entries.some(e => e.owner_id === player?.id);
 
@@ -256,8 +264,19 @@ export default function DerbyRace() {
             </Card>
           </div>
 
-          {/* Betting Sidebar */}
-          <div>
+          {/* Betting & Momentum Sidebar */}
+          <div className="space-y-6">
+            {/* Momentum Tracker for Owners */}
+            {isOwnerInRace && race.status === 'running' && (
+              <MomentumTracker
+                race={race}
+                entries={entries}
+                horses={horses}
+                playerId={player.id}
+                config={config}
+              />
+            )}
+
             <BettingSlip
               race={race}
               horses={horses}
