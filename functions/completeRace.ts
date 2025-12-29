@@ -30,6 +30,42 @@ Deno.serve(async (req) => {
     const configs = await base44.asServiceRole.entities.RaceConfig.list();
     const config = configs[0];
 
+    // Check minimum pool size
+    const totalBettingPool = race.total_win_pool + race.total_place_pool + race.total_show_pool;
+    const minPoolSize = config?.min_pool_size || 0;
+    
+    if (minPoolSize > 0 && totalBettingPool < minPoolSize) {
+      // Refund all bets
+      const allBets = await base44.asServiceRole.entities.RaceBet.filter({ race_id });
+      for (const bet of allBets) {
+        const bettors = await base44.asServiceRole.entities.Player.filter({ id: bet.player_id });
+        const bettor = bettors[0];
+        await base44.asServiceRole.entities.Player.update(bet.player_id, {
+          points_balance: bettor.points_balance + bet.amount,
+        });
+        await base44.asServiceRole.entities.RaceBet.update(bet.id, { status: 'refunded' });
+        await base44.asServiceRole.entities.Ledger.create({
+          player_id: bet.player_id,
+          change: bet.amount,
+          reason: 'refund',
+          balance_after: bettor.points_balance + bet.amount,
+          note: `Bet refunded - pool below minimum - Race ${race.id.slice(0, 6)}`,
+        });
+      }
+      
+      await base44.asServiceRole.entities.RaceEvent.update(race_id, {
+        status: 'cancelled',
+        completed_at: new Date().toISOString(),
+      });
+      
+      return Response.json({ 
+        success: false, 
+        message: 'Race cancelled - betting pool below minimum',
+        pool_size: totalBettingPool,
+        min_required: minPoolSize
+      });
+    }
+
     // Get horses for skill ratings
     const horsesData = await Promise.all(
       entries.map(entry => 

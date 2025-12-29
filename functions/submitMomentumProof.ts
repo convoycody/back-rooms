@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { race_id, entry_id } = await req.json();
+    const { race_id, entry_id, proof_token } = await req.json();
 
     if (!race_id || !entry_id) {
       return Response.json({ error: 'race_id and entry_id required' }, { status: 400 });
@@ -31,6 +31,12 @@ Deno.serve(async (req) => {
 
     if (race.status !== 'running') {
       return Response.json({ error: 'Race not running' }, { status: 400 });
+    }
+
+    // Validate proof token (anti-macro protection)
+    const expectedToken = `${race_id}_${entry_id}_${Math.floor(Date.now() / 3000)}`;
+    if (proof_token !== expectedToken) {
+      return Response.json({ error: 'Invalid proof token' }, { status: 400 });
     }
 
     // Get entry

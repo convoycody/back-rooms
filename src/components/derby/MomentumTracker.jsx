@@ -16,9 +16,12 @@ export default function MomentumTracker({ race, entries, horses, playerId, confi
 
   const submitProofMutation = useMutation({
     mutationFn: async () => {
+      // Generate time-based token (3-second windows)
+      const proofToken = `${race.id}_${myEntry.id}_${Math.floor(Date.now() / 3000)}`;
       const response = await base44.functions.invoke('submitMomentumProof', {
         race_id: race.id,
         entry_id: myEntry.id,
+        proof_token: proofToken,
       });
       return response.data;
     },
