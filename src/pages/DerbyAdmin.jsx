@@ -90,8 +90,17 @@ export default function DerbyAdmin() {
               Back to Admin
             </Button>
           </Link>
-          <h1 className="text-3xl font-black text-white mb-2">🏇 Derby Racetrack Admin</h1>
-          <p className="text-slate-400 text-sm">Configure racing system and manage events</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-black text-white mb-2">🏇 Derby Racetrack Admin</h1>
+              <p className="text-slate-400 text-sm">Configure racing system and manage events</p>
+            </div>
+            <Link to={createPageUrl('DerbyBreakdown')}>
+              <Button variant="outline" className="border-amber-500 text-amber-400 hover:bg-amber-500/10">
+                📚 System Breakdown
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Stats Overview */}

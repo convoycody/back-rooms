@@ -47,6 +47,7 @@ import DerbyEnter from './pages/DerbyEnter';
 import DerbyRaceShare from './pages/DerbyRaceShare';
 import FiftyFiftyAdmin from './pages/FiftyFiftyAdmin';
 import NumbersLotteryAdmin from './pages/NumbersLotteryAdmin';
+import DerbyBreakdown from './pages/DerbyBreakdown';
 import __Layout from './Layout.jsx';
 
 
@@ -100,6 +101,7 @@ export const PAGES = {
     "DerbyRaceShare": DerbyRaceShare,
     "FiftyFiftyAdmin": FiftyFiftyAdmin,
     "NumbersLotteryAdmin": NumbersLotteryAdmin,
+    "DerbyBreakdown": DerbyBreakdown,
 }
 
 export const pagesConfig = {
