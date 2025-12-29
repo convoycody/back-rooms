@@ -229,9 +229,13 @@ export default function BettingSlip({ race, horses, entries, player, isOwnerInRa
                     {entries.map((entry) => {
                       const horse = horses.find(h => h.id === entry.horse_id);
                       if (!horse) return null;
+                      
+                      const isNew = horse.races_entered < 3;
+                      const winRate = horse.races_entered > 0 ? ((horse.wins / horse.races_entered) * 100).toFixed(0) : 0;
+                      
                       return (
                         <option key={horse.id} value={horse.id}>
-                          {horse.avatar_emoji} {horse.horse_name}
+                          {horse.avatar_emoji} {horse.horse_name} {isNew ? '(Unrated)' : `- ${winRate}% win`}
                         </option>
                       );
                     })}

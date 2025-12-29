@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import moment from 'moment';
 import BettingSlip from '@/components/derby/BettingSlip';
+import OddsDisplay from '@/components/derby/OddsDisplay';
 
 export default function DerbyRace() {
   const navigate = useNavigate();
@@ -76,19 +77,41 @@ export default function DerbyRace() {
     return '6-Horse Main Event';
   };
 
-  const getHorseOdds = (horseId) => {
-    // Simple odds calculation based on skill rating
-    const horse = horses.find(h => h.id === horseId);
-    if (!horse) return '—';
+  const calculateOdds = (horse) => {
+    if (!horse) return null;
     
+    // New horses are unrated
+    if (horse.races_entered < 3) {
+      return { display: 'Unrated', isNew: true, decimal: null };
+    }
+
+    // Calculate base probability from skill rating
     const totalSkill = horses.reduce((sum, h) => sum + (h.skill_rating || 1000), 0);
-    const horseSkill = horse.skill_rating || 1000;
-    const probability = horseSkill / totalSkill;
-    const odds = (1 / probability) - 1;
+    const baseProb = horse.skill_rating / totalSkill;
+
+    // Adjust for recent form (win rate)
+    const winRate = horse.races_entered > 0 ? horse.wins / horse.races_entered : 0;
+    const formAdjustment = winRate * 0.2; // Up to 20% boost
+
+    // Adjust for place/show performance
+    const placeRate = horse.races_entered > 0 ? (horse.places + horse.shows) / horse.races_entered : 0;
+    const consistencyBonus = placeRate * 0.1; // Up to 10% boost
+
+    // Final probability
+    const adjustedProb = Math.min(0.95, Math.max(0.05, baseProb + formAdjustment + consistencyBonus));
     
-    if (horse.races_entered < 3) return 'Unrated';
+    // Convert to decimal odds
+    const decimalOdds = 1 / adjustedProb;
     
-    return odds.toFixed(1);
+    // Convert to fractional for display
+    const fractional = decimalOdds - 1;
+    
+    return {
+      display: `${fractional.toFixed(1)}:1`,
+      decimal: decimalOdds.toFixed(2),
+      isNew: false,
+      probability: (adjustedProb * 100).toFixed(1),
+    };
   };
 
   if (isLoading || !race) {
@@ -169,7 +192,10 @@ export default function DerbyRace() {
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Horses List */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Odds Board */}
+            <OddsDisplay horses={horses} entries={entries} />
+            
             <Card className="bg-slate-900/50 border-slate-700/50">
               <CardContent className="p-6">
                 <h2 className="text-xl font-bold text-white mb-4">Horses in Race</h2>
@@ -180,6 +206,8 @@ export default function DerbyRace() {
                     {entries.map((entry) => {
                       const horse = horses.find(h => h.id === entry.horse_id);
                       if (!horse) return null;
+                      
+                      const odds = calculateOdds(horse);
 
                       return (
                         <Card key={entry.id} className="bg-slate-800/50 border-slate-700/50">
@@ -196,13 +224,26 @@ export default function DerbyRace() {
                               </div>
                               <div className="text-right">
                                 <p className="text-slate-400 text-sm">Odds</p>
-                                <p className="text-amber-400 font-bold">{getHorseOdds(horse.id)}</p>
+                                {odds.isNew ? (
+                                  <div className="text-slate-500 font-bold text-sm">
+                                    Unrated
+                                    <p className="text-xs text-slate-600">New horse</p>
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <p className="text-amber-400 font-bold">{odds.display}</p>
+                                    <p className="text-slate-500 text-xs">{odds.probability}% chance</p>
+                                  </div>
+                                )}
                               </div>
                             </div>
                             <div className="mt-3 pt-3 border-t border-slate-700 flex gap-4 text-xs text-slate-400">
                               <span>Races: {horse.races_entered}</span>
                               <span>Wins: {horse.wins}</span>
                               <span>Rating: {horse.skill_rating}</span>
+                              {!odds.isNew && (
+                                <span className="text-green-400">Win: {horse.races_entered > 0 ? ((horse.wins / horse.races_entered) * 100).toFixed(0) : 0}%</span>
+                              )}
                             </div>
                           </CardContent>
                         </Card>
