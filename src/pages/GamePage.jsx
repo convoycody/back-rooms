@@ -175,6 +175,32 @@ export default function GamePage() {
     await refetchPlayer();
   };
 
+  const [errorId, setErrorId] = useState(null);
+
+  useEffect(() => {
+    if (game && !GAME_COMPONENTS[game.component] && !GAME_COMPONENTS[gameSlug]) {
+      // Log game load failure
+      base44.functions.invoke('logError', {
+        error_type: 'game_load_failed',
+        error_message: `Game component not found: ${game.component || gameSlug}`,
+        page_url: window.location.href,
+        game_slug: gameSlug,
+        additional_data: {
+          game_id: game.id,
+          game_name: game.name,
+          component: game.component,
+          available_components: Object.keys(GAME_COMPONENTS)
+        }
+      }).then(response => {
+        if (response.data?.error_id) {
+          setErrorId(response.data.error_id);
+        }
+      }).catch(err => {
+        console.error('Failed to log game error:', err);
+      });
+    }
+  }, [game, gameSlug]);
+
   if (!currentUser || !player || !game) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
@@ -188,9 +214,23 @@ export default function GamePage() {
   if (!GameComponent) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-2">Game Not Found</h1>
-          <p className="text-slate-400">This game is not available yet.</p>
+        <div className="text-center max-w-md">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold text-white mb-2">Game Loading Error</h1>
+          <p className="text-slate-400 mb-4">This game component failed to load.</p>
+          {errorId && (
+            <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 mb-4">
+              <p className="text-slate-400 text-sm mb-1">Error ID:</p>
+              <p className="text-amber-400 font-mono text-lg font-bold">{errorId}</p>
+              <p className="text-slate-500 text-xs mt-2">Please share this ID with support if the issue persists.</p>
+            </div>
+          )}
+          <button
+            onClick={() => navigate(createPageUrl('GameGallery'))}
+            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold rounded-xl hover:scale-105 transition-transform"
+          >
+            Back to Games
+          </button>
         </div>
       </div>
     );
