@@ -30,16 +30,24 @@ Deno.serve(async (req) => {
     const configs = await base44.asServiceRole.entities.RaceConfig.list();
     const config = configs[0];
 
+    // Get horses for skill ratings
+    const horsesData = await Promise.all(
+      entries.map(entry => 
+        base44.asServiceRole.entities.RaceHorse.filter({ id: entry.horse_id }).then(h => h[0])
+      )
+    );
+
     // Determine winner using RNG + skill + momentum
-    const results = entries.map(entry => {
-      const horse = base44.asServiceRole.entities.RaceHorse.filter({ id: entry.horse_id }).then(h => h[0]);
+    const results = entries.map((entry, idx) => {
+      const horse = horsesData[idx];
       const baseRng = Math.random();
-      const skillBonus = (entry.skill_rating || 1000) / 10000;
-      const momentumBonus = (entry.momentum_score || 0) * (config.momentum_impact_cap / 100);
+      const skillBonus = (horse?.skill_rating || 1000) / 10000;
+      const momentumBonus = (entry.momentum_score || 0) / 100; // Convert to decimal
       const finalScore = baseRng + skillBonus + momentumBonus;
       
       return {
         ...entry,
+        horse,
         finalScore,
       };
     });

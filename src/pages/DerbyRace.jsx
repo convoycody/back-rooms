@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import moment from 'moment';
 import BettingSlip from '@/components/derby/BettingSlip';
 import OddsDisplay from '@/components/derby/OddsDisplay';
+import MomentumTracker from '@/components/derby/MomentumTracker';
 
 export default function DerbyRace() {
   const navigate = useNavigate();
