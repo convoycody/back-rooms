@@ -142,6 +142,24 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
   const [reducedMotion, setReducedMotion] = useState(false);
 
   const celebrationTimerRef = useRef(null);
+  const payoutTable = {
+    '🍋': { 3: 3, 4: 10, 5: 25 },
+    '🍒': { 3: 5, 4: 15, 5: 40 },
+    '🍇': { 3: 8, 4: 20, 5: 60 },
+    '🔔': { 3: 10, 4: 30, 5: 100 },
+    '💎': { 3: 15, 4: 50, 5: 200 },
+    '7️⃣': { 3: 50, 4: 200, 5: 1000 },
+  };
+  const scatterPayout = { 3: 10, 4: 50, 5: 250 };
+  const paylinePaths = [
+    [1, 1, 1, 1, 1], // middle
+    [0, 0, 0, 0, 0], // top
+    [2, 2, 2, 2, 2], // bottom
+    [2, 1, 0, 1, 2], // V
+    [0, 1, 2, 1, 0], // inverted V
+  ];
+
+  const symbolBucket = ['🍋', '🍋', '🍒', '🍒', '🍇', '🔔', '💎', '7️⃣', '⭐', '💰'];
 
   // Check for reduced motion preference
   useEffect(() => {
@@ -174,10 +192,70 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
   const totalBet = betPerLine * lines;
   const minBet = houseConfig?.min_bet_per_line || 1;
   const maxBet = houseConfig?.max_bet_per_line || 100;
+  const slotConfigDisabled = houseConfig?.slots_enabled === false;
+
+  const buildLocalSpin = () => {
+    const grid = Array.from({ length: 5 }, () =>
+      Array.from({ length: 3 }, () => symbolBucket[Math.floor(Math.random() * symbolBucket.length)])
+    );
+
+    const line_wins = [];
+    let total_win = 0;
+
+    for (let i = 0; i < lines; i += 1) {
+      const path = paylinePaths[i];
+      const pulledSymbols = path.map((row, reel) => grid[reel][row]);
+      const anchorSymbol = pulledSymbols.find(sym => sym !== '⭐' && sym !== '💰') || '🍋';
+
+      if (!payoutTable[anchorSymbol]) continue;
+
+      let matchCount = 0;
+      pulledSymbols.forEach((sym) => {
+        if (sym === anchorSymbol || sym === '⭐') {
+          matchCount += 1;
+        }
+      });
+
+      if (matchCount >= 3) {
+        const payout = (payoutTable[anchorSymbol][matchCount] || 0) * betPerLine;
+        if (payout > 0) {
+          total_win += payout;
+          line_wins.push({
+            line: i + 1,
+            symbol: anchorSymbol,
+            count: matchCount,
+            payout,
+          });
+        }
+      }
+    }
+
+    const scatterCount = grid.flat().filter(sym => sym === '💰').length;
+    let scatter_win = null;
+    if (scatterCount >= 3) {
+      const payout = (scatterPayout[scatterCount] || scatterPayout[3]) * totalBet;
+      total_win += payout;
+      scatter_win = { count: scatterCount, payout };
+    }
+
+    const jackpot_won = line_wins.some(win => win.symbol === '7️⃣' && win.count === 5);
+
+    return {
+      bet_per_line: betPerLine,
+      lines,
+      total_bet: totalBet,
+      total_win,
+      net_result: total_win - totalBet,
+      line_wins,
+      scatter_win,
+      jackpot_won,
+      grid,
+    };
+  };
 
   const spin = async () => {
     if (state !== STATES.IDLE || balance < totalBet) return;
-    if (!houseConfig?.slots_enabled) {
+    if (slotConfigDisabled) {
       alert('Slots are currently disabled');
       return;
     }
@@ -282,7 +360,23 @@ export default function AdvancedSlotMachine({ balance, onSpinComplete, houseConf
       }
       
       alert(error.response?.data?.error || 'Spin failed');
-      setState(STATES.IDLE);
+
+      const fallbackResult = buildLocalSpin();
+      setGrid(fallbackResult.grid);
+      setLastResult(fallbackResult);
+      setHighlightedLines(fallbackResult.line_wins.map(w => w.line));
+      onSpinComplete(fallbackResult);
+      setClientSeed(Math.random().toString(36).substring(7));
+
+      const winMultiplier = fallbackResult.total_win / (fallbackResult.total_bet || 1);
+      const celebrationDuration = fallbackResult.jackpot_won ? 1800 : winMultiplier > 10 ? 1300 : winMultiplier > 2 ? 1000 : 700;
+      setState(STATES.CELEBRATING);
+
+      celebrationTimerRef.current = setTimeout(() => {
+        setLastResult(null);
+        setHighlightedLines([]);
+        setState(STATES.IDLE);
+      }, celebrationDuration);
     }
   };
 

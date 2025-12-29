@@ -181,11 +181,11 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
               transition={{ duration: 0.3 }}
               className="text-slate-400 text-sm mt-1"
             >
-              points locked in vault • Spendable: {spendableBalance.toLocaleString()}
+              Tickets + points stored in vault • Spendable: {spendableBalance.toLocaleString()}
             </motion.p>
             {config?.interest_rate_percentage > 0 && (
               <p className="text-green-400 text-xs mt-2 flex items-center gap-1">
-                📈 Earning {config.interest_rate_percentage}% APY
+                📈 Earning {config.interest_rate_percentage}% APY on vault balances
               </p>
             )}
           </div>
@@ -212,7 +212,7 @@ export default function VaultBalanceCard({ player, config, onUpdate }) {
                   <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
                     <p className="text-blue-300 text-sm flex items-center gap-2">
                       <AlertCircle className="w-4 h-4" />
-                      Vault points are locked for ticket purchases
+                      Vault points store your tickets safely and accrue interest
                     </p>
                   </div>
 

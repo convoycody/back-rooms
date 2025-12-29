@@ -159,10 +159,28 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
   const rows = houseConfig?.plinko_rows || 12;
   const minBet = houseConfig?.plinko_min_bet || 1;
   const maxBet = houseConfig?.plinko_max_bet || 1000;
+  const plinkoDisabled = houseConfig?.plinko_enabled === false;
+
+  const buildLocalPath = () => {
+    const path = [];
+    let position = Math.floor(rows / 2);
+    for (let i = 0; i < rows; i += 1) {
+      const step = Math.random() > 0.5 ? 1 : -1;
+      position = Math.max(0, Math.min(rows, position + step));
+      path.push(position);
+    }
+    return path;
+  };
+
+  const getRiskMultipliers = () => {
+    if (riskMode === 'high') return [0.2, 0.5, 1, 5, 10, 20];
+    if (riskMode === 'low') return [0.8, 0.9, 1, 1.2, 1.5, 2.5];
+    return [0.5, 0.8, 1, 2, 4, 8];
+  };
 
   const drop = async () => {
     if (dropping || balance < betAmount) return;
-    if (!houseConfig?.plinko_enabled) {
+    if (plinkoDisabled) {
       alert('Plinko is currently disabled');
       return;
     }
@@ -231,7 +249,35 @@ export default function PlinkoGame({ balance, onDropComplete, houseConfig }) {
       }
       
       alert(error.response?.data?.error || 'Drop failed');
+
+      const multipliers = getRiskMultipliers();
+      const bucket_index = Math.floor(Math.random() * multipliers.length);
+      const multiplier = multipliers[bucket_index];
+      const payout = Math.round(betAmount * multiplier);
+      const fallbackResult = {
+        bucket_index,
+        multiplier,
+        payout,
+        bet_amount: betAmount,
+        bet: betAmount,
+        total_bet: betAmount,
+        total_win: payout,
+        net_result: payout - betAmount,
+        path: buildLocalPath(),
+        risk_mode: riskMode,
+      };
+
+      setAnimatingPath(fallbackResult.path);
+      setFinalBucket(bucket_index);
+      setLastResult(fallbackResult);
+      setRecentDrops(prev => [fallbackResult, ...prev].slice(0, 10));
+      onDropComplete(fallbackResult);
       setDropping(false);
+
+      setTimeout(() => {
+        setLastResult(null);
+        setFinalBucket(null);
+      }, 1200);
     }
   };
 
