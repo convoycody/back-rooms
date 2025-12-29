@@ -320,6 +320,11 @@ export default function Admin() {
               DevOps Testing
             </Button>
           </Link>
+          <Link to={createPageUrl('ErrorLogs')}>
+            <Button className="bg-gradient-to-r from-red-500 to-rose-500 text-white font-bold">
+              🚨 Error Logs
+            </Button>
+          </Link>
           <Button 
             onClick={handleGiveBonus}
             className="bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold"
