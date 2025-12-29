@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 import VIPBadge from '@/components/VIPBadge';
 
 export default function Leaderboards() {
-  const { data: currentUser } = useQuery({
+  const { data: _currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });

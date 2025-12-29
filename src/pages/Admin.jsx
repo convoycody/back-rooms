@@ -21,7 +21,7 @@ export default function Admin() {
   const [resetConfirmText, setResetConfirmText] = useState('');
   const queryClient = useQueryClient();
 
-  const { data: currentUser, isLoading: userLoading } = useQuery({
+  const { isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
@@ -144,7 +144,7 @@ export default function Admin() {
   const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   
-  const playersLast24h = players.filter(p => new Date(p.updated_date) >= last24Hours).length;
+  const _playersLast24h = players.filter(p => new Date(p.updated_date) >= last24Hours).length;
   const playersLast7d = players.filter(p => new Date(p.updated_date) >= last7Days).length;
   
   const gamesLast24h = [...sessions, ...slotSessions].filter(s => new Date(s.created_date) >= last24Hours).length;

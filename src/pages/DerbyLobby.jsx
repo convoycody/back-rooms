@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Loader2, Trophy, Users, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import moment from 'moment';
+import { getLicenseCost, isDerbyEnabled, useRaceConfig } from '@/hooks/useRaceConfig';
 
 export default function DerbyLobby() {
   const navigate = useNavigate();
@@ -29,13 +30,7 @@ export default function DerbyLobby() {
     enabled: !!currentUser,
   });
 
-  const { data: config } = useQuery({
-    queryKey: ['raceConfig'],
-    queryFn: async () => {
-      const configs = await base44.entities.RaceConfig.list();
-      return configs[0];
-    },
-  });
+  const { data: config, isLoading: configLoading, error: configError } = useRaceConfig();
 
   const { data: openRaces = [], isLoading } = useQuery({
     queryKey: ['openRaces'],
@@ -67,7 +62,7 @@ export default function DerbyLobby() {
     return '6-Horse Main Event';
   };
 
-  if (!currentUser || !player) {
+  if (!currentUser || !player || configLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
@@ -75,7 +70,27 @@ export default function DerbyLobby() {
     );
   }
 
-  if (!config?.derby_enabled) {
+  if (configError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+        <Card className="bg-slate-900/50 border-red-700/50 max-w-xl w-full">
+          <CardContent className="p-6 text-center">
+            <h2 className="text-2xl font-bold text-white mb-2">Unable to load Derby</h2>
+            <p className="text-slate-400 mb-3">We couldn’t fetch race settings. Please try again.</p>
+            <Button
+              variant="outline"
+              className="border-slate-600 text-slate-200"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!isDerbyEnabled(config)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
         <Card className="bg-slate-900/50 border-slate-700/50">
@@ -140,11 +155,11 @@ export default function DerbyLobby() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-slate-400 text-sm">License Cost: {config?.owner_license_cost?.toLocaleString()} pts</p>
+                    <p className="text-slate-400 text-sm">License Cost: {getLicenseCost(config)?.toLocaleString()} pts</p>
                     <Button
                       onClick={() => navigate(createPageUrl('DerbyStable'))}
                       className="w-full bg-amber-600 hover:bg-amber-700"
-                      disabled={player.points_balance < (config?.owner_license_cost || 50000)}
+                      disabled={player.points_balance < getLicenseCost(config)}
                     >
                       Get Owner License
                     </Button>

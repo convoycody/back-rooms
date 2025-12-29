@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function BettingSlip({ race, horses, entries, player, isOwnerInRace, isBettingOpen, myBets }) {
@@ -17,7 +17,7 @@ export default function BettingSlip({ race, horses, entries, player, isOwnerInRa
   const [amount, setAmount] = useState('');
 
   const placeBetMutation = useMutation({
-    mutationFn: async (betData) => {
+    mutationFn: async () => {
       // Validate
       if (!selectedHorse || !amount || parseFloat(amount) <= 0) {
         throw new Error('Please select a horse and enter amount');

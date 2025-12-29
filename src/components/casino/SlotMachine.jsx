@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Loader2 } from 'lucide-react';
@@ -91,7 +91,6 @@ export default function SlotMachine({ balance, onSpin, disabled }) {
   const [betAmount, setBetAmount] = useState(10);
   const [lastWin, setLastWin] = useState(null);
   const [showJackpot, setShowJackpot] = useState(false);
-  const audioRef = useRef(null);
 
   const betOptions = [10, 25, 50, 100, 250, 500];
 

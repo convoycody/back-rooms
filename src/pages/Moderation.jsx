@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Trash2, Ban, Clock, Shield, MessageSquare } from 'lucide-react';
+import { Trash2, Ban, Clock, Shield, MessageSquare } from 'lucide-react';
 import moment from 'moment';
 import { toast } from 'sonner';
 import {

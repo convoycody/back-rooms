@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Loader2, ArrowLeft, Plus, Trophy, TrendingUp, Users, DollarSign, Zap } from 'lucide-react';
+import { Loader2, ArrowLeft, Trophy, TrendingUp, Users, DollarSign, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function DerbyAdmin() {

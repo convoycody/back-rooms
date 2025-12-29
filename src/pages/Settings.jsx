@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { Loader2, ArrowLeft, Shield, Eye, EyeOff } from 'lucide-react';
+import { Loader2, ArrowLeft, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Settings() {

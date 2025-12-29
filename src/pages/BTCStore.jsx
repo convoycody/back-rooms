@@ -15,7 +15,7 @@ export default function BTCStore() {
   const [selectedPack, setSelectedPack] = useState(null);
   const [creating, setCreating] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState(null);
-  const [currentInvoiceId, setCurrentInvoiceId] = useState(null);
+  const [_currentInvoiceId, setCurrentInvoiceId] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: currentUser, isLoading: userLoading } = useQuery({

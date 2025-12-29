@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Loader2, ArrowLeft, Sparkles, Clock, Coins, Users, Trophy, Shuffle } from 'lucide-react';
+import { Loader2, ArrowLeft, Sparkles, Clock, Coins, Users, Shuffle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import moment from 'moment';
 
 export default function NumbersLottery() {
-  const navigate = useNavigate();
   const [selectedMain, setSelectedMain] = useState([]);
   const [selectedPower, setSelectedPower] = useState(null);
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
@@ -140,7 +139,6 @@ export default function NumbersLottery() {
     );
   }
 
-  const vaultBalance = player?.vault_points || 0;
   const totalPot = activeDraw ? activeDraw.total_pot + (activeDraw.rollover_from_previous || 0) : 0;
 
   return (

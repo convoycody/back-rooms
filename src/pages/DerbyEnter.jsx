@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, ArrowLeft, Trophy } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import moment from 'moment';

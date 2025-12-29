@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, ArrowLeft, Gamepad2, Coins, Trophy, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 

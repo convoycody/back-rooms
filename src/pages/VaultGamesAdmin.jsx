@@ -9,8 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, ArrowLeft, Save, PlayCircle, Plus } from 'lucide-react';
+import { Loader2, ArrowLeft, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function VaultGamesAdmin() {

@@ -9,7 +9,7 @@ import ChatSidebar from '@/components/chat/ChatSidebar';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Layout({ children, currentPageName }) {
-  const [lastChange, setLastChange] = useState(0);
+  const [lastChange] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   

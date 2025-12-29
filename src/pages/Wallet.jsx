@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, ArrowLeft, Wallet as WalletIcon, TrendingUp, TrendingDown, Clock } from 'lucide-react';
+import { Loader2, ArrowLeft, Wallet as WalletIcon, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import moment from 'moment';
 import DailyBonusCard from '@/components/casino/DailyBonusCard';

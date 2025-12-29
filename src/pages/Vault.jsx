@@ -14,7 +14,6 @@ import {
   ArrowUpFromLine,
   Ticket,
   Trophy,
-  Clock,
   ShieldCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
