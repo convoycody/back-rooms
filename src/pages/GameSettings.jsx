@@ -1,40 +1,48 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { useNavigate, Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Loader2, ArrowLeft, Settings, Gamepad2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, ArrowLeft, Gamepad2, Coins, Trophy, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function GameSettings() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const { data: games = [], isLoading: gamesLoading } = useQuery({
-    queryKey: ['games'],
-    queryFn: () => base44.entities.Game.list('sort_order'),
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
   });
 
-  const updateGameMutation = useMutation({
-    mutationFn: async ({ gameId, updates }) => {
-      await base44.entities.Game.update(gameId, updates);
+  const { data: player, isLoading } = useQuery({
+    queryKey: ['player', currentUser?.email],
+    queryFn: async () => {
+      if (!currentUser) return null;
+      const players = await base44.entities.Player.filter({ created_by: currentUser.email });
+      return players[0] || null;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['games'] });
-      toast.success('Game settings updated');
-    },
+    enabled: !!currentUser,
   });
 
-  if (gamesLoading) {
+  const isAdmin = player?.is_admin || currentUser?.role === 'admin';
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+        <Card className="bg-slate-900/50 border-red-500/50">
+          <CardContent className="p-8 text-center">
+            <h2 className="text-2xl font-bold text-white mb-2">Access Denied</h2>
+            <p className="text-slate-400">Admin privileges required</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -54,133 +62,107 @@ export default function GameSettings() {
             <div>
               <h1 className="text-3xl font-black text-white flex items-center gap-3">
                 <Gamepad2 className="w-8 h-8 text-purple-500" />
-                Game Settings
+                Game Settings Dashboard
               </h1>
-              <p className="text-slate-400">Configure limits and settings for each game</p>
+              <p className="text-slate-400">Configure all game types and settings</p>
             </div>
           </div>
         </div>
 
-        {/* Games Grid */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {games.map((game) => (
-            <Card key={game.id} className="bg-slate-900/50 border-slate-700/50">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-3">
-                  <span className="text-3xl">{game.icon}</span>
-                  <div>
-                    <p className="text-xl">{game.name}</p>
-                    <p className="text-slate-400 text-sm font-normal">{game.tagline}</p>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Enabled Toggle */}
-                <div className="flex items-center justify-between pb-4 border-b border-slate-700">
-                  <div>
-                    <Label className="text-white">Game Enabled</Label>
-                    <p className="text-slate-400 text-sm">Allow players to access this game</p>
-                  </div>
-                  <Switch
-                    checked={game.enabled}
-                    onCheckedChange={(checked) => updateGameMutation.mutate({ 
-                      gameId: game.id, 
-                      updates: { enabled: checked } 
-                    })}
-                  />
-                </div>
+        {/* Classic Games */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <h2 className="text-2xl font-black text-white mb-4 flex items-center gap-2">
+            <Zap className="w-6 h-6 text-blue-400" />
+            Classic Casino Games
+          </h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            <Link to={createPageUrl('SlotsAdmin')}>
+              <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-700/50 hover:scale-105 transition-transform cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <span className="text-5xl block mb-3">🎰</span>
+                  <h3 className="text-xl font-bold text-white mb-1">Slots</h3>
+                  <p className="text-slate-400 text-sm">RTP, volatility, jackpot, bet limits</p>
+                </CardContent>
+              </Card>
+            </Link>
 
-                {/* Featured Toggle */}
-                <div className="flex items-center justify-between pb-4 border-b border-slate-700">
-                  <div>
-                    <Label className="text-white">Featured Game</Label>
-                    <p className="text-slate-400 text-sm">Show in featured section</p>
-                  </div>
-                  <Switch
-                    checked={game.featured}
-                    onCheckedChange={(checked) => updateGameMutation.mutate({ 
-                      gameId: game.id, 
-                      updates: { featured: checked } 
-                    })}
-                  />
-                </div>
+            <Link to={createPageUrl('PlinkoAdmin')}>
+              <Card className="bg-gradient-to-br from-orange-900/30 to-red-900/30 border-orange-700/50 hover:scale-105 transition-transform cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <span className="text-5xl block mb-3">🎯</span>
+                  <h3 className="text-xl font-bold text-white mb-1">Plinko</h3>
+                  <p className="text-slate-400 text-sm">Rows, bet limits, multipliers</p>
+                </CardContent>
+              </Card>
+            </Link>
 
-                {/* Bet Limits */}
-                <div className="space-y-4">
-                  <h3 className="text-white font-bold flex items-center gap-2">
-                    <Settings className="w-4 h-4" />
-                    Betting Limits
-                  </h3>
-                  
-                  <div>
-                    <Label className="text-white text-sm mb-2 block">Minimum Bet</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        value={game.min_bet || 1}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value) || 1;
-                          updateGameMutation.mutate({ 
-                            gameId: game.id, 
-                            updates: { min_bet: Math.max(1, val) } 
-                          });
-                        }}
-                        disabled={!game.enabled}
-                        className="bg-slate-800 border-slate-600 text-white font-bold text-lg"
-                      />
-                      <span className="text-slate-400 text-sm">pts</span>
-                    </div>
-                  </div>
+            <Link to={createPageUrl('BlackjackAdmin')}>
+              <Card className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-green-700/50 hover:scale-105 transition-transform cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <span className="text-5xl block mb-3">🃏</span>
+                  <h3 className="text-xl font-bold text-white mb-1">Blackjack</h3>
+                  <p className="text-slate-400 text-sm">Payouts, bet limits, rules</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </motion.div>
 
-                  <div>
-                    <Label className="text-white text-sm mb-2 block">Maximum Bet</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        value={game.max_bet || 1000}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value) || 1000;
-                          updateGameMutation.mutate({ 
-                            gameId: game.id, 
-                            updates: { max_bet: Math.max(1, val) } 
-                          });
-                        }}
-                        disabled={!game.enabled}
-                        className="bg-slate-800 border-slate-600 text-white font-bold text-lg"
-                      />
-                      <span className="text-slate-400 text-sm">pts</span>
-                    </div>
-                  </div>
-                </div>
+        {/* Vault Games */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
+          <h2 className="text-2xl font-black text-white mb-4 flex items-center gap-2">
+            <Coins className="w-6 h-6 text-amber-400" />
+            Vault Games (Lottery)
+          </h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Link to={createPageUrl('FiftyFiftyAdmin')}>
+              <Card className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-green-700/50 hover:scale-105 transition-transform cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <span className="text-5xl block mb-3">🎯</span>
+                  <h3 className="text-xl font-bold text-white mb-1">50/50 Pool</h3>
+                  <p className="text-slate-400 text-sm">Ticket price, draw schedule, pool caps</p>
+                </CardContent>
+              </Card>
+            </Link>
 
-                {/* Category Badge */}
-                <div className="pt-4 border-t border-slate-700">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-400 text-sm">Category</span>
-                    <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium">
-                      {game.category}
-                    </span>
-                  </div>
-                  {game.coming_soon && (
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-slate-400 text-sm">Status</span>
-                      <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium">
-                        Coming Soon
-                      </span>
-                    </div>
-                  )}
-                </div>
+            <Link to={createPageUrl('NumbersLotteryAdmin')}>
+              <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-700/50 hover:scale-105 transition-transform cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <span className="text-5xl block mb-3">🎱</span>
+                  <h3 className="text-xl font-bold text-white mb-1">Numbers Lottery</h3>
+                  <p className="text-slate-400 text-sm">Numbers config, payouts, rollover</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Flagship Platform Games */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <h2 className="text-2xl font-black text-white mb-4 flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-amber-400" />
+            Flagship Platform Games
+          </h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Link to={createPageUrl('DerbyAdmin')}>
+              <Card className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 border-amber-700/50 hover:scale-105 transition-transform cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <span className="text-5xl block mb-3">🏇</span>
+                  <h3 className="text-xl font-bold text-white mb-1">Derby Racetrack</h3>
+                  <p className="text-slate-400 text-sm">Entry fees, purses, odds, momentum</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Card className="bg-slate-800/30 border-slate-700/50 opacity-50">
+              <CardContent className="p-6 text-center">
+                <span className="text-5xl block mb-3">🎮</span>
+                <h3 className="text-xl font-bold text-slate-500 mb-1">More Coming Soon</h3>
+                <p className="text-slate-600 text-sm">Future flagship games</p>
               </CardContent>
             </Card>
-          ))}
-        </div>
-
-        {games.length === 0 && (
-          <div className="text-center py-20">
-            <Gamepad2 className="w-16 h-16 mx-auto mb-4 text-slate-600" />
-            <p className="text-slate-400 text-lg">No games configured yet</p>
           </div>
-        )}
+        </motion.div>
       </div>
     </div>
   );

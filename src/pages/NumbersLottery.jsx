@@ -164,6 +164,74 @@ export default function NumbersLottery() {
           <p className="text-slate-400 text-sm">Pick your numbers and win big prizes</p>
         </div>
 
+        {/* No Active Draw - How It Works */}
+        {!activeDraw && (
+          <Card className="bg-slate-900/50 border-slate-700/50 mb-6">
+            <CardContent className="p-8">
+              <div className="text-center mb-6">
+                <Clock className="w-16 h-16 text-purple-500 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-white mb-2">No Active Draw</h3>
+                <p className="text-slate-400 mb-4">Next draw starting soon!</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-700/30 rounded-lg p-6">
+                <h4 className="text-white font-bold mb-4 text-lg">🎱 How Numbers Lottery Works</h4>
+                <div className="space-y-3 text-sm text-slate-300">
+                  <div className="flex items-start gap-3">
+                    <span className="text-purple-400 font-bold">1.</span>
+                    <p>Pick <span className="text-amber-400 font-bold">{config?.main_numbers_count || 5} main numbers</span> ({config?.main_numbers_min || 1}-{config?.main_numbers_max || 69}) + <span className="text-pink-400 font-bold">1 power number</span> ({config?.power_number_min || 1}-{config?.power_number_max || 26})</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-purple-400 font-bold">2.</span>
+                    <p>Or use <span className="text-blue-400 font-bold">Quick Pick</span> for random numbers</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-purple-400 font-bold">3.</span>
+                    <p>Wait for the <span className="text-amber-400 font-bold">scheduled draw</span></p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-purple-400 font-bold">4.</span>
+                    <p>Match numbers to win prizes!</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Prize Tiers */}
+              <div className="mt-4 bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                <p className="text-white font-bold mb-3 text-sm">🏆 Prize Tiers</p>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">5 Main + Power</span>
+                    <span className="text-amber-400 font-bold">JACKPOT ({config?.payout_tier_5_match_percentage || 50}% of pot)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">5 Main</span>
+                    <span className="text-green-400 font-bold">{config?.payout_tier_5_percentage || 10}% of pot</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">4 Main + Power</span>
+                    <span className="text-blue-400 font-bold">{config?.payout_tier_4_power_percentage || 5}% of pot</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">4 Main</span>
+                    <span className="text-purple-400 font-bold">{config?.payout_tier_4_percentage || 3}% of pot</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">3 Main + Power</span>
+                    <span className="text-pink-400 font-bold">{config?.payout_tier_3_power_percentage || 2}% of pot</span>
+                  </div>
+                </div>
+              </div>
+
+              {config?.rollover_enabled && (
+                <div className="mt-4 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-center">
+                  <p className="text-amber-400 text-sm font-bold">💰 Jackpot rolls over if no top-tier winner!</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Active Draw */}
         {activeDraw && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">

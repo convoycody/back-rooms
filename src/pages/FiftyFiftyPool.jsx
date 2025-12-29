@@ -287,10 +287,50 @@ export default function FiftyFiftyPool() {
         {/* No Active Pool */}
         {!activePool && (
           <Card className="bg-slate-900/50 border-slate-700/50 mb-8">
-            <CardContent className="p-12 text-center">
-              <Clock className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">No Active Pool</h3>
-              <p className="text-slate-400">Check back soon for the next draw!</p>
+            <CardContent className="p-8">
+              <div className="text-center mb-6">
+                <Clock className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-white mb-2">No Active Pool</h3>
+                <p className="text-slate-400 mb-4">Check back soon for the next draw!</p>
+              </div>
+
+              {/* How It Works */}
+              <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border border-green-700/30 rounded-lg p-6">
+                <h4 className="text-white font-bold mb-4 text-lg">🎯 How 50/50 Pool Works</h4>
+                <div className="space-y-3 text-sm text-slate-300">
+                  <div className="flex items-start gap-3">
+                    <span className="text-green-400 font-bold">1.</span>
+                    <p>Buy tickets from your <span className="text-amber-400 font-bold">vault balance</span> ({config?.ticket_price?.toLocaleString()} points each)</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-green-400 font-bold">2.</span>
+                    <p>All ticket sales go into a <span className="text-purple-400 font-bold">total pot</span></p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-green-400 font-bold">3.</span>
+                    <p>At draw time, <span className="text-amber-400 font-bold">one random ticket wins 50%</span> of the pot</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-green-400 font-bold">4.</span>
+                    <p>The other 50% goes to the platform reserve</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-blue-400 font-bold">💡</span>
+                    <p>More tickets = bigger pot = bigger potential win!</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Example */}
+              <div className="mt-4 bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                <p className="text-xs text-slate-400 mb-2">Example:</p>
+                <p className="text-sm text-slate-300">
+                  100 tickets sold × {config?.ticket_price?.toLocaleString()} pts = <span className="text-amber-400 font-bold">{(100 * (config?.ticket_price || 1000)).toLocaleString()} pts</span> pot
+                </p>
+                <p className="text-sm text-green-400 font-bold mt-1">
+                  Winner gets: {((100 * (config?.ticket_price || 1000)) / 2).toLocaleString()} pts
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}
