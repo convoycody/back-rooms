@@ -271,16 +271,16 @@ export default function UserProfile() {
                     
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-400">XP Progress</span>
+                        <span className="text-slate-400">VIP Progress</span>
                         <span className="text-purple-400 font-bold">
-                          {(player.vip_points || 0).toLocaleString()} XP
+                          {(player.vip_points || 0).toLocaleString()} pts
                         </span>
                       </div>
                       {nextTier && (
                         <>
                           <Progress value={vipProgress} className="h-2" />
                           <p className="text-xs text-slate-500 text-right">
-                            {nextTier.threshold.toLocaleString()} XP for {nextTier.name}
+                            {nextTier.threshold.toLocaleString()} pts for {nextTier.name}
                           </p>
                         </>
                       )}
