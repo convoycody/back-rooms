@@ -1,13 +1,15 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DerbySystemReadme from './DerbySystemReadme';
 
 export default function DerbySystemBreakdown() {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-black text-white mb-3">🏇 Derby Racetrack System</h1>
-        <p className="text-slate-400">Complete Technical & Scientific Breakdown</p>
+        <p className="text-slate-400 mb-4">Complete Technical & Scientific Breakdown</p>
+        <DerbySystemReadme />
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
