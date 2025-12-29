@@ -136,7 +136,31 @@ export default function DerbyAdmin() {
           </TabsList>
 
           {/* General Settings */}
-          <TabsContent value="general">
+          <TabsContent value="general" className="space-y-6">
+            {/* Outcome Weighting Breakdown */}
+            <Card className="bg-slate-800/50 border-slate-700/50">
+              <CardHeader>
+                <CardTitle className="text-white text-sm">Outcome Weighting (Transparency)</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-300">🎲 RNG (Randomness)</span>
+                  <span className="text-amber-400 font-bold">{config?.rng_weight_percentage || 75}%</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-300">📊 Skill Rating</span>
+                  <span className="text-blue-400 font-bold">{config?.skill_weight_percentage || 17}%</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-300">⚡ Momentum (Max)</span>
+                  <span className="text-purple-400 font-bold">{config?.momentum_weight_percentage || 8}%</span>
+                </div>
+                <p className="text-slate-500 text-xs mt-2 pt-2 border-t border-slate-700">
+                  These percentages show how each factor contributes to race outcomes. RNG ensures fairness, skill rewards performance, momentum rewards engagement.
+                </p>
+              </CardContent>
+            </Card>
+
             <Card className="bg-slate-900/50 border-slate-700/50">
               <CardHeader>
                 <CardTitle className="text-white">General Settings</CardTitle>
@@ -188,6 +212,17 @@ export default function DerbyAdmin() {
                     onChange={(e) => updateConfigMutation.mutate({ ...config, momentum_impact_cap: parseInt(e.target.value) })}
                     className="bg-slate-800 border-slate-700 text-white"
                   />
+                </div>
+
+                <div>
+                  <Label className="text-slate-400">Minimum Pool Size</Label>
+                  <Input
+                    type="number"
+                    value={config?.min_pool_size || 0}
+                    onChange={(e) => updateConfigMutation.mutate({ ...config, min_pool_size: parseInt(e.target.value) })}
+                    className="bg-slate-800 border-slate-700 text-white"
+                  />
+                  <p className="text-slate-500 text-xs mt-1">Minimum total betting pool to run race (0 = no minimum, prevents low-pool manipulation)</p>
                 </div>
               </CardContent>
             </Card>

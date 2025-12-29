@@ -46,12 +46,9 @@ export default function OddsDisplay({ horses, entries }) {
   return (
     <Card className="bg-slate-900/50 border-slate-700/50">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-white font-bold">Live Odds</h3>
-          <span className="text-xs text-slate-500 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" />
-            Track odds
-          </span>
+        <div className="mb-4">
+          <h3 className="text-white font-bold">Projected Odds</h3>
+          <p className="text-slate-400 text-xs mt-1">Final payout depends on total pool at race close</p>
         </div>
         
         <div className="space-y-2">

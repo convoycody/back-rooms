@@ -4,8 +4,16 @@ import Announcements from './pages/Announcements';
 import BTCPaySetup from './pages/BTCPaySetup';
 import BTCStore from './pages/BTCStore';
 import CryptoDisclosure from './pages/CryptoDisclosure';
+import DerbyAdmin from './pages/DerbyAdmin';
+import DerbyBreakdown from './pages/DerbyBreakdown';
+import DerbyEnter from './pages/DerbyEnter';
+import DerbyLobby from './pages/DerbyLobby';
+import DerbyRace from './pages/DerbyRace';
+import DerbyRaceShare from './pages/DerbyRaceShare';
+import DerbyStable from './pages/DerbyStable';
 import DevOpsTest from './pages/DevOpsTest';
 import Fairness from './pages/Fairness';
+import FiftyFiftyAdmin from './pages/FiftyFiftyAdmin';
 import FiftyFiftyPool from './pages/FiftyFiftyPool';
 import FiftyFiftyShare from './pages/FiftyFiftyShare';
 import GamblingDisclaimer from './pages/GamblingDisclaimer';
@@ -22,6 +30,7 @@ import LargeWinnings from './pages/LargeWinnings';
 import Leaderboards from './pages/Leaderboards';
 import Moderation from './pages/Moderation';
 import NumbersLottery from './pages/NumbersLottery';
+import NumbersLotteryAdmin from './pages/NumbersLotteryAdmin';
 import NumbersLotteryShare from './pages/NumbersLotteryShare';
 import PlayGame from './pages/PlayGame';
 import PlayerProfile from './pages/PlayerProfile';
@@ -39,15 +48,6 @@ import Vault from './pages/Vault';
 import VaultGamesAdmin from './pages/VaultGamesAdmin';
 import VaultTickets from './pages/VaultTickets';
 import Wallet from './pages/Wallet';
-import DerbyAdmin from './pages/DerbyAdmin';
-import DerbyLobby from './pages/DerbyLobby';
-import DerbyRace from './pages/DerbyRace';
-import DerbyStable from './pages/DerbyStable';
-import DerbyEnter from './pages/DerbyEnter';
-import DerbyRaceShare from './pages/DerbyRaceShare';
-import FiftyFiftyAdmin from './pages/FiftyFiftyAdmin';
-import NumbersLotteryAdmin from './pages/NumbersLotteryAdmin';
-import DerbyBreakdown from './pages/DerbyBreakdown';
 import __Layout from './Layout.jsx';
 
 
@@ -58,8 +58,16 @@ export const PAGES = {
     "BTCPaySetup": BTCPaySetup,
     "BTCStore": BTCStore,
     "CryptoDisclosure": CryptoDisclosure,
+    "DerbyAdmin": DerbyAdmin,
+    "DerbyBreakdown": DerbyBreakdown,
+    "DerbyEnter": DerbyEnter,
+    "DerbyLobby": DerbyLobby,
+    "DerbyRace": DerbyRace,
+    "DerbyRaceShare": DerbyRaceShare,
+    "DerbyStable": DerbyStable,
     "DevOpsTest": DevOpsTest,
     "Fairness": Fairness,
+    "FiftyFiftyAdmin": FiftyFiftyAdmin,
     "FiftyFiftyPool": FiftyFiftyPool,
     "FiftyFiftyShare": FiftyFiftyShare,
     "GamblingDisclaimer": GamblingDisclaimer,
@@ -76,6 +84,7 @@ export const PAGES = {
     "Leaderboards": Leaderboards,
     "Moderation": Moderation,
     "NumbersLottery": NumbersLottery,
+    "NumbersLotteryAdmin": NumbersLotteryAdmin,
     "NumbersLotteryShare": NumbersLotteryShare,
     "PlayGame": PlayGame,
     "PlayerProfile": PlayerProfile,
@@ -93,15 +102,6 @@ export const PAGES = {
     "VaultGamesAdmin": VaultGamesAdmin,
     "VaultTickets": VaultTickets,
     "Wallet": Wallet,
-    "DerbyAdmin": DerbyAdmin,
-    "DerbyLobby": DerbyLobby,
-    "DerbyRace": DerbyRace,
-    "DerbyStable": DerbyStable,
-    "DerbyEnter": DerbyEnter,
-    "DerbyRaceShare": DerbyRaceShare,
-    "FiftyFiftyAdmin": FiftyFiftyAdmin,
-    "NumbersLotteryAdmin": NumbersLotteryAdmin,
-    "DerbyBreakdown": DerbyBreakdown,
 }
 
 export const pagesConfig = {
