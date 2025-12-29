@@ -17,6 +17,7 @@ export default function FiftyFiftyPool() {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -88,7 +89,7 @@ export default function FiftyFiftyPool() {
     },
   });
 
-  const handleBuyTickets = () => {
+  const handleBuyTickets = async () => {
     if (!activePool) {
       toast.error('No active pool available');
       return;
@@ -97,7 +98,33 @@ export default function FiftyFiftyPool() {
       toast.error('Quantity must be between 1 and 50');
       return;
     }
-    buyTicketMutation.mutate({ pool_id: activePool.id, qty: quantity });
+
+    const ticketPrice = config?.ticket_price || 1000;
+    const totalCost = ticketPrice * quantity;
+    const vaultBalance = player?.vault_points || 0;
+    const spendableBalance = player?.points_balance || 0;
+    const shortfall = totalCost - vaultBalance;
+
+    try {
+      setPurchaseLoading(true);
+      if (shortfall > 0) {
+        if (spendableBalance < shortfall) {
+          toast.error('Not enough points to cover these tickets.');
+          setPurchaseLoading(false);
+          return;
+        }
+        await base44.functions.invoke('depositToVault', { amount: shortfall });
+        queryClient.invalidateQueries({ queryKey: ['player'] });
+        queryClient.invalidateQueries({ queryKey: ['vaultTransactions', player?.id] });
+      }
+
+      await buyTicketMutation.mutateAsync({ pool_id: activePool.id, qty: quantity });
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to purchase ticket');
+      setPurchaseLoading(false);
+    } finally {
+      setPurchaseLoading(false);
+    }
   };
 
   if (poolLoading || !player) {
@@ -109,8 +136,9 @@ export default function FiftyFiftyPool() {
   }
 
   const vaultBalance = player?.vault_points || 0;
+  const spendableBalance = player?.points_balance || 0;
   const ticketPrice = config?.ticket_price || 1000;
-  const maxTicketsAffordable = Math.floor(vaultBalance / ticketPrice);
+  const maxTicketsAffordable = Math.floor((vaultBalance + spendableBalance) / ticketPrice);
   const cutoffTime = activePool ? new Date(activePool.cutoff_at) : null;
   const isCutoffPassed = cutoffTime && new Date() >= cutoffTime;
   const potentialWinning = activePool ? Math.floor(activePool.total_pot * 0.5) + (ticketPrice * quantity * 0.5) : 0;
@@ -224,12 +252,18 @@ export default function FiftyFiftyPool() {
                       <DialogTitle className="text-white">Purchase 50/50 Tickets</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 pt-4">
-                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
-                        <p className="text-amber-300 text-sm">
-                          Vault Balance: <span className="font-bold">{vaultBalance.toLocaleString()}</span> pts
+                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 space-y-1">
+                        <p className="text-amber-300 text-sm font-semibold">Ticket Funds</p>
+                        <p className="text-white text-sm flex items-center justify-between">
+                          <span>Vault safe</span>
+                          <span className="font-bold">{vaultBalance.toLocaleString()} pts</span>
+                        </p>
+                        <p className="text-white text-sm flex items-center justify-between">
+                          <span>Spendable balance</span>
+                          <span className="font-bold">{spendableBalance.toLocaleString()} pts</span>
                         </p>
                         <p className="text-slate-400 text-xs mt-1">
-                          Can afford: {maxTicketsAffordable} tickets
+                          We auto-move points from spendable to vault to mint your tickets. Can afford: {maxTicketsAffordable} tickets.
                         </p>
                       </div>
 
@@ -257,23 +291,23 @@ export default function FiftyFiftyPool() {
 
                       <Button
                         onClick={handleBuyTickets}
-                        disabled={buyTicketMutation.isPending || vaultBalance < ticketPrice * quantity}
+                        disabled={buyTicketMutation.isPending || purchaseLoading || (vaultBalance + spendableBalance) < ticketPrice * quantity}
                         className="w-full bg-green-600 hover:bg-green-700 text-white font-bold"
                       >
-                        {buyTicketMutation.isPending ? (
+                        {buyTicketMutation.isPending || purchaseLoading ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                           `Buy ${quantity} Ticket${quantity > 1 ? 's' : ''}`
                         )}
                       </Button>
 
-                      {vaultBalance < ticketPrice && (
+                      {(vaultBalance + spendableBalance) < ticketPrice * quantity && (
                         <Button
                           variant="outline"
                           className="w-full"
                           onClick={() => navigate(createPageUrl('Wallet'))}
                         >
-                          Deposit to Vault
+                          Add points to continue
                         </Button>
                       )}
                     </div>
@@ -300,7 +334,7 @@ export default function FiftyFiftyPool() {
                 <div className="space-y-3 text-sm text-slate-300">
                   <div className="flex items-start gap-3">
                     <span className="text-green-400 font-bold">1.</span>
-                    <p>Buy tickets from your <span className="text-amber-400 font-bold">vault balance</span> ({config?.ticket_price?.toLocaleString()} points each)</p>
+                    <p>Tickets are stored in your vault wallet ({config?.ticket_price?.toLocaleString()} points each).</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <span className="text-green-400 font-bold">2.</span>
