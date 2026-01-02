@@ -12,6 +12,7 @@ import DerbyRace from './pages/DerbyRace';
 import DerbyRaceShare from './pages/DerbyRaceShare';
 import DerbyStable from './pages/DerbyStable';
 import DevOpsTest from './pages/DevOpsTest';
+import ErrorLogs from './pages/ErrorLogs';
 import Fairness from './pages/Fairness';
 import FiftyFiftyAdmin from './pages/FiftyFiftyAdmin';
 import FiftyFiftyPool from './pages/FiftyFiftyPool';
@@ -40,6 +41,7 @@ import Referrals from './pages/Referrals';
 import ResponsiblePlay from './pages/ResponsiblePlay';
 import ScratchersMetrics from './pages/ScratchersMetrics';
 import Settings from './pages/Settings';
+import SlotsBreakdown from './pages/SlotsBreakdown';
 import Support from './pages/Support';
 import TermsOfUse from './pages/TermsOfUse';
 import UserProfile from './pages/UserProfile';
@@ -48,8 +50,6 @@ import Vault from './pages/Vault';
 import VaultGamesAdmin from './pages/VaultGamesAdmin';
 import VaultTickets from './pages/VaultTickets';
 import Wallet from './pages/Wallet';
-import ErrorLogs from './pages/ErrorLogs';
-import SlotsBreakdown from './pages/SlotsBreakdown';
 import __Layout from './Layout.jsx';
 
 
@@ -68,6 +68,7 @@ export const PAGES = {
     "DerbyRaceShare": DerbyRaceShare,
     "DerbyStable": DerbyStable,
     "DevOpsTest": DevOpsTest,
+    "ErrorLogs": ErrorLogs,
     "Fairness": Fairness,
     "FiftyFiftyAdmin": FiftyFiftyAdmin,
     "FiftyFiftyPool": FiftyFiftyPool,
@@ -96,6 +97,7 @@ export const PAGES = {
     "ResponsiblePlay": ResponsiblePlay,
     "ScratchersMetrics": ScratchersMetrics,
     "Settings": Settings,
+    "SlotsBreakdown": SlotsBreakdown,
     "Support": Support,
     "TermsOfUse": TermsOfUse,
     "UserProfile": UserProfile,
@@ -104,8 +106,6 @@ export const PAGES = {
     "VaultGamesAdmin": VaultGamesAdmin,
     "VaultTickets": VaultTickets,
     "Wallet": Wallet,
-    "ErrorLogs": ErrorLogs,
-    "SlotsBreakdown": SlotsBreakdown,
 }
 
 export const pagesConfig = {

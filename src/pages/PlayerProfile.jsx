@@ -71,6 +71,27 @@ export default function PlayerProfile() {
     enabled: !!playerId,
   });
 
+  const { data: referrals = [] } = useQuery({
+    queryKey: ['referrals', playerId],
+    queryFn: () => base44.entities.Referral.filter({ referrer_id: playerId }),
+    enabled: !!playerId,
+  });
+
+  const { data: referredBy } = useQuery({
+    queryKey: ['referredBy', playerId],
+    queryFn: async () => {
+      const refs = await base44.entities.Referral.filter({ referee_id: playerId });
+      return refs[0] || null;
+    },
+    enabled: !!playerId,
+  });
+
+  const { data: scratchCards = [] } = useQuery({
+    queryKey: ['scratchCards', playerId],
+    queryFn: () => base44.entities.ScratchCard.filter({ player_id: playerId }, '-scratched_at', 20),
+    enabled: !!playerId,
+  });
+
   const allSessions = [...gameSessions, ...slotSessions, ...plinkoSessions]
     .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))
     .slice(0, 50);
@@ -139,6 +160,16 @@ export default function PlayerProfile() {
   const netProfit = totalWon - totalWagered;
   const winRate = totalWagered > 0 ? ((totalWon / totalWagered) * 100).toFixed(1) : 0;
 
+  // VIP tier names
+  const vipTierNames = ['Player', 'Regular', 'Insider', 'High Roller', 'Elite', 'Legend'];
+  const vipTierName = vipTierNames[player.vip_tier || 0];
+
+  // Achievements calculations
+  const completedReferrals = referrals.filter(r => r.status === 'completed').length;
+  const pendingReferrals = referrals.filter(r => r.status === 'pending').length;
+  const scratchWins = scratchCards.filter(c => c.is_winner).length;
+  const accountAgeDays = Math.floor((Date.now() - new Date(player.created_date).getTime()) / (1000 * 60 * 60 * 24));
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
       <div className="max-w-7xl mx-auto">
@@ -159,13 +190,35 @@ export default function PlayerProfile() {
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-3xl">
-                  {player.display_name?.[0]?.toUpperCase() || '?'}
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-3xl relative">
+                  {player.avatar_url ? (
+                    <img src={player.avatar_url} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    player.display_name?.[0]?.toUpperCase() || '?'
+                  )}
+                  {player.vip_tier > 0 && (
+                    <div className="absolute -bottom-1 -right-1 bg-amber-500 rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                      👑
+                    </div>
+                  )}
                 </div>
                 <div>
-                  <h1 className="text-3xl font-black text-white mb-1">{player.display_name}</h1>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-3xl font-black text-white">{player.display_name}</h1>
+                    {player.vip_tier > 0 && (
+                      <span className="px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white">
+                        {vipTierName}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-slate-400">{player.created_by}</p>
-                  <p className="text-slate-500 text-sm">Member since {moment(player.created_date).format('MMM D, YYYY')}</p>
+                  <div className="flex items-center gap-4 mt-1">
+                    <p className="text-slate-500 text-sm">Member {accountAgeDays} days</p>
+                    <p className="text-slate-500 text-sm">• {player.active_days || 0} active days</p>
+                    {player.current_streak > 0 && (
+                      <p className="text-orange-400 text-sm">🔥 {player.current_streak} day streak</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -421,6 +474,231 @@ export default function PlayerProfile() {
           </Card>
         </div>
 
+        {/* VIP & Achievements Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* VIP Status */}
+          <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-700/50">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                👑 VIP Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-slate-400 text-sm">Current Tier</p>
+                <p className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  {vipTierName}
+                </p>
+                <p className="text-purple-300 text-sm mt-1">Tier {player.vip_tier || 0} / 5</p>
+              </div>
+              <div>
+                <p className="text-slate-400 text-sm">VIP Points</p>
+                <p className="text-2xl font-bold text-purple-400">{(player.vip_points || 0).toLocaleString()}</p>
+              </div>
+              <div className="pt-3 border-t border-slate-700">
+                <p className="text-slate-400 text-xs mb-2">Progress to next tier</p>
+                <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                    style={{ width: `${Math.min((player.vip_points || 0) % 1000 / 10, 100)}%` }}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Achievements */}
+          <Card className="bg-gradient-to-br from-amber-900/30 to-yellow-900/30 border-amber-700/50">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                🏆 Achievements
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🎯</span>
+                  <div>
+                    <p className="text-white font-semibold">Referral Master</p>
+                    <p className="text-slate-400 text-xs">{completedReferrals} completed referrals</p>
+                  </div>
+                </div>
+                {completedReferrals >= 10 && <span className="text-amber-400">✓</span>}
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🔥</span>
+                  <div>
+                    <p className="text-white font-semibold">Streak Champion</p>
+                    <p className="text-slate-400 text-xs">Longest: {player.longest_streak || 0} days</p>
+                  </div>
+                </div>
+                {player.longest_streak >= 7 && <span className="text-amber-400">✓</span>}
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🎰</span>
+                  <div>
+                    <p className="text-white font-semibold">High Roller</p>
+                    <p className="text-slate-400 text-xs">{totalWagered.toLocaleString()} wagered</p>
+                  </div>
+                </div>
+                {totalWagered >= 1000000 && <span className="text-amber-400">✓</span>}
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🎫</span>
+                  <div>
+                    <p className="text-white font-semibold">Lucky Scratcher</p>
+                    <p className="text-slate-400 text-xs">{scratchWins} winning scratchers</p>
+                  </div>
+                </div>
+                {scratchWins >= 5 && <span className="text-amber-400">✓</span>}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Referral History */}
+        {(referrals.length > 0 || referredBy) && (
+          <Card className="bg-slate-900/50 border-slate-700/50 mb-6">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                👥 Referral Network
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {referredBy && (
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                  <p className="text-blue-300 text-sm mb-2">Referred by</p>
+                  <p className="text-white font-semibold">Code: {referredBy.referral_code_used}</p>
+                  <p className="text-slate-400 text-xs mt-1">
+                    Signup bonus: {referredBy.referee_signup_bonus?.toLocaleString() || 0} pts
+                  </p>
+                </div>
+              )}
+
+              {referrals.length > 0 && (
+                <div>
+                  <p className="text-slate-400 text-sm mb-3">
+                    Your Referrals ({completedReferrals} completed, {pendingReferrals} pending)
+                  </p>
+                  <div className="space-y-2">
+                    {referrals.slice(0, 5).map((ref) => (
+                      <div key={ref.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                        <div>
+                          <p className="text-white text-sm">
+                            {ref.referee_games_played || 0} games played
+                          </p>
+                          <p className="text-slate-500 text-xs">
+                            {moment(ref.created_date).format('MMM D, YYYY')}
+                          </p>
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                          ref.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                          ref.status === 'qualified' ? 'bg-blue-500/20 text-blue-400' :
+                          'bg-slate-500/20 text-slate-400'
+                        }`}>
+                          {ref.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Admin Controls (if admin) */}
+        {isAdmin && (
+          <Card className="bg-gradient-to-br from-red-900/30 to-orange-900/30 border-red-700/50 mb-6">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                ⚙️ Admin Controls
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => {
+                    if (confirm('Reset player stats to default?')) {
+                      updatePlayerMutation.mutate({
+                        updates: {
+                          total_wagered: 0,
+                          total_won: 0,
+                          games_played: 0,
+                          biggest_win: 0,
+                          xp: 0,
+                          level: 1,
+                          vip_points: 0,
+                          vip_tier: 0,
+                        },
+                      });
+                    }
+                  }}
+                  variant="outline"
+                  className="border-orange-600 text-orange-400"
+                >
+                  Reset Stats
+                </Button>
+
+                <Button
+                  onClick={() => {
+                    const newTier = prompt('Set VIP tier (0-5):');
+                    if (newTier !== null) {
+                      const tier = Math.max(0, Math.min(5, parseInt(newTier) || 0));
+                      updatePlayerMutation.mutate({
+                        updates: { vip_tier: tier },
+                      });
+                    }
+                  }}
+                  variant="outline"
+                  className="border-purple-600 text-purple-400"
+                >
+                  Set VIP Tier
+                </Button>
+
+                <Button
+                  onClick={() => {
+                    if (confirm('Toggle admin status?')) {
+                      updatePlayerMutation.mutate({
+                        updates: { is_admin: !player.is_admin },
+                      });
+                    }
+                  }}
+                  variant="outline"
+                  className="border-amber-600 text-amber-400"
+                >
+                  {player.is_admin ? 'Remove Admin' : 'Make Admin'}
+                </Button>
+
+                <Button
+                  onClick={() => {
+                    const streak = prompt('Set current streak (days):');
+                    if (streak !== null) {
+                      const days = Math.max(0, parseInt(streak) || 0);
+                      updatePlayerMutation.mutate({
+                        updates: { 
+                          current_streak: days,
+                          longest_streak: Math.max(player.longest_streak || 0, days)
+                        },
+                      });
+                    }
+                  }}
+                  variant="outline"
+                  className="border-blue-600 text-blue-400"
+                >
+                  Set Streak
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Tabs for History */}
         <Tabs defaultValue="transactions" className="w-full">
           <TabsList className="bg-slate-800/50 border border-slate-700/50 p-1 mb-6">
@@ -429,6 +707,9 @@ export default function PlayerProfile() {
             </TabsTrigger>
             <TabsTrigger value="games" className="data-[state=active]:bg-slate-700">
               Game History
+            </TabsTrigger>
+            <TabsTrigger value="scratchers" className="data-[state=active]:bg-slate-700">
+              Scratch Cards
             </TabsTrigger>
           </TabsList>
 
@@ -533,6 +814,56 @@ export default function PlayerProfile() {
                       })}
                     </TableBody>
                   </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="scratchers">
+            <Card className="bg-slate-900/50 border-slate-700/50">
+              <CardHeader>
+                <CardTitle className="text-white">Scratch Card History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {scratchCards.length === 0 ? (
+                  <p className="text-slate-400 text-center py-8">No scratch cards yet</p>
+                ) : (
+                  <div className="space-y-3">
+                    {scratchCards.map((card) => (
+                      <div
+                        key={card.id}
+                        className={`p-4 rounded-lg border-2 ${
+                          card.is_winner
+                            ? 'bg-gradient-to-r from-amber-900/30 to-yellow-900/30 border-amber-500/50'
+                            : 'bg-slate-800/30 border-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-white font-bold">
+                              {card.is_winner ? '🏆 Winner!' : '❌ No Win'}
+                            </p>
+                            <p className="text-slate-400 text-sm">
+                              {moment(card.scratched_at).format('MMM D, YYYY h:mm A')}
+                            </p>
+                            {card.prize_tier && (
+                              <p className="text-purple-400 text-xs mt-1">
+                                Tier: {card.prize_tier}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-slate-400 text-sm">Cost: {card.cost.toLocaleString()}</p>
+                            {card.prize > 0 && (
+                              <p className="text-amber-400 font-bold text-lg">
+                                +{card.prize.toLocaleString()} pts
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </CardContent>
             </Card>
